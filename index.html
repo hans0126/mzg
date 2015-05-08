@@ -6,16 +6,30 @@
     <title>game</title>
 </head>
 <div id="gameView"></div>
+
+<table>
+    <tr>
+        <td>名字</td>
+        <td id="name"></td>
+    </tr>
+    <tr>
+        <td>裝備</td>
+        <td id="equip"></td>
+    </tr>
+
+</table>
+
 <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 <script src="js/pixi.js/bin/pixi.min.js"></script>
 <script src="js/model.js"></script>
 <script>
-var arrTimer = new Array();
-var arrMap = new Array();
-var arrRole = new Array();
-var arrDoors = new Array();
-var arrDoorsDisplayObj = new Array();
-var arrRoleType = new Array();
+var arrTimer = new Array(); //時間倒數物件
+var arrMap = new Array(); //地圖
+var arrRole = new Array(); //角色物件
+var arrDoors = new Array(); //門資訊
+var arrDoorsDisplayObj = new Array(); //門物件
+var arrRoleType = new Array(); //角色類別
+var arrWeaponsType = new Array(); //武器資訊
 var totalRoom = 0;
 
 var currentRole;
@@ -73,7 +87,7 @@ arrDoors = [{
     height: 20,
     visible: true,
     open: true
-},{
+}, {
     "root_room": "a",
     passage: ["a", "d"],
     x: 40,
@@ -82,7 +96,7 @@ arrDoors = [{
     height: 10,
     visible: true,
     open: true
-},{
+}, {
     "root_room": "d",
     passage: ["d", "g"],
     x: 40,
@@ -98,10 +112,14 @@ arrRoleType = [{
     color: 0x33FFCC
 }, {
     typeName: "survivor",
-    color: 0xFF6600
+    color: 0xFFFF00
 }];
 
 
+
+
+arrWeaponsType[0] = {name:"pistal",attackType:"range",power:1,minRange:0,maxRange:1,successRange:4,target:1};
+arrWeaponsType[1] = {name:"knife",attackType:"melee",power:1,minRange:0,maxRange:0,successRange:4,target:2};
 
 
 var width = 600;
@@ -199,16 +217,45 @@ for (var i = 0; i < 18; i++) {
 
     role.on('mousedown', roleClick);
     role.objectName = "z" + i;
-    role.local =  _roleLocal;
+    role.local = _roleLocal;
     role.faction = "enemy";
 
 
     arrRole.push(role);
 
-    locationCheck(role, arrRole, getRoomLocal( _roleLocal));
+    locationCheck(role, arrRole, getRoomLocal(_roleLocal));
     container.addChild(role);
 
 }
+
+/*
+    create survivor    
+*/
+
+var role = new PIXI.Graphics();
+
+var _roleLocal = "a";
+var _roomLocal = getRoomLocal(_roleLocal);
+
+role.lineStyle(0);
+role.beginFill(arrRoleType[1].color, 1);
+role.drawCircle(0, 0, 10);
+role.endFill();
+
+role.x = randomDeploy(_roomLocal.x, blockWidth);
+role.y = randomDeploy(_roomLocal.y, blockHeight);
+
+role.on('mousedown', roleClick);
+role.objectName = "player";
+role.local = _roleLocal;
+role.faction = "enemy";
+
+role.interactive = true;
+role.equip = {main:[0,1],sub:[]};
+arrRole.push(role);
+
+locationCheck(role, arrRole, getRoomLocal(_roleLocal));
+container.addChild(role);
 /*
 updateAttribute(arrRole, null, {
     interactive: true
@@ -219,16 +266,26 @@ updateAttribute(arrRole, null, {
 
 function roleClick(event) {
     //console.log(this.objectName);
-
+    /*
     for (var i = 0; i < arrRole.length; i++) {
         arrRole[i].tint = 0xFFFF0B;
     }
-
+*/
     this.tint = 0xFF0000;
 
     currentRoomDoorActive(this.local);
     currentRole = this;
 
+
+    $('#name').html(this.objectName);
+    var strEquip = "<ul>";
+    for(var i=0;i<this.equip.main.length;i++){
+       strEquip+="<li>"+arrWeaponsType[i].name+"</li>";
+    }
+
+    strEquip += "</ul>";
+
+    $('#equip').html(strEquip);
 
 }
 
