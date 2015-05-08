@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>game</title>
+</head>
+<div id="gameView"></div>
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script src="js/pixi.js/bin/pixi.min.js"></script>
+<script src="js/model.js"></script>
+<script>
+var arrTimer = new Array();
+var arrMap = new Array();
+var arrRole = new Array();
+var arrDoors = new Array();
+var arrDoorsDisplayObj = new Array();
+var arrRoleType = new Array();
+var totalRoom = 0;
+
+var currentRole;
+
+
+//block size
+var blockWidth = 100;
+var blockHeight = 100;
+var t = 0;
+
+
+arrMap = [
+    [{
+        visible: true,
+        room_id: "a"
+    }, {
+        visible: true,
+        room_id: "b"
+    }, {
+        visible: true,
+        room_id: "c"
+    }, {
+        visible: true,
+        room_id: "j"
+    }],
+    [{
+        visible: true,
+        room_id: "d"
+    }, {
+        visible: false,
+        room_id: "e"
+    }, {
+        visible: true,
+        room_id: "f"
+    }],
+    [{
+        visible: true,
+        room_id: "g"
+    }, {
+        visible: true,
+        room_id: "h"
+    }, {
+        visible: true,
+        room_id: "i"
+    }]
+];
+
+
+arrDoors = [{
+    "root_room": "a",
+    passage: ["a", "b"],
+    x: 95,
+    y: 40,
+    width: 10,
+    height: 20,
+    visible: true,
+    open: true
+},{
+    "root_room": "a",
+    passage: ["a", "d"],
+    x: 40,
+    y: 95,
+    width: 20,
+    height: 10,
+    visible: true,
+    open: true
+},{
+    "root_room": "d",
+    passage: ["d", "g"],
+    x: 40,
+    y: 95,
+    width: 20,
+    height: 10,
+    visible: true,
+    open: true
+}]
+
+arrRoleType = [{
+    typeName: "Zombie",
+    color: 0x33FFCC
+}, {
+    typeName: "survivor",
+    color: 0xFF6600
+}];
+
+
+
+
+var width = 600;
+var height = 400;
+
+// create the root of the scene graph
+var stage = new PIXI.Container();
+
+// レンダラーを作る
+var renderer = PIXI.autoDetectRenderer(width, height, {
+    backgroundColor: 0x1099bb
+});
+
+var texture = PIXI.Texture.fromImage('images/p2.jpeg');
+var tilingSprite = new PIXI.extras.TilingSprite(texture, renderer.width, renderer.height);
+
+stage.addChild(tilingSprite);
+
+// レンダラーのviewをDOMに追加する
+document.getElementById("gameView").appendChild(renderer.view);
+
+//增加容器
+var container = new PIXI.Container();
+
+var graphics = new PIXI.Graphics();
+
+graphics.beginFill(0xFF3300);
+
+graphics.moveTo(0, 0);
+graphics.lineStyle(1, 0x0000FF, 1);
+graphics.beginFill(0xFF700B, 1);
+container.addChild(graphics);
+container.interactive = true;
+/*
+    產生地圖以及門
+*/
+for (var y = 0; y < arrMap.length; y++) {
+    for (var x = 0; x < arrMap[y].length; x++) {
+        totalRoom++;
+        if (arrMap[y][x].visible == true) {
+            graphics.drawRect(x * blockWidth, y * blockHeight, blockWidth, blockHeight);
+
+
+            //房間文字
+            var textObj = new PIXI.Text(arrMap[y][x].room_id);
+            textObj.x = x * blockWidth + 5;
+            textObj.y = y * blockHeight + 5;
+            container.addChild(textObj);
+
+            //門
+            for (var i = 0; i < arrDoors.length; i++) {
+                if (arrDoors[i].root_room == arrMap[y][x].room_id) {
+                    var doorGraphics = new PIXI.Graphics();
+                    if (arrDoors[i].open) {
+                        doorGraphics.beginFill(0x666666, 1);
+                    } else {
+                        doorGraphics.beginFill(0x99FFFF, 1);
+                    }
+
+                    doorGraphics.drawRect((x * blockWidth) + arrDoors[i].x, (y * blockWidth) + arrDoors[i].y, arrDoors[i].width, arrDoors[i].height);
+                    doorGraphics.lineStyle(1, 0x0000FF, 1);
+
+                    doorGraphics.passage = arrDoors[i].passage;
+                    doorGraphics.open = arrDoors[i].open;
+
+                    doorGraphics.on('mousedown', passageDoor);
+
+                    arrDoorsDisplayObj.push(doorGraphics);
+                    container.addChild(doorGraphics);
+                }
+            }
+        }
+    }
+}
+
+
+
+/*
+    create zombie    
+*/
+
+for (var i = 0; i < 18; i++) {
+    var role = new PIXI.Graphics();
+
+    var _roleLocal = getRandomRoom(totalRoom);
+    var _roomLocal = getRoomLocal(_roleLocal);
+
+    role.lineStyle(0);
+    role.beginFill(arrRoleType[0].color, 1);
+    role.drawCircle(0, 0, 10);
+    role.endFill();
+
+    role.x = randomDeploy(_roomLocal.x, blockWidth);
+    role.y = randomDeploy(_roomLocal.y, blockHeight);
+
+    role.on('mousedown', roleClick);
+    role.objectName = "z" + i;
+    role.local =  _roleLocal;
+    role.faction = "enemy";
+
+
+    arrRole.push(role);
+
+    locationCheck(role, arrRole, getRoomLocal( _roleLocal));
+    container.addChild(role);
+
+}
+/*
+updateAttribute(arrRole, null, {
+    interactive: true
+});
+
+*/
+
+
+function roleClick(event) {
+    //console.log(this.objectName);
+
+    for (var i = 0; i < arrRole.length; i++) {
+        arrRole[i].tint = 0xFFFF0B;
+    }
+
+    this.tint = 0xFF0000;
+
+    currentRoomDoorActive(this.local);
+    currentRole = this;
+
+
+}
+
+
+
+
+function passageDoor(event) {
+    //currentRole
+    var targetRoom = false;
+    for (var i = 0; i < this.passage.length; i++) {
+        if (this.passage[i] != currentRole.local) {
+            targetRoom = this.passage[i];
+            break;
+        }
+    }
+
+    if (targetRoom) {
+        //search room location
+        var roomLocal = getRoomLocal(targetRoom);
+
+        currentRole.x = randomDeploy(roomLocal.x, blockWidth);
+        currentRole.y = randomDeploy(roomLocal.y, blockWidth);
+        currentRole.local = targetRoom;
+        locationCheck(currentRole, arrRole, roomLocal);
+
+        updateAttribute(arrDoorsDisplayObj, null, {
+            interactive: false,
+            tint: 0x666666
+        });
+
+        currentRoomDoorActive(targetRoom);
+
+
+    }
+
+    //this.beginFill(0xFF0000);
+
+    //this.tint = 0xFF0000;
+}
+
+
+function currentRoomDoorActive(room_id) {
+    for (var i = 0; i < arrDoorsDisplayObj.length; i++) {
+
+        if (arrDoorsDisplayObj[i].passage.indexOf(room_id) > -1) {
+            arrDoorsDisplayObj[i].interactive = true;
+            arrDoorsDisplayObj[i].tint = 0x00FF00;
+        }
+
+    }
+}
+
+
+
+container.on('mousedown', onDragStart)
+    .on('touchstart', onDragStart)
+    // events for drag end
+    .on('mouseup', onDragEnd)
+    .on('mouseupoutside', onDragEnd)
+    .on('touchend', onDragEnd)
+    .on('touchendoutside', onDragEnd)
+    // events for drag move
+    .on('mousemove', onDragMove)
+    .on('touchmove', onDragMove);
+
+
+//stage.on('mousewheel',onWheel);
+
+document.getElementById('gameView').addEventListener("mousewheel", onWheel, false);
+
+// gridLayer.anchor.set(0.5);// graphics.pivot , sprite.anchor    
+
+
+
+
+
+
+function onDragStart(event) {
+    // store a reference to the data
+    // the reason for this is because of multitouch
+    // we want to track the movement of this particular touch
+    this.data = event.data;
+    //this.alpha = 0.5;
+    this.dragging = true;
+    this.sx = this.data.getLocalPosition(this).x * this.scale.x;
+    this.sy = this.data.getLocalPosition(this).y * this.scale.y;
+
+
+}
+
+function onDragEnd() {
+    this.alpha = 1;
+
+    this.dragging = false;
+
+    // set the interaction data to null
+    this.data = null;
+}
+
+function onDragMove() {
+    if (this.dragging) {
+        var newPosition = this.data.getLocalPosition(this.parent);
+        this.position.x = newPosition.x - this.sx;
+        this.position.y = newPosition.y - this.sy;
+
+    }
+}
+
+function onWheel(event) {
+    console.log(event);
+    if (event.wheelDelta < 1) {
+        container.scale.x -= 0.1;
+        container.scale.y -= 0.1;
+    } else {
+        container.scale.x += 0.1;
+        container.scale.y += 0.1;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+var t2 = new countdown();
+t2.process = function(){
+    console.log(this.percent);
+}
+
+arrTimer.push(t2);
+
+*/
+
+stage.addChild(container);
+
+// アニメーション関数を定義する
+function animate() {
+    requestAnimFrame(animate);
+    renderer.render(stage);
+
+    tilingSprite.tilePosition.x += 1;
+    tilingSprite.tilePosition.y += 1;
+
+    for (var i = 0; i < arrTimer.length; i++) {
+        //console.log(arrTimer.length);
+        if (arrTimer[i].play()) {
+            arrTimer.splice(i, 1);
+        }
+
+    }
+}
+
+// 次のアニメーションフレームでanimate()を呼び出してもらう
+animate();
+//以後參考
+//graphics.hitTest = graphics.getBounds();
+</script>
+</body>
+
+</html>
