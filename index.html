@@ -6,7 +6,6 @@
     <title>game</title>
 </head>
 <div id="gameView"></div>
-
 <table>
     <tr>
         <td>名字</td>
@@ -16,110 +15,32 @@
         <td>裝備</td>
         <td id="equip"></td>
     </tr>
-
 </table>
 
+<div id="bbb">111111</div>
 <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 <script src="js/pixi.js/bin/pixi.min.js"></script>
+<script src="js/datas.js"></script>
 <script src="js/model.js"></script>
 <script>
-var arrTimer = new Array(); //時間倒數物件
-var arrMap = new Array(); //地圖
-var arrRole = new Array(); //角色物件
-var arrDoors = new Array(); //門資訊
-var arrDoorsDisplayObj = new Array(); //門物件
-var arrRoleType = new Array(); //角色類別
-var arrWeaponsType = new Array(); //武器資訊
-var totalRoom = 0;
 
-var currentRole;
+  
+
+var arrTimer = new Array(); //時間倒數物件
+var arrRole = new Array(); //角色物件
+var arrDoorsDisplayObj = new Array(); //門物件
+
+
+var totalRoom = 0; //總房間數
+
+var currentRole; //目前操作的腳色
+var attackButtom = new Array();
 
 
 //block size
 var blockWidth = 100;
 var blockHeight = 100;
 var t = 0;
-
-
-arrMap = [
-    [{
-        visible: true,
-        room_id: "a"
-    }, {
-        visible: true,
-        room_id: "b"
-    }, {
-        visible: true,
-        room_id: "c"
-    }, {
-        visible: true,
-        room_id: "j"
-    }],
-    [{
-        visible: true,
-        room_id: "d"
-    }, {
-        visible: false,
-        room_id: "e"
-    }, {
-        visible: true,
-        room_id: "f"
-    }],
-    [{
-        visible: true,
-        room_id: "g"
-    }, {
-        visible: true,
-        room_id: "h"
-    }, {
-        visible: true,
-        room_id: "i"
-    }]
-];
-
-
-arrDoors = [{
-    "root_room": "a",
-    passage: ["a", "b"],
-    x: 95,
-    y: 40,
-    width: 10,
-    height: 20,
-    visible: true,
-    open: true
-}, {
-    "root_room": "a",
-    passage: ["a", "d"],
-    x: 40,
-    y: 95,
-    width: 20,
-    height: 10,
-    visible: true,
-    open: true
-}, {
-    "root_room": "d",
-    passage: ["d", "g"],
-    x: 40,
-    y: 95,
-    width: 20,
-    height: 10,
-    visible: true,
-    open: true
-}]
-
-arrRoleType = [{
-    typeName: "Zombie",
-    color: 0x33FFCC
-}, {
-    typeName: "survivor",
-    color: 0xFFFF00
-}];
-
-
-
-
-arrWeaponsType[0] = {name:"pistal",attackType:"range",power:1,minRange:0,maxRange:1,successRange:4,target:1};
-arrWeaponsType[1] = {name:"knife",attackType:"melee",power:1,minRange:0,maxRange:0,successRange:4,target:2};
 
 
 var width = 600;
@@ -195,8 +116,6 @@ for (var y = 0; y < arrMap.length; y++) {
     }
 }
 
-
-
 /*
     create zombie    
 */
@@ -215,12 +134,11 @@ for (var i = 0; i < 18; i++) {
     role.x = randomDeploy(_roomLocal.x, blockWidth);
     role.y = randomDeploy(_roomLocal.y, blockHeight);
 
-    role.on('mousedown', roleClick);
     role.objectName = "z" + i;
     role.local = _roleLocal;
     role.faction = "enemy";
 
-
+    role.on()
     arrRole.push(role);
 
     locationCheck(role, arrRole, getRoomLocal(_roleLocal));
@@ -251,7 +169,10 @@ role.local = _roleLocal;
 role.faction = "enemy";
 
 role.interactive = true;
-role.equip = {main:[0,1],sub:[]};
+role.equip = {
+    main: [0, 2],
+    sub: []
+};
 arrRole.push(role);
 
 locationCheck(role, arrRole, getRoomLocal(_roleLocal));
@@ -279,15 +200,23 @@ function roleClick(event) {
 
     $('#name').html(this.objectName);
     var strEquip = "<ul>";
-    for(var i=0;i<this.equip.main.length;i++){
-       strEquip+="<li>"+arrWeaponsType[i].name+"</li>";
+    for (var i = 0; i < this.equip.main.length; i++) {
+        strEquip += "<li item_id='" + this.equip.main[i] + "' item_category='" + arrItems[this.equip.main[i]].category + "'>" + arrItems[this.equip.main[i]].name + "</li>";
     }
 
     strEquip += "</ul>";
 
-    $('#equip').html(strEquip);
+    $('#equip').html(strEquip).find('li').on('click', choseWeapon);
 
 }
+
+function choseWeapon() {
+    if ($(this).attr('item_category') == "weapon") {
+        attackRange(arrItems[$(this).attr('item_id')]);
+    }
+}
+
+
 
 
 
@@ -339,7 +268,6 @@ function currentRoomDoorActive(room_id) {
 }
 
 
-
 container.on('mousedown', onDragStart)
     .on('touchstart', onDragStart)
     // events for drag end
@@ -357,10 +285,6 @@ container.on('mousedown', onDragStart)
 document.getElementById('gameView').addEventListener("mousewheel", onWheel, false);
 
 // gridLayer.anchor.set(0.5);// graphics.pivot , sprite.anchor    
-
-
-
-
 
 
 function onDragStart(event) {
@@ -406,19 +330,6 @@ function onWheel(event) {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 /*
 var t2 = new countdown();
 t2.process = function(){
@@ -448,7 +359,7 @@ function animate() {
     }
 }
 
-// 次のアニメーションフレームでanimate()を呼び出してもらう
+
 animate();
 //以後參考
 //graphics.hitTest = graphics.getBounds();
