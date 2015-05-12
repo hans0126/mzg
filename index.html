@@ -20,15 +20,41 @@
         <td id="attack_count"></td>
     </tr>
 </table>
-
 <div id="bbb">111111</div>
 <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 <script src="js/pixi.js/bin/pixi.min.js"></script>
 <script src="js/datas.js"></script>
-<script src="js/model.js"></script>
+<script src="js/core.js"></script>
+<script src="js/attack_model.js"></script>
 <script>
+var languageCombination //語言組合
 
-  
+window.addEventListener('keydown', function(event) {
+
+    if (arrLanguage[event.keyCode] != "undefined" && arrLanguage[event.keyCode] != null) {
+
+        if (arrLanguage[event.keyCode].level == 2 || languageCombination != '') {
+            if (languageCombination != '') {
+                languageCombination += arrLanguage[event.keyCode].code;
+
+                if (arrLanguage[languageCombination] != "undefined" && arrLanguage[languageCombination] != null) {
+
+                    console.log(arrLanguage[languageCombination].mean);
+                }
+            } else {
+                console.log(arrLanguage[event.keyCode].mean);
+            }
+
+            languageCombination = '';
+        } else {
+            languageCombination = arrLanguage[event.keyCode].code;
+        }
+
+    } else {
+        languageCombination = '';
+    }
+
+})
 
 var arrTimer = new Array(); //時間倒數物件
 var arrRole = new Array(); //角色物件
@@ -40,7 +66,7 @@ var totalRoom = 0; //總房間數
 var currentRole; //目前操作的腳色
 var attackButtom = new Array();
 
-
+var attackMode = false;
 //block size
 var blockWidth = 100;
 var blockHeight = 100;
@@ -53,7 +79,9 @@ var height = 400;
 // create the root of the scene graph
 var stage = new PIXI.Container();
 
-// レンダラーを作る
+
+
+
 var renderer = PIXI.autoDetectRenderer(width, height, {
     backgroundColor: 0x1099bb
 });
@@ -171,10 +199,12 @@ role.on('mousedown', roleClick);
 role.objectName = "player";
 role.local = _roleLocal;
 role.faction = "player";
+role.skill = [];
 
 role.interactive = true;
+role.buttonMode = true;
 role.equip = {
-    main: [0, 2],
+    main: [0, 1],
     sub: []
 };
 arrRole.push(role);
@@ -196,6 +226,7 @@ function roleClick(event) {
         arrRole[i].tint = 0xFFFF0B;
     }
 */
+
     this.tint = 0xFF0000;
 
     currentRoomDoorActive(this.local);
@@ -215,8 +246,11 @@ function roleClick(event) {
 }
 
 function choseWeapon() {
-    if ($(this).attr('item_category') == "weapon") {
-        attackRange(arrItems[$(this).attr('item_id')]);
+    if (!attackMode) {
+        if ($(this).attr('item_category') == "weapon") {
+            attack(arrItems[$(this).attr('item_id')]);
+            attackMode = true;
+        }
     }
 }
 
@@ -246,7 +280,8 @@ function passageDoor(event) {
 
         updateAttribute(arrDoorsDisplayObj, null, {
             interactive: false,
-            tint: 0x666666
+            tint: 0x666666,
+            buttonMode: false
         });
 
         currentRoomDoorActive(targetRoom);
@@ -265,6 +300,7 @@ function currentRoomDoorActive(room_id) {
 
         if (arrDoorsDisplayObj[i].passage.indexOf(room_id) > -1) {
             arrDoorsDisplayObj[i].interactive = true;
+            arrDoorsDisplayObj[i].buttonMode = true;
             arrDoorsDisplayObj[i].tint = 0x00FF00;
         }
 
