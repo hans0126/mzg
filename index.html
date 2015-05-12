@@ -15,6 +15,10 @@
         <td>裝備</td>
         <td id="equip"></td>
     </tr>
+    <tr>
+        <td>attack count</td>
+        <td id="attack_count"></td>
+    </tr>
 </table>
 
 <div id="bbb">111111</div>
@@ -166,7 +170,7 @@ role.y = randomDeploy(_roomLocal.y, blockHeight);
 role.on('mousedown', roleClick);
 role.objectName = "player";
 role.local = _roleLocal;
-role.faction = "enemy";
+role.faction = "player";
 
 role.interactive = true;
 role.equip = {
@@ -278,6 +282,8 @@ container.on('mousedown', onDragStart)
     // events for drag move
     .on('mousemove', onDragMove)
     .on('touchmove', onDragMove);
+
+
 
 
 //stage.on('mousewheel',onWheel);

@@ -196,20 +196,25 @@ function updateAttribute(arrGraphic, condition, attribute) {
 
 /**/
 function attackRange(item_id) {
-
+    var _range = false;
     //current local
     var _currentLocal = getRoomLocal(currentRole.local); //腳色目前所在位置
     var _weaponObj = item_id; //武器
     var _minRange = _weaponObj.minRange; //最小射程
     var _maxRange = _weaponObj.maxRange; //最大射程
     var _clockwise = [-1, 1, 1, -1]; //四方推演 順時針
-    var _blockOff = [true, true, true, true]; //阻擋紀錄      
+    var _blockOff = [true, true, true, true]; //阻擋紀錄   
+    var _attackCounter = 0;
+    var _activeRole = [];
 
     for (var i = _minRange; i < _maxRange + 1; i++) {
 
         if (i < 1) {
-
-            attackButtom.push(createAttackArea(_currentLocal.x, _currentLocal.y));
+            if (_range) { //是否為範圍攻擊
+                attackButtom.push(createAttackArea(_currentLocal.x, _currentLocal.y));
+            } else {
+                showSingleTarget(currentRole.local);
+            }
 
         } else {
             //4方擴展 clockwise y-1 x+1 y+1 x-1 
@@ -230,8 +235,11 @@ function attackRange(item_id) {
                             if (_tempCurrentLocal.x < arrMap[_tempCurrentLocal.y].length) {
                                 var _tempTarget = arrMap[_tempCurrentLocal.y][_tempCurrentLocal.x];
                                 if (_tempTarget.visible == true) {
-                                    var _targetLocal = getRoomLocal(_tempTarget.room_id);
-                                    attackButtom.push(createAttackArea(_targetLocal.x, _targetLocal.y));
+
+                                    if (_range) { //是否為範圍攻擊
+                                        var _targetLocal = getRoomLocal(_tempTarget.room_id);
+                                        attackButtom.push(createAttackArea(_targetLocal.x, _targetLocal.y));
+                                    }
                                 } else {
                                     _blockOff[j] = false;
                                 }
@@ -252,7 +260,7 @@ function attackRange(item_id) {
         _tg.beginFill(0xFFFFFF);
         _tg.alpha = 0.7;
         _tg.interactive = true;
-        _tg.on('mousedown', attackStart);
+        _tg.on('mousedown', randomAttack);
         _tg.local = localToRoom(_localX, _localY).room_id;
         container.addChild(_tg);
 
@@ -261,45 +269,63 @@ function attackRange(item_id) {
         return _tg;
     }
 
-    /*攻擊開始*/
-    function attackStart() {
-    
-        var _countRole = 0;    //該房間算出人數
-        var _target = 0; 
+    /*範圍內亂數攻擊目標*/
+    function randomAttack() {
+
+        var _countRole = 0; //該房間算出人數
+        var _target = 0;
         var _arrTemp = []; //此房間的敵人
-        var _arrRemoveTemp = [];//被殺死的敵人
-    
-        for (var i = 0; i < arrRole.length; i++) {
+        var _arrRemoveTemp = []; //被殺死的敵人
+        var _arrAttackResult = [];
+        var _attackCount = 0;
+        var _attackEnd = false;
 
-            if (arrRole[i].local == this.local) {
-                _countRole++;
-                _arrTemp.push(i);
-            }
-        }
-        /*需改變為，一次判定所有成功次數，再將傷害賦予敵人*/
-        if (_countRole > _weaponObj.target) {
-            _target = _weaponObj.target;
-        } else {
-            _target = _countRole;
-        }
-
-        for (var i = 0; i < _target; i++) {
+        //判斷攻擊次數以及成功
+        for (var i = 0; i < _weaponObj.target; i++) {
             var _attackResult = Math.floor(Math.random() * 6);
             if (_attackResult >= _weaponObj.successRange) {
-                console.log(_attackResult + "_攻擊成功");
-                //_arrTemp[i].clear();
-                container.removeChild(arrRole[_arrTemp[i]]);
-                _arrRemoveTemp.push(_arrTemp[i]);
+                _arrAttackResult.push(true);
             } else {
-                console.log(_attackResult + "_攻擊失敗");
+                _arrAttackResult.push(false);
+            }
+        }
+        //該房間的敵人
+        for (var i = 0; i < arrRole.length; i++) {
+            if (arrRole[i].local == this.local) {
+                _countRole++;
+                _arrTemp.push(arrRole[i]);
             }
         }
 
-        for(var i=0;i<_arrRemoveTemp.length;i++){
-             arrRole.splice(_arrRemoveTemp[i],1);  
+        for (var i = 0; i < _arrTemp.length; i++) {
+
+            while (_attackCount < _arrAttackResult.length) {
+
+                var _success = false;
+
+                if (_arrAttackResult[_attackCount]) {
+                    console.log(_weaponObj.name + " 對 " + _arrTemp[i].objectName + " 攻擊成功");
+                    _success = true;
+                    _arrRemoveTemp.push(_arrTemp[i]);
+
+                } else {
+                    console.log(_weaponObj.name + " 對 " + _arrTemp[i].objectName + " 攻擊失敗");
+
+                }
+
+                _attackCount++;
+
+                if (_success) {
+                    break;
+                }
+            }
         }
-       
-        console.log(arrRole.length);
+
+        for (var i = 0; i < _arrRemoveTemp.length; i++) {
+            _arrRemoveTemp[i].clear();
+            arrRole.splice(_arrRemoveTemp[i], 1);
+        }
+
 
         //清除陣列
 
@@ -307,8 +333,76 @@ function attackRange(item_id) {
         removeAttackRangeArea();
     }
 
-}
+    /*單體攻擊目標露出*/
+    function showSingleTarget(room_id) {
 
+        for (var i = 0; i < arrRole.length; i++) {
+            if (arrRole[i].local == room_id && arrRole[i].faction == "enemy") {
+
+                arrRole[i].interactive = true;
+                arrRole[i].on("mousedown", attackClick);
+                arrRole[i].tint = 0xFFF000;
+                _activeRole.push(arrRole[i]);
+            }
+
+        }
+
+        _attackCounter = _weaponObj.target;
+        $('#attack_count').html(_attackCounter);
+
+    }
+
+    function attackClick() {
+
+        _attackCounter--;;
+        $('#attack_count').html(_attackCounter);
+
+        //計算攻擊
+
+        var _attackResult = Math.floor(Math.random() * 6);
+        if (_attackResult >= _weaponObj.successRange) {
+             console.log(_weaponObj.name + " 對 " + this.objectName + " 攻擊成功");
+             this.clear();
+            console.log(arrRole.length);
+           for(var i=0;i<arrRole.length;i++){
+                if(arrRole[i].objectName==this.objectName){
+                    arrRole.splice(i,1);
+                    break;
+                }
+           }
+           console.log(arrRole.length);
+
+
+        } else {
+             console.log(_weaponObj.name + " 對 " + this.objectName + " 攻擊失敗");
+        }
+
+        if (_attackCounter == 0 || _activeRole.length <= 0) {
+            showSingleEnd();
+        }
+
+
+
+
+
+        //this.off("mousedown", testaaa);
+
+    }
+
+    function showSingleEnd() {
+        console.log("end");
+
+        for (var i = 0; i < _activeRole.length; i++) {
+            _activeRole[i].interactive = false;
+            _activeRole[i].off("mousedown", attackClick);
+            _activeRole[i].tint = arrRoleType[0].color;
+        }
+
+
+
+    }
+
+}
 
 function removeAttackRangeArea() {
 

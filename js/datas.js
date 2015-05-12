@@ -80,7 +80,7 @@ arrRoleType = [{
 }];
 
 
-arrItems[0] = {category:"weapon",name:"pistal",attackType:"range",power:1,minRange:0,maxRange:1,successRange:4,target:2};
+arrItems[0] = {category:"weapon",name:"pistal",attackType:"range",power:1,minRange:0,maxRange:1,successRange:4,target:5};
 arrItems[1] = {category:"weapon",name:"knife",attackType:"melee",power:1,minRange:0,maxRange:0,successRange:4,target:2};
 arrItems[2] = {category:"item",name:"food",attackType:"null",power:null,minRange:null,maxRange:null,successRange:null,target:null};
 
