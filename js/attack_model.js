@@ -1,6 +1,6 @@
 /**/
 function attack(weapon) {
-    var _range = false; //判斷是否為遠程武器
+    var _range = false; //判斷是否為遠程武器 //跟攻擊模式有關    
     //current local
     var _currentLocal = getRoomLocal(currentRole.local); //腳色目前所在位置
     var _weaponObj = weapon; //武器
@@ -10,8 +10,37 @@ function attack(weapon) {
     var _blockOff = [true, true, true, true]; //阻擋紀錄   
     var _attackCounter = 0;
     var _activeRole = [];
-    var _successRange = _weaponObj.successRange;//攻擊成功參數:起始值
-    var _numberOfAttack = _weaponObj.numberOfAttack;//攻擊次數
+    var _successRange = _weaponObj.successRange; //攻擊成功參數:起始值
+    var _numberOfAttack = _weaponObj.numberOfAttack; //攻擊次數
+
+    //初始range
+    if (_weaponObj.attackType == "range") {
+        _range = true;        
+    }
+    //處理skill    
+    if (currentRole.skill.length > 0) {
+        //combat traget
+        _numberOfAttack += _getSkillValue("combatTarget");
+        _successRange -= _getSkillValue("combatSuccessRange");
+
+        if (!_range) {
+            _numberOfAttack += _getSkillValue("meleeTarget");
+            _successRange -= _getSkillValue("meleeSuccessRange");
+        } else {
+            _numberOfAttack += _getSkillValue("rangeTarget");
+            _successRange -= _getSkillValue("rangeSuccessRange");
+            _maxRange += _getSkillValue("rangeDistance");
+        }
+    }
+
+   if(_range){
+        if(currentRole.skill.indexOf(parseInt(70))>-1){
+            _range = false;
+           
+        }
+   }
+    
+
 
     if (_weaponObj.dual) {
         if (currentRole.equip.main[0] == currentRole.equip.main[1]) {
@@ -21,13 +50,7 @@ function attack(weapon) {
     }
 
 
-    if (_weaponObj.attackType == "range") {        
-        _range = true;
-        if(currentRole.skill.indexOf(4)>-1){
-            _range = false;
-        }
-    }
-
+  
 
     for (var i = _minRange; i < _maxRange + 1; i++) {
 
@@ -85,7 +108,7 @@ function attack(weapon) {
         _tg.buttonMode = true;
         _tg.on('mousedown', _randomAttack);
         _tg.local = localToRoom(_localX, _localY).room_id;
-        container.addChild(_tg);
+        mapContainer.addChild(_tg);
 
         _tg.drawRect((_localX * blockWidth) + 10, (_localY * blockHeight) + 10, blockWidth - 20, blockHeight - 20);
 
@@ -109,10 +132,10 @@ function attack(weapon) {
             }
         }
         //該房間的敵人
-        for (var i = 0; i < arrRole.length; i++) {
-            if (arrRole[i].local == this.local && arrRole[i] != currentRole) {
+        for (var i = 0; i < arrRoleObj.length; i++) {
+            if (arrRoleObj[i].local == this.local && arrRoleObj[i] != currentRole) {
 
-                _arrTemp.push(arrRole[i]);
+                _arrTemp.push(arrRoleObj[i]);
             }
         }
 
@@ -142,9 +165,9 @@ function attack(weapon) {
 
         for (var i = 0; i < _arrRemoveTemp.length; i++) {
             _arrRemoveTemp[i].clear();
-            for (var j = 0; j < arrRole.length; j++) {
-                if (_arrRemoveTemp[i] == arrRole[j]) {
-                    arrRole.splice(j, 1);
+            for (var j = 0; j < arrRoleObj.length; j++) {
+                if (_arrRemoveTemp[i] == arrRoleObj[j]) {
+                    arrRoleObj.splice(j, 1);
                     break;
                 }
             }
@@ -156,16 +179,16 @@ function attack(weapon) {
     /*單體攻擊目標露出*/
     function _showSingleTarget(room_id) {
 
-        for (var i = 0; i < arrRole.length; i++) {
-            if (arrRole[i].local == room_id && arrRole[i].faction == "enemy") {
+        for (var i = 0; i < arrRoleObj.length; i++) {
+            if (arrRoleObj[i].local == room_id && arrRoleObj[i].faction == "enemy") {
 
-                arrRole[i].interactive = true;
-                arrRole[i].buttonMode = true;
-                
+                arrRoleObj[i].interactive = true;
+                arrRoleObj[i].buttonMode = true;
 
-                arrRole[i].on("mousedown", _attackClick);
-                arrRole[i].tint = 0xFFF000;
-                _activeRole.push(arrRole[i]);
+
+                arrRoleObj[i].on("mousedown", _attackClick);
+                arrRoleObj[i].tint = 0xFFF000;
+                _activeRole.push(arrRoleObj[i]);
             }
 
         }
@@ -185,9 +208,9 @@ function attack(weapon) {
             console.log(_weaponObj.name + " 對 " + this.objectName + " 攻擊成功");
             this.clear();
 
-            for (var i = 0; i < arrRole.length; i++) {
-                if (arrRole[i].objectName == this.objectName) {
-                    arrRole.splice(i, 1);
+            for (var i = 0; i < arrRoleObj.length; i++) {
+                if (arrRoleObj[i].objectName == this.objectName) {
+                    arrRoleObj.splice(i, 1);
                     break;
                 }
             }
@@ -203,7 +226,7 @@ function attack(weapon) {
             console.log(_weaponObj.name + " 對 " + this.objectName + " 攻擊失誤");
         }
 
-        
+
 
         if (_attackCounter == 0 || _activeRole.length <= 0) {
             _attackEnd(_range);
@@ -230,7 +253,7 @@ function attack(weapon) {
                 _activeRole[i].tint = arrRoleType[0].color;
             }
         }
-         $('#attack_count').html(0);
+        $('#attack_count').html(0);
         attackMode = false;
     }
 
@@ -238,5 +261,28 @@ function attack(weapon) {
         return Math.floor(Math.random() * 6) + 1;
     }
 
+    //讀取技能參數
+
+    function _getSkillValue(_skillType) {
+        var _arrSkillType = new Array();
+        var _returnValue = 0;
+        _arrSkillType["combatTarget"] = [0, 9];
+        _arrSkillType["combatSuccessRange"] = [10, 19];
+        _arrSkillType["meleeTarget"] = [20, 29];
+        _arrSkillType["meleeSuccessRange"] = [30, 39];
+        _arrSkillType["rangeTarget"] = [40, 49];
+        _arrSkillType["rangeSuccessRange"] = [50, 59];
+        _arrSkillType["rangeDistance"] = [60, 69];
+
+        for (var i = _arrSkillType[_skillType][0]; i < _arrSkillType[_skillType][1] + 1; i++) {
+
+            if (currentRole.skill.indexOf(parseInt(i)) > -1) {
+                _returnValue += arrSkills[i].value;
+                  console.log(arrSkills[i]+"/"+i);
+            }
+
+        }
+        return _returnValue;
+    }
 
 }
