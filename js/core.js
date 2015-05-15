@@ -462,34 +462,34 @@ function init() {
     //增加容器
     mapContainer = new PIXI.Container();
     createMap();
-
-    var cR = new createRole();
-    cR._roleTypeObj = arrRoleType[0];
-    cR._faction = "enemy";
-    for (var i = 0; i < 18; i++) {
-        cR._roleLocal = null;
-        cR.create();
-    }
-
-
-    cR._roleTypeObj = arrRoleType[1];
-    cR._faction = "player";
-    var newR = cR.create();
-
-    newR.interactive = true;
-    newR.buttonMode = true;
-
-    newR.skill = [0, 10, 20, 30, 40, 50, 60, 70];
-    newR.equip = {
-        main: [0, 1],
-        sub: []
-    };
+    /*
+        var cR = new createRole();
+        cR._roleTypeObj = arrRoleType[0];
+        cR._faction = "enemy";
+        for (var i = 0; i < 18; i++) {
+            cR._roleLocal = null;
+            cR.create();
+        }
 
 
+        cR._roleTypeObj = arrRoleType[1];
+        cR._faction = "player";
+        var newR = cR.create();
 
-    newR.on('mousedown', roleClick);
+        newR.interactive = true;
+        newR.buttonMode = true;
 
-    enemyMove();
+        newR.skill = [0, 10, 20, 30, 40, 50, 60, 70];
+        newR.equip = {
+            main: [0, 1],
+            sub: []
+        };
+
+
+
+        newR.on('mousedown', roleClick);
+    */
+    //enemyMove();
 
     mapContainer.on('mousedown', onDragStart)
         .on('touchstart', onDragStart)
@@ -503,6 +503,8 @@ function init() {
         .on('touchmove', onDragMove);
 
     animate();
+
+    findPath("b", "g", null, new Array(), new Array(), new Array());
 }
 
 
@@ -558,7 +560,136 @@ function enemyMove() {
     }
 }
 
+function findPath(_targetLocalId, _currentLocalId, _lastLocalId, _arrPathRecord, _arrStamp, _doorMemory) {
+    //找出此房間的門，則可判斷出通往的房間
 
+    var _thisRoomDoors = new Array();
+    //search door
+    for (var i = 0; i < arrDoorsDisplayObj.length; i++) {
+        var _indexOf = arrDoorsDisplayObj[i].passage.indexOf(_currentLocalId);
+        if (_indexOf > -1 && arrDoorsDisplayObj[i].open == true) {
+            if (_indexOf == 0) {
+                _indexOf = 1;
+            } else {
+                _indexOf = 0;
+            }
+
+            _thisRoomDoors.push(arrDoorsDisplayObj[i].passage[_indexOf]);
+        }
+    }
+
+
+
+    _arrPathRecord.push(_currentLocalId);
+
+
+    var _getDoorTogo;
+
+   
+    if (_thisRoomDoors.indexOf(_lastLocalId) > -1) {
+        _thisRoomDoors.splice(_thisRoomDoors.indexOf(_lastLocalId), 1);
+    }
+
+
+
+    if (_thisRoomDoors.length >= 2) {
+        _arrStamp.push("r");
+    } else if (_thisRoomDoors.length == 1) {
+        _arrStamp.push("0");
+    } else if (_thisRoomDoors.length == 0) {
+        _arrStamp.push("-");
+    }
+
+
+    if (_thisRoomDoors.length > 0 && _arrPathRecord.indexOf(_thisRoomDoors[0]) < 0) {
+
+        _getDoorTogo = _thisRoomDoors[0];
+        _thisRoomDoors.splice(0, 1);
+
+        _doorMemory.push(_thisRoomDoors);
+
+
+        findPath(_targetLocalId, _getDoorTogo, _currentLocalId, _arrPathRecord, _arrStamp, _doorMemory);
+    } else {
+        _doorMemory.push(new Array());
+        console.log("**");
+        console.log(_arrPathRecord);
+        console.log(_arrStamp);
+        console.log("**");
+
+        var _c = 0
+        for (var i = _arrStamp.length - 1; i > -1; i--) {
+
+            if (_arrStamp[i] == "r") {
+                if (_doorMemory.length > 0) {
+                    if (_doorMemory[i].length > 0) {
+
+                        _getDoorTogo = _doorMemory[i][0];
+
+                        _doorMemory[i].splice(0, 1);
+
+                        _arrPathRecord.splice(-1 * _c, _c);
+                        _arrStamp.splice(-1 * _c, _c);
+                        _doorMemory.splice(-1 * _c, _c);
+
+                        findPath(_targetLocalId, _getDoorTogo, _arrPathRecord[i], _arrPathRecord, _arrStamp, _doorMemory);
+                    }
+                } else {
+
+                }
+
+            }
+            _c++;
+        }
+
+    }
+
+}
+
+function iii() {
+    var aa = ["h", "g", "d", "i", "f", "c", "b", "a", "j"];
+
+    var map = ["r", 0, "-", 0, 0, "r", 0, "-", "-"];
+
+    var result = [];
+
+    var thisIndex = 0;
+    var max = 0;
+    for (var i = 0; i < map.length; i++) {
+        if (map[i] == "-") {
+            result.push(new Array());
+            max++;
+        }
+    }
+
+
+
+
+
+    for (var i = 0; i < aa.length; i++) {
+        if (map[i] == "r") {
+            for (var j = thisIndex; j < max; j++) {
+                result[j].push(aa[i]);
+            }
+        }
+
+        if (map[i] == 0) {
+            for (var j = thisIndex; j < max; j++) {
+                result[j].push(aa[i]);
+            }
+        }
+
+        if (map[i] == "-") {
+            result[thisIndex].push(aa[i]);
+            thisIndex++;
+        }
+
+
+    }
+
+    console.log(result);
+
+}
 
 
 

@@ -24,7 +24,7 @@ arrMap = [
         visible: true,
         room_id: "d"
     }, {
-        visible: false,
+        visible: true,
         room_id: "e"
     }, {
         visible: true,
@@ -124,8 +124,30 @@ arrDoors = [{
         width: 10,
         height: 20,
         visible: true,
-        open: false
+        open: true
+    },
+    {
+        "root_room": "e",
+        passage: ["e", "f"],
+        x: 95,
+        y: 40,
+        width: 10,
+        height: 20,
+        visible: true,
+        open: true
+    },
+
+    {
+        "root_room": "e",
+        passage: ["e", "h"],
+        x: 40,
+        y: 95,
+        width: 20,
+        height: 10,
+        visible: true,
+        open: true
     }
+
 ]
 
 
