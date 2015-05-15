@@ -504,7 +504,11 @@ function init() {
 
     animate();
 
-    findPath("b", "g", null, new Array(), new Array(), new Array());
+    var _pathResult = findPath("b", "g", null, new Array(), new Array(), new Array());
+
+    for (var i = 0; i < _pathResult.length; i++) {
+        console.log(_pathResult[i]);
+    }
 }
 
 
@@ -560,7 +564,7 @@ function enemyMove() {
     }
 }
 
-function findPath(_targetLocalId, _currentLocalId, _lastLocalId, _arrPathRecord, _arrStamp, _doorMemory) {
+function findPath(_targetLocalId, _currentLocalId, _lastLocalId, _arrPathRecord, _arrStamp, _doorMemory, _successPath) {
     //找出此房間的門，則可判斷出通往的房間
 
     var _thisRoomDoors = new Array();
@@ -578,14 +582,16 @@ function findPath(_targetLocalId, _currentLocalId, _lastLocalId, _arrPathRecord,
         }
     }
 
-
+    if (typeof(_successPath) == "undefined") {
+        _successPath = new Array();
+    }
 
     _arrPathRecord.push(_currentLocalId);
 
 
     var _getDoorTogo;
 
-   
+
     if (_thisRoomDoors.indexOf(_lastLocalId) > -1) {
         _thisRoomDoors.splice(_thisRoomDoors.indexOf(_lastLocalId), 1);
     }
@@ -596,12 +602,12 @@ function findPath(_targetLocalId, _currentLocalId, _lastLocalId, _arrPathRecord,
         _arrStamp.push("r");
     } else if (_thisRoomDoors.length == 1) {
         _arrStamp.push("0");
-    } else if (_thisRoomDoors.length == 0) {
+    } else if (_thisRoomDoors.length == 0 || _currentLocalId == _targetLocalId) {
         _arrStamp.push("-");
     }
 
 
-    if (_thisRoomDoors.length > 0 && _arrPathRecord.indexOf(_thisRoomDoors[0]) < 0) {
+    if (_thisRoomDoors.length > 0 && _arrPathRecord.indexOf(_thisRoomDoors[0]) < 0 && _currentLocalId != _targetLocalId) {
 
         _getDoorTogo = _thisRoomDoors[0];
         _thisRoomDoors.splice(0, 1);
@@ -609,13 +615,21 @@ function findPath(_targetLocalId, _currentLocalId, _lastLocalId, _arrPathRecord,
         _doorMemory.push(_thisRoomDoors);
 
 
-        findPath(_targetLocalId, _getDoorTogo, _currentLocalId, _arrPathRecord, _arrStamp, _doorMemory);
+        findPath(_targetLocalId, _getDoorTogo, _currentLocalId, _arrPathRecord, _arrStamp, _doorMemory, _successPath);
     } else {
         _doorMemory.push(new Array());
-        console.log("**");
-        console.log(_arrPathRecord);
-        console.log(_arrStamp);
-        console.log("**");
+
+
+        if (_currentLocalId == _targetLocalId) {
+            _successPath.push(_arrPathRecord.slice());
+            console.log("**");
+            console.log(_successPath);
+            console.log(_arrPathRecord);
+            console.log(_arrStamp);
+            console.log("**");
+        }
+
+        
 
         var _c = 0
         for (var i = _arrStamp.length - 1; i > -1; i--) {
@@ -632,7 +646,7 @@ function findPath(_targetLocalId, _currentLocalId, _lastLocalId, _arrPathRecord,
                         _arrStamp.splice(-1 * _c, _c);
                         _doorMemory.splice(-1 * _c, _c);
 
-                        findPath(_targetLocalId, _getDoorTogo, _arrPathRecord[i], _arrPathRecord, _arrStamp, _doorMemory);
+                        findPath(_targetLocalId, _getDoorTogo, _arrPathRecord[i], _arrPathRecord, _arrStamp, _doorMemory, _successPath);
                     }
                 } else {
 
@@ -643,6 +657,8 @@ function findPath(_targetLocalId, _currentLocalId, _lastLocalId, _arrPathRecord,
         }
 
     }
+
+    return _successPath;
 
 }
 
