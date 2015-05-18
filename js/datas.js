@@ -145,7 +145,7 @@ arrDoors = [{
         width: 20,
         height: 10,
         visible: true,
-        open: true
+        open: false
     }
 
 ]

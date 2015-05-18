@@ -20,7 +20,7 @@
         <td id="attack_count"></td>
     </tr>
 </table>
-<div id="bbb">111111</div>
+<div id="e_move">Enemy Move</div>
 <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 <script src="js/pixi.js/bin/pixi.min.js"></script>
 <script src="js/datas.js"></script>
@@ -72,6 +72,75 @@ arrTimer.push(t2);
 
 */
 
+function init() {
+
+    stage = new PIXI.Container();
+
+    renderer = PIXI.autoDetectRenderer(displayWidth, displayHeight, {
+        backgroundColor: 0x1099bb
+    });
+
+    document.getElementById("gameView").appendChild(renderer.view);
+
+    //增加容器
+    mapContainer = new PIXI.Container();
+    createMap();
+
+    var cR = new createRole();
+    cR._roleTypeObj = arrRoleType[0];
+    cR._faction = "enemy";
+    for (var i = 0; i < 1; i++) {
+        cR._roleLocal = null;
+        cR.create();
+    }
+
+    var cR = new createRole();
+    cR._roleTypeObj = arrRoleType[1];
+    cR._faction = "player";
+    var newR = cR.create();
+
+    newR.interactive = true;
+    newR.buttonMode = true;
+
+    newR.skill = [0, 10, 20, 30, 40, 50, 60, 70];
+    newR.equip = {
+        main: [0, 1],
+        sub: []
+    };
+
+    newR.oX = newR.position.x;
+    newR.oY = newR.position.y;
+    newR.at = 2000;
+    newR.endTime = new Date().getTime() + newR.at;
+
+    newR.startTime = new Date().getTime();
+
+
+
+
+
+    $('#e_move').click(function() {
+        enemyMove();
+    })
+
+    newR.on('mousedown', roleClick);
+
+    //enemyMove();
+
+    mapContainer.on('mousedown', onDragStart)
+        .on('touchstart', onDragStart)
+        // events for drag end
+        .on('mouseup', onDragEnd)
+        .on('mouseupoutside', onDragEnd)
+        .on('touchend', onDragEnd)
+        .on('touchendoutside', onDragEnd)
+        // events for drag move
+        .on('mousemove', onDragMove)
+        .on('touchmove', onDragMove);
+
+    animate();
+}
+
 stage.addChild(mapContainer);
 
 // アニメーション関数を定義する
@@ -87,6 +156,78 @@ function animate() {
         if (arrTimer[i].play()) {
             arrTimer.splice(i, 1);
         }
+
+    }
+
+    for (var i = 0; i < arrRoleObj.length; i++) {
+
+
+        if (arrRoleObj[i].faction == "player") {
+
+            var _de = (new Date().getTime() - arrRoleObj[i].startTime) / arrRoleObj[i].at * 100;
+
+
+
+            if (_de) {
+
+
+                var _dy = 0 - arrRoleObj[i].position.y;
+                var _dx = 0 - arrRoleObj[i].position.x;
+
+
+
+                var _ro = Math.atan2(_dy, _dx);
+                var _x = Math.cos(_ro);
+                var _y = Math.sin(_ro);
+                /*
+                                if (Math.abs(_x) < 0.1) {
+                                    if (_x < 0) {
+                                        _x = -0.1;
+                                    } else {
+                                        _x = 0.1;
+                                    }
+                                }
+
+                                if (Math.abs(_y) < 0.1) {
+                                    if (_y < 0) {
+                                        _y = -0.1;
+                                    } else {
+                                        _y = 0.1;
+                                    }
+                                }
+
+                */
+
+                arrRoleObj[i].position.x += _x;
+                arrRoleObj[i].position.y += _y;
+                if (_x != 1) {
+
+
+                    if (arrRoleObj[i].position.x < 20) {
+                        arrRoleObj[i].position.x = 20;
+
+                    }
+
+                    if (arrRoleObj[i].position.y < 20) {
+                        arrRoleObj[i].position.y = 20;
+
+                    }
+
+                }
+            }
+
+
+
+        }
+
+
+        /*  var _rotation = Math.atan2(arrRoleObj[i].position.y - arrRoleObj[i].goalY, arrRoleObj[i].position.x - arrRoleObj[i].goalX);
+          console.log(Math.cos(_rotation));*/
+        // Move towards the player
+        /* arrRoleObj[i].position.x += Math.cos(_rotation);
+         arrRoleObj[i].position.y += Math.sin(_rotation);*/
+
+
 
     }
 }

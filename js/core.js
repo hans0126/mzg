@@ -300,9 +300,13 @@ function createRole() {
         _role.local = this._roleLocal;
         _role.faction = this._faction;
 
+     
+
         arrRoleObj.push(_role);
         locationCheck(_role, arrRoleObj, getRoomLocal(this._roleLocal));
         mapContainer.addChild(_role);
+
+
 
         return _role;
     }
@@ -397,9 +401,6 @@ function choseWeapon() {
 }
 
 
-
-
-
 /*通過房間*/
 function passageDoor(event) {
     //currentRole
@@ -449,73 +450,11 @@ function currentRoomDoorActive(room_id) {
     }
 }
 
-function init() {
-
-    stage = new PIXI.Container();
-
-    renderer = PIXI.autoDetectRenderer(displayWidth, displayHeight, {
-        backgroundColor: 0x1099bb
-    });
-
-    document.getElementById("gameView").appendChild(renderer.view);
-
-    //增加容器
-    mapContainer = new PIXI.Container();
-    createMap();
-    /*
-        var cR = new createRole();
-        cR._roleTypeObj = arrRoleType[0];
-        cR._faction = "enemy";
-        for (var i = 0; i < 18; i++) {
-            cR._roleLocal = null;
-            cR.create();
-        }
-
-
-        cR._roleTypeObj = arrRoleType[1];
-        cR._faction = "player";
-        var newR = cR.create();
-
-        newR.interactive = true;
-        newR.buttonMode = true;
-
-        newR.skill = [0, 10, 20, 30, 40, 50, 60, 70];
-        newR.equip = {
-            main: [0, 1],
-            sub: []
-        };
-
-
-
-        newR.on('mousedown', roleClick);
-    */
-    //enemyMove();
-
-    mapContainer.on('mousedown', onDragStart)
-        .on('touchstart', onDragStart)
-        // events for drag end
-        .on('mouseup', onDragEnd)
-        .on('mouseupoutside', onDragEnd)
-        .on('touchend', onDragEnd)
-        .on('touchendoutside', onDragEnd)
-        // events for drag move
-        .on('mousemove', onDragMove)
-        .on('touchmove', onDragMove);
-
-    animate();
-
-    var _pathResult = findPath("b", "g", null, new Array(), new Array(), new Array());
-
-    for (var i = 0; i < _pathResult.length; i++) {
-        console.log(_pathResult[i]);
-    }
-}
-
-
 
 
 function enemyMove() {
-
+    var _canMovePlay = new Array();
+    var _canMoveTargetRoom = new Array();
     var _player = updateAttribute(arrRoleObj, {
         faction: "player"
     });
@@ -524,49 +463,91 @@ function enemyMove() {
         _player = _player[0];
     }
 
-    var _playerLocal = getRoomLocal(_player);
+    var _playerLocal = _player.local;
 
     for (var y = 0; y < arrMap.length; y++) {
         for (var x = 0; x < arrMap[y].length; x++) {
 
             var _roomId = arrMap[y][x].room_id;
-
+            var _resultPaths;
+            var _targetRoom;
+            var _newRoomLocal;
             var _enemyCount = updateAttribute(arrRoleObj, {
                 faction: "enemy",
                 local: _roomId
             });
 
+            console.log(_roomId + "->" + _enemyCount.length);
 
+            if (_enemyCount.length > 0 && _playerLocal != _roomId) {
+                _resultPaths = findPath(_playerLocal, _roomId);
+                //array sort
+                _resultPaths.sort(function(a, b) {
+                    return a.length - b.length;
+                })
 
+                if (_resultPaths.length > 0) {
+                    _targetRoom = _resultPaths[0][1];
+                    _newRoomLocal = getRoomLocal(_targetRoom);
 
-            //找出這個房間的出口
-            for (var i = 0; i < arrDoorsDisplayObj.length; i++) {
-                var _indexOf = arrDoorsDisplayObj[i].passage.indexOf(_roomId);
-                if (_indexOf > -1 && arrDoorsDisplayObj[i].open == true) {
-                    if (_indexOf == 0) {
-                        _indexOf = 1;
-                    } else {
-                        _indexOf = 0;
+                    console.log("curremt:" + _roomId);
+                    console.log("target:" + _targetRoom);
+                    console.log(_newRoomLocal.x + "/" + _newRoomLocal.y);
+                    for (var i = 0; i < _enemyCount.length; i++) {
+                        _enemyCount[i].goalX = Math.floor(randomDeploy(_newRoomLocal.x, blockWidth));
+                        _enemyCount[i].goalY = Math.floor(randomDeploy(_newRoomLocal.y, blockHeight));
+
+                        _canMovePlay.push(_enemyCount[i]);
+                        _canMoveTargetRoom.push(_targetRoom);
                     }
-                    var _targetRoomId = arrDoorsDisplayObj[i].passage[_indexOf];
-
-                    console.log(_roomId + "-->" + _targetRoomId);
 
                 }
             }
 
-
-
-
+            console.log("--------------");          
 
         }
+    }
 
+    for (var i = 0; i < _canMovePlay.length; i++) {
+        _canMovePlay[i].local = _canMoveTargetRoom[i];
     }
 }
 
-function findPath(_targetLocalId, _currentLocalId, _lastLocalId, _arrPathRecord, _arrStamp, _doorMemory, _successPath) {
-    //找出此房間的門，則可判斷出通往的房間
+/*search path 
 
+    _targetLocalId : target room id
+    _currentLocalId : current room id
+
+    return 
+    
+    all can arrive path
+
+*/
+
+function findPath(_targetLocalId, _currentLocalId, _lastLocalId, _arrPathRecord, _arrStamp, _doorMemory, _successPath) {
+
+    if (typeof(_lastLocalId) == "undefined") {
+        _lastLocalId = null;
+    }
+
+    if (typeof(_arrPathRecord) == "undefined") {
+        _arrPathRecord = new Array();
+    }
+
+    if (typeof(_arrStamp) == "undefined") {
+        _arrStamp = new Array();
+    }
+
+    if (typeof(_doorMemory) == "undefined") {
+        _doorMemory = new Array();
+    }
+
+    if (typeof(_successPath) == "undefined") {
+        _successPath = new Array();
+    }
+
+    //找出此房間的門，則可判斷出通往的房間
     var _thisRoomDoors = new Array();
     //search door
     for (var i = 0; i < arrDoorsDisplayObj.length; i++) {
@@ -582,21 +563,13 @@ function findPath(_targetLocalId, _currentLocalId, _lastLocalId, _arrPathRecord,
         }
     }
 
-    if (typeof(_successPath) == "undefined") {
-        _successPath = new Array();
-    }
-
     _arrPathRecord.push(_currentLocalId);
 
-
     var _getDoorTogo;
-
 
     if (_thisRoomDoors.indexOf(_lastLocalId) > -1) {
         _thisRoomDoors.splice(_thisRoomDoors.indexOf(_lastLocalId), 1);
     }
-
-
 
     if (_thisRoomDoors.length >= 2) {
         _arrStamp.push("r");
@@ -605,7 +578,6 @@ function findPath(_targetLocalId, _currentLocalId, _lastLocalId, _arrPathRecord,
     } else if (_thisRoomDoors.length == 0 || _currentLocalId == _targetLocalId) {
         _arrStamp.push("-");
     }
-
 
     if (_thisRoomDoors.length > 0 && _arrPathRecord.indexOf(_thisRoomDoors[0]) < 0 && _currentLocalId != _targetLocalId) {
 
@@ -619,17 +591,9 @@ function findPath(_targetLocalId, _currentLocalId, _lastLocalId, _arrPathRecord,
     } else {
         _doorMemory.push(new Array());
 
-
         if (_currentLocalId == _targetLocalId) {
             _successPath.push(_arrPathRecord.slice());
-            console.log("**");
-            console.log(_successPath);
-            console.log(_arrPathRecord);
-            console.log(_arrStamp);
-            console.log("**");
         }
-
-        
 
         var _c = 0
         for (var i = _arrStamp.length - 1; i > -1; i--) {
@@ -661,53 +625,6 @@ function findPath(_targetLocalId, _currentLocalId, _lastLocalId, _arrPathRecord,
     return _successPath;
 
 }
-
-function iii() {
-    var aa = ["h", "g", "d", "i", "f", "c", "b", "a", "j"];
-
-    var map = ["r", 0, "-", 0, 0, "r", 0, "-", "-"];
-
-    var result = [];
-
-    var thisIndex = 0;
-    var max = 0;
-    for (var i = 0; i < map.length; i++) {
-        if (map[i] == "-") {
-            result.push(new Array());
-            max++;
-        }
-    }
-
-
-
-
-
-    for (var i = 0; i < aa.length; i++) {
-        if (map[i] == "r") {
-            for (var j = thisIndex; j < max; j++) {
-                result[j].push(aa[i]);
-            }
-        }
-
-        if (map[i] == 0) {
-            for (var j = thisIndex; j < max; j++) {
-                result[j].push(aa[i]);
-            }
-        }
-
-        if (map[i] == "-") {
-            result[thisIndex].push(aa[i]);
-            thisIndex++;
-        }
-
-
-    }
-
-    console.log(result);
-
-}
-
-
 
 /*拖拉地圖*/
 
