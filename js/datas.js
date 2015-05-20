@@ -9,143 +9,229 @@ var arrLanguage = new Array(); //說話
 arrMap = [
     [{
         visible: true,
-        room_id: "a"
+        room_id: "a",
+        tx: 0,
+        ty: 0,
+        group: "1"
+    }, {
+        visible: false,
+        room_id: "b",
+        tx: 0,
+        ty: 0,
+        group: null
     }, {
         visible: true,
-        room_id: "b"
+        room_id: "c",
+        tx: 2,
+        ty: 2,
+        group: "2"
     }, {
         visible: true,
-        room_id: "c"
-    }, {
-        visible: true,
-        room_id: "j"
+        room_id: "d",
+        tx: 3,
+        ty: 2,
+        group: "2"
     }],
     [{
         visible: true,
-        room_id: "d"
+        room_id: "e",
+        tx: 2,
+        ty: 1,
+        group: "3"
     }, {
         visible: true,
-        room_id: "e"
+        room_id: "f",
+        tx: 3,
+        ty: 1,
+        group: "3"
     }, {
         visible: true,
-        room_id: "f"
+        room_id: "g",
+        tx: 0,
+        ty: 2,
+        group: "2"
+    }, {
+        visible: true,
+        room_id: "h",
+        tx: 1,
+        ty: 2,
+        group: "2"
+    }],
+    [{
+        visible: false,
+        room_id: "i",
+        tx: null,
+        ty: 0,
+        group: null
+    }, {
+        visible: true,
+        room_id: "j",
+        tx: 0,
+        ty: 0,
+        group: "4"
+    }, {
+        visible: false,
+        room_id: "k",
+        tx: null,
+        ty: 0,
+        group: null
+    }, {
+        visible: true,
+        room_id: "l",
+        tx: 1,
+        ty: 1,
+        group: "5"
     }],
     [{
         visible: true,
-        room_id: "g"
+        room_id: "m",
+        tx: 2,
+        ty: 1,
+        group: "6"
     }, {
         visible: true,
-        room_id: "h"
+        room_id: "o",
+        tx: 2,
+        ty: 0,
+        group: "6"
     }, {
         visible: true,
-        room_id: "i"
+        room_id: "p",
+        tx: 3,
+        ty: 1,
+        group: "6"
+    }, {
+        visible: true,
+        room_id: "q",
+        tx: 0,
+        ty: 1,
+        group: "5"
     }]
 ];
 
 arrDoors = [{
-        "root_room": "a",
-        passage: ["a", "b"],
-        x: 95,
-        y: 40,
-        width: 10,
-        height: 20,
+        root_room: "a",
+        passage: ["a", "e"],
+        x: 80,
+        y: 185,
+        width: 30,
+        height: 30,
         visible: true,
         open: true
     }, {
-        "root_room": "a",
-        passage: ["a", "d"],
-        x: 40,
-        y: 95,
-        width: 20,
-        height: 10,
-        visible: true,
-        open: true
-    }, {
-        "root_room": "d",
-        passage: ["d", "g"],
-        x: 40,
-        y: 95,
-        width: 20,
-        height: 10,
-        visible: true,
-        open: true
-    }, {
-        "root_room": "b",
-        passage: ["b", "c"],
-        x: 95,
-        y: 40,
-        width: 10,
-        height: 20,
-        visible: true,
-        open: true
-    }, {
-        "root_room": "c",
-        passage: ["c", "f"],
-        x: 40,
-        y: 95,
-        width: 20,
-        height: 10,
-        visible: true,
-        open: true
-    },
-
-    {
-        "root_room": "c",
-        passage: ["c", "j"],
-        x: 95,
-        y: 40,
-        width: 10,
-        height: 20,
-        visible: true,
-        open: true
-    }, {
-        "root_room": "f",
-        passage: ["f", "i"],
-        x: 40,
-        y: 95,
-        width: 20,
-        height: 10,
-        visible: true,
-        open: true
-    }, {
-        "root_room": "g",
-        passage: ["g", "h"],
-        x: 95,
-        y: 40,
-        width: 10,
-        height: 20,
-        visible: true,
-        open: true
-    }, {
-        "root_room": "h",
-        passage: ["h", "i"],
-        x: 95,
-        y: 40,
-        width: 10,
-        height: 20,
-        visible: true,
-        open: true
-    },
-    {
-        "root_room": "e",
+        root_room: "e",
         passage: ["e", "f"],
-        x: 95,
-        y: 40,
-        width: 10,
-        height: 20,
+        x: 185,
+        y: 85,
+        width: 30,
+        height: 30,
+        visible: true,
+        open: true
+    }, {
+        root_room: "f",
+        passage: ["f", "j"],
+        x: 80,
+        y: 185,
+        width: 30,
+        height: 30,
+        visible: true,
+        open: true
+    }, {
+        root_room: "j",
+        passage: ["j", "o"],
+        x: 80,
+        y: 185,
+        width: 30,
+        height: 30,
+        visible: true,
+        open: true
+    }, {
+        root_room: "o",
+        passage: ["o", "m"],
+        x: 0,
+        y: 85,
+        width: 30,
+        height: 30,
         visible: true,
         open: true
     },
 
     {
-        "root_room": "e",
-        passage: ["e", "h"],
-        x: 40,
-        y: 95,
-        width: 20,
-        height: 10,
+        root_room: "o",
+        passage: ["o", "p"],
+        x: 185,
+        y: 85,
+        width: 30,
+        height: 30,
         visible: true,
-        open: false
+        open: true
+    }, {
+        root_room: "p",
+        passage: ["p", "q"],
+        x: 185,
+        y: 85,
+        width: 30,
+        height: 30,
+        visible: true,
+        open: true
+    }, {
+        root_room: "q",
+        passage: ["q", "l"],
+        x: 85,
+        y: 0,
+        width: 30,
+        height: 30,
+        visible: true,
+        open: true
+    }, {
+        root_room: "l",
+        passage: ["h", "l"],
+        x: 95,
+        y: 0,
+        width: 30,
+        height: 30,
+        visible: true,
+        open: true
+    }, {
+        root_room: "h",
+        passage: ["h", "d"],
+        x: 95,
+        y: 0,
+        width: 30,
+        height: 30,
+        visible: true,
+        open: true
+    },
+
+    {
+        root_room: "h",
+        passage: ["h", "g"],
+        x: 0,
+        y: 95,
+        width: 30,
+        height: 30,
+        visible: true,
+        open: true
+    },
+
+    {
+        root_room: "c",
+        passage: ["c", "d"],
+        x: 185,
+        y: 95,
+        width: 30,
+        height: 30,
+        visible: true,
+        open: true
+    }, {
+        root_room: "c",
+        passage: ["c", "g"],
+        x: 95,
+        y: 185,
+        width: 30,
+        height: 30,
+        visible: true,
+        open: true
     }
 
 ]

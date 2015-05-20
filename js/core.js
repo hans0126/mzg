@@ -165,41 +165,99 @@ status 變更狀態 interactiveSwitch
 
 function updateAttribute(arrGraphic, condition, attribute) {
 
-    var returnObj = new Array();
+        var returnObj = new Array();
+
+        if (status == "undefined") {
+            status = true;
+        }
+
+
+        if (typeof(arrGraphic) != "object") {
+            return false;
+        }
+
+        for (var i = 0; i < arrGraphic.length; i++) {
+
+            var currentMatch = true;
+
+            if (condition != "undefined" || condition != null) {
+                for (var key in condition) {
+                    if (arrGraphic[i][key] != condition[key]) {
+                        currentMatch = false;
+                        break;
+                    }
+                }
+            }
+
+            if (currentMatch) {
+                for (var key in attribute) {
+                    arrGraphic[i][key] = attribute[key];
+                }
+
+                returnObj.push(arrGraphic[i]);
+            }
+        }
+
+        return returnObj;
+    }
+    //二維
+function getMapInfo(_arrMap, _condition) {
+
+    var _returnObj = new Array();
 
     if (status == "undefined") {
         status = true;
     }
 
 
-    if (typeof(arrGraphic) != "object") {
+    if (typeof(_arrMap) != "object") {
         return false;
     }
 
-    for (var i = 0; i < arrGraphic.length; i++) {
+    for (var y = 0; y < _arrMap.length; y++) {
+        for (var x = 0; x < _arrMap[y].length; x++) {
+            var currentMatch = true;
 
-        var currentMatch = true;
-
-        if (condition != "undefined" || condition != null) {
-            for (var key in condition) {
-                if (arrGraphic[i][key] != condition[key]) {
-                    currentMatch = false;
-                    break;
+            if (_condition != "undefined" || _condition != null) {
+                for (var key in _condition) {
+                    if (_arrMap[y][x][key] != _condition[key]) {
+                        currentMatch = false;
+                        break;
+                    }
                 }
             }
-        }
 
-        if (currentMatch) {
-            for (var key in attribute) {
-                arrGraphic[i][key] = attribute[key];
+            if (currentMatch) {
+
+                _returnObj.push(_arrMap[y][x]);
             }
-
-            returnObj.push(arrGraphic[i]);
         }
     }
 
-    return returnObj;
+    return _returnObj;
 }
+
+function getRoomPassage(_roomId) {
+    var _returnPassage = new Array();
+    for (var i = 0; i < arrDoorsDisplayObj.length; i++) {
+        var _thisPassageIndex = arrDoorsDisplayObj[i].passage.indexOf(_roomId)
+        if (_thisPassageIndex > -1) {
+            if (arrDoorsDisplayObj[i].open == true) {
+                if (_thisPassageIndex == 0) {
+                    _thisPassageIndex = 1;
+                } else {
+                    _thisPassageIndex = 0;
+                }
+
+                _returnPassage.push(arrDoorsDisplayObj[i].passage[_thisPassageIndex]);
+
+            }
+        }
+    }
+
+    return _returnPassage;
+}
+
 
 function removeAttackRangeArea() {
 
@@ -300,13 +358,13 @@ function createRole() {
         _role.local = this._roleLocal;
         _role.faction = this._faction;
 
-     
+        _role.actionMovement = false;
+        _role.goalX = null;
+        _role.goalY = null;
 
         arrRoleObj.push(_role);
         locationCheck(_role, arrRoleObj, getRoomLocal(this._roleLocal));
         mapContainer.addChild(_role);
-
-
 
         return _role;
     }
@@ -315,25 +373,26 @@ function createRole() {
 /*產生地圖*/
 function createMap() {
 
-    var _graphics = new PIXI.Graphics();
-
-    _graphics.beginFill(0xFF3300);
-
-    _graphics.moveTo(0, 0);
-    _graphics.lineStyle(1, 0x0000FF, 1);
-    _graphics.beginFill(0xFF700B, 1);
-    mapContainer.addChild(_graphics);
     mapContainer.interactive = true;
     /*
-        產生地圖以及門
+        產生地圖以及連接路徑
     */
     for (var y = 0; y < arrMap.length; y++) {
         for (var x = 0; x < arrMap[y].length; x++) {
             totalRoom++;
             if (arrMap[y][x].visible == true) {
-                _graphics.drawRect(x * blockWidth, y * blockHeight, blockWidth, blockHeight);
+                //   _graphics.drawRect(x * blockWidth, y * blockHeight, blockWidth, blockHeight);
+                var _tilingSprite = new PIXI.extras.TilingSprite(mapTexture, blockWidth, blockWidth);
+                _tilingSprite.x = x * blockWidth;
+                _tilingSprite.y = y * blockWidth;
+                _tilingSprite.tilePosition.x = (blockWidth * arrMap[y][x].tx) * -1;
+                _tilingSprite.tilePosition.y = (blockWidth * arrMap[y][x].ty) * -1;
+                _tilingSprite.zIndex = 20;
+                mapContainer.addChild(_tilingSprite);
                 arrMap[y][x].localX = x;
                 arrMap[y][x].localY = y;
+                arrMap[y][x].noise = 0;
+
                 //房間文字
                 var _textObj = new PIXI.Text(arrMap[y][x].room_id);
                 _textObj.x = x * blockWidth + 5;
@@ -357,7 +416,7 @@ function createMap() {
                         _doorGraphics.open = arrDoors[i].open;
 
                         _doorGraphics.on('mousedown', passageDoor);
-
+                        _doorGraphics.zIndex = 10;
                         arrDoorsDisplayObj.push(_doorGraphics);
                         mapContainer.addChild(_doorGraphics);
                     }
@@ -365,6 +424,17 @@ function createMap() {
             }
         }
     }
+    //z-index排序
+    mapContainer.updateLayersOrder = function() {
+        mapContainer.children.sort(function(a, b) {
+            a.zIndex = a.zIndex || 0;
+            b.zIndex = b.zIndex || 0;
+            return b.zIndex - a.zIndex
+        });
+    };
+
+    mapContainer.updateLayersOrder();
+
 }
 
 
@@ -416,10 +486,11 @@ function passageDoor(event) {
         //search room location
         var roomLocal = getRoomLocal(targetRoom);
 
-        currentRole.x = randomDeploy(roomLocal.x, blockWidth);
-        currentRole.y = randomDeploy(roomLocal.y, blockWidth);
+        currentRole.goalX = randomDeploy(roomLocal.x, blockWidth);
+        currentRole.goalY = randomDeploy(roomLocal.y, blockWidth);
         currentRole.local = targetRoom;
-        locationCheck(currentRole, arrRoleObj, roomLocal);
+        currentRole.actionMovement = true;
+        //locationCheck(currentRole, arrRoleObj, roomLocal);
 
         updateAttribute(arrDoorsDisplayObj, null, {
             interactive: false,
@@ -504,13 +575,14 @@ function enemyMove() {
                 }
             }
 
-            console.log("--------------");          
+            console.log("--------------");
 
         }
     }
 
     for (var i = 0; i < _canMovePlay.length; i++) {
         _canMovePlay[i].local = _canMoveTargetRoom[i];
+        _canMovePlay[i].actionMovement = true;
     }
 }
 
@@ -625,6 +697,103 @@ function findPath(_targetLocalId, _currentLocalId, _lastLocalId, _arrPathRecord,
     return _successPath;
 
 }
+
+
+/*
+尋找目標:眼睛
+
+result: array[room id]
+*/
+function findEnemyByEyes(_currentRoomId, _roomGroup, _history) {
+
+    var _currentRoom;
+
+    if (typeof(_history) == "undefined") {
+        _history = new Array();
+    }
+
+    _history.push(_currentRoomId);
+
+    //目視十字
+    _currentRoom = getMapInfo(arrMap, {
+        room_id: _currentRoomId
+    })[0];
+
+
+    if (typeof(_roomGroup) == "undefined") {
+        _roomGroup = _currentRoom.group;
+    }
+
+    _currentPassage = getRoomPassage(_currentRoomId);
+    //判斷這個房間是否有玩家 
+    var _tempHasPlayer = new Array();
+    for (var i = 0; i < _currentPassage.length; i++) {
+
+        var _temp = updateAttribute(arrRoleObj, {
+            faction: "player",
+            local: _currentPassage[i]
+        });
+
+        if (_temp.length > 0) {
+            _tempHasPlayer.push(_currentPassage[i]);
+        }
+    }
+
+    if (_tempHasPlayer.length == 0) {
+
+        for (var i = 0; i < _currentPassage.length; i++) {
+            //查詢是不是同一個群組的
+            if (_history.indexOf(_currentPassage[i]) == -1) {
+
+                var _nextRoomGroup = getMapInfo(arrMap, {
+                    room_id: _currentPassage[i]
+                })[0].group;
+
+                if (_currentRoom.group == _nextRoomGroup) {
+                    _tempHasPlayer = findEnemyByEyes(_currentPassage[i], _roomGroup, _history);
+                }
+            }
+
+        }
+    }
+
+    return _tempHasPlayer;
+}
+
+/*
+找尋全地圖噪音最大的點(暫)
+
+
+*/
+
+
+function findEnemyByNoise() {
+    var _tempMap = new Array();
+
+    for (var y = 0; y < arrMap.length; y++) {
+        for (var x = 0; x < arrMap[y].length; x++) {
+            /*查看該地圖是否有活人*/
+            if (arrMap[y][x].visible == true) {
+                var _mens = updateAttribute(arrRoleObj, {
+                    faction: "player",
+                    local: arrMap[y][x].room_id
+                });
+                console.log(arrMap[y][x].room_id + "/" + (arrMap[y][x].noise + _mens.length));
+                //  _tempMap[arrMap[y][x].room_id] =  arrMap[y][x].noise +  _mens.length;
+                _tempMap.push({
+                    room_id: arrMap[y][x].room_id,
+                    noise: arrMap[y][x].noise + _mens.length
+                });
+            }
+
+        }
+    }
+    return  _tempMap.sort(function(a, b) {
+        return b.noise - a.noise;
+    });
+
+}
+
 
 /*拖拉地圖*/
 
