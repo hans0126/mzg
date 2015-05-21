@@ -12,6 +12,7 @@ function attack(weapon) {
     var _activeRole = [];
     var _successRange = _weaponObj.successRange; //攻擊成功參數:起始值
     var _numberOfAttack = _weaponObj.numberOfAttack; //攻擊次數
+    var _attackArea =[];
 
     //初始range
     if (_weaponObj.attackType == "range") {
@@ -49,7 +50,7 @@ function attack(weapon) {
         }
     }
 
-
+   // _attackArea = getPanorama(currentRole.local,_minRange,_maxRange);
   
 
     for (var i = _minRange; i < _maxRange + 1; i++) {

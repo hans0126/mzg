@@ -65,18 +65,23 @@ function hitTest(r1, r2) {
 }
 
 
-/* 隨機位置不重疊 */
+/* 隨機位置不重疊
+    _target : 比對的對象
+    _targetGroup : 比對的群組
+    _roomObject:區域
+    
+ */
 
-function locationCheck(target, targetGroup, roomLocal) {
+function locationCheck(_target, _targetGroup, _roomObject) {
 
-    for (var i = 0; i < targetGroup.length; i++) {
-        if (target.local == targetGroup[i].local && target.objectName != targetGroup[i].objectName) {
-            if (hitTest(target, targetGroup[i])) {
+    for (var i = 0; i < _targetGroup.length; i++) {
+        if (_target.local == _targetGroup[i].local && _target != _targetGroup[i]) {
+            if (hitTest(_target, _targetGroup[i])) {
 
-                target.x = randomDeploy(roomLocal.x, blockHeight);
-                target.y = randomDeploy(roomLocal.y, blockHeight);
+                _target.x = randomDeploy(_roomObject.localX, blockHeight);
+                _target.y = randomDeploy(_roomObject.localY, blockHeight);
 
-                locationCheck(target, targetGroup, roomLocal);
+                locationCheck(_target, _targetGroup, _roomObject);
                 break;
             }
         }
@@ -84,44 +89,44 @@ function locationCheck(target, targetGroup, roomLocal) {
 }
 
 
-/* random depoly to room */
+/* 
+random depoly to room 
+roomCount : 總房間數
+
+return Object
+
+*/
 
 function getRandomRoom(roomCount) {
 
     var randomCount = Math.floor(Math.random() * roomCount);
-
     var count = 0;
-    var room_id;
+    var roomObject;
     for (var i = 0; i < arrMap.length; i++) {
         for (var j = 0; j < arrMap[i].length; j++) {
-
-
             if (randomCount == count) {
 
                 if (arrMap[i][j].visible == true) {
-                    room_id = arrMap[i][j].room_id;
+                    roomObject = arrMap[i][j];
                 } else {
-                    room_id = getRandomRoom(roomCount);
+                    roomObject = getRandomRoom(roomCount);
                 }
             }
 
             count++;
         }
     }
-
-    return room_id;
-
-
+    return roomObject;
 }
 
 
 
 
 /* get room local */
-
-function getRoomLocal(room_id) {
-    var getRoom = false;
-    var returnObj = {};
+/*
+function getRoomObject(room_id) {
+    var _getRoom = false;
+    var _returnObj ;
 
     for (var y = 0; y < arrMap.length; y++) {
 
@@ -144,10 +149,12 @@ function getRoomLocal(room_id) {
     return returnObj;
 
 }
-
+*/
 /*隨機
     level:倍數 
     space:寬
+
+    return num
     
 */
 
@@ -163,7 +170,7 @@ condition 條件式 物件
 status 變更狀態 interactiveSwitch
 */
 
-function updateAttribute(arrGraphic, condition, attribute) {
+function objectHelp(arrGraphic, condition, attribute) {
 
         var returnObj = new Array();
 
@@ -327,10 +334,13 @@ function languageCombination(event) {
 }
 
 
-/*產生角色*/
+/*產生角色
+
+ function create return: object
+*/
 
 function createRole() {
-    this._roleLocal;
+    this._roleLocal; //Object
     this._roleTypeObj;
     this._faction;
     this._objectName;
@@ -344,10 +354,12 @@ function createRole() {
             this._roleLocal = getRandomRoom(totalRoom);
         }
 
-        var _roomLocal = getRoomLocal(this._roleLocal);
+        //  var _roomLocal = getRoomObject(this._roleLocal);
 
-        _role.x = randomDeploy(_roomLocal.x, blockWidth);
-        _role.y = randomDeploy(_roomLocal.y, blockHeight);
+        _role.x = randomDeploy(this._roleLocal.localX, blockWidth);
+        _role.y = randomDeploy(this._roleLocal.localY, blockHeight);
+
+
 
         if (this._objectName == "undefined" || this._objectName == null) {
             _role.objectName = "z" + Math.floor(Math.random() * 999999) + "_" + new Date().getTime(); //亂數
@@ -363,7 +375,7 @@ function createRole() {
         _role.goalY = null;
 
         arrRoleObj.push(_role);
-        locationCheck(_role, arrRoleObj, getRoomLocal(this._roleLocal));
+        locationCheck(_role, arrRoleObj, this._roleLocal);
         mapContainer.addChild(_role);
 
         return _role;
@@ -443,7 +455,7 @@ function roleClick(event) {
     //console.log(this.objectName);
     this.tint = 0xFF0000;
 
-    currentRoomDoorActive(this.local);
+    currentRoomDoorActive(this.local.room_id);
     currentRole = this;
 
 
@@ -474,31 +486,33 @@ function choseWeapon() {
 /*通過房間*/
 function passageDoor(event) {
     //currentRole
-    var targetRoom = false;
+    var _targetRoomId = false;
     for (var i = 0; i < this.passage.length; i++) {
-        if (this.passage[i] != currentRole.local) {
-            targetRoom = this.passage[i];
+        if (this.passage[i] != currentRole.local.room_id) {
+            _targetRoomId = this.passage[i];
             break;
         }
     }
 
-    if (targetRoom) {
+    if (_targetRoomId) {
         //search room location
-        var roomLocal = getRoomLocal(targetRoom);
+        var _roomLocal = getMapInfo(arrMap, {
+            room_id: _targetRoomId
+        })[0];
 
-        currentRole.goalX = randomDeploy(roomLocal.x, blockWidth);
-        currentRole.goalY = randomDeploy(roomLocal.y, blockWidth);
-        currentRole.local = targetRoom;
+        currentRole.goalX = randomDeploy(_roomLocal.localX, blockWidth);
+        currentRole.goalY = randomDeploy(_roomLocal.localY, blockWidth);
+        currentRole.local = _roomLocal;
         currentRole.actionMovement = true;
         //locationCheck(currentRole, arrRoleObj, roomLocal);
 
-        updateAttribute(arrDoorsDisplayObj, null, {
+        objectHelp(arrDoorsDisplayObj, null, {
             interactive: false,
             tint: 0x666666,
             buttonMode: false
         });
 
-        currentRoomDoorActive(targetRoom);
+        currentRoomDoorActive(_targetRoomId);
 
 
     }
@@ -521,12 +535,15 @@ function currentRoomDoorActive(room_id) {
     }
 }
 
-
+/*
+敵人移動
+目前僅指向單人
+*/
 
 function enemyMove() {
     var _canMovePlay = new Array();
     var _canMoveTargetRoom = new Array();
-    var _player = updateAttribute(arrRoleObj, {
+    var _player = objectHelp(arrRoleObj, {
         faction: "player"
     });
 
@@ -539,19 +556,18 @@ function enemyMove() {
     for (var y = 0; y < arrMap.length; y++) {
         for (var x = 0; x < arrMap[y].length; x++) {
 
-            var _roomId = arrMap[y][x].room_id;
+            var _roomObject = arrMap[y][x];
             var _resultPaths;
             var _targetRoom;
             var _newRoomLocal;
-            var _enemyCount = updateAttribute(arrRoleObj, {
+            var _enemyCount = objectHelp(arrRoleObj, {
                 faction: "enemy",
-                local: _roomId
+                local: _roomObject
             });
 
-            console.log(_roomId + "->" + _enemyCount.length);
+            if (_enemyCount.length > 0 && _playerLocal != _roomObject) {
+                _resultPaths = findPath(_playerLocal.room_id, _roomObject.room_id);
 
-            if (_enemyCount.length > 0 && _playerLocal != _roomId) {
-                _resultPaths = findPath(_playerLocal, _roomId);
                 //array sort
                 _resultPaths.sort(function(a, b) {
                     return a.length - b.length;
@@ -559,24 +575,21 @@ function enemyMove() {
 
                 if (_resultPaths.length > 0) {
                     _targetRoom = _resultPaths[0][1];
-                    _newRoomLocal = getRoomLocal(_targetRoom);
+                    _newRoomLocal = getMapInfo(arrMap, {
+                        room_id: _targetRoom
+                    })[0];
 
-                    console.log("curremt:" + _roomId);
-                    console.log("target:" + _targetRoom);
-                    console.log(_newRoomLocal.x + "/" + _newRoomLocal.y);
+
                     for (var i = 0; i < _enemyCount.length; i++) {
-                        _enemyCount[i].goalX = Math.floor(randomDeploy(_newRoomLocal.x, blockWidth));
-                        _enemyCount[i].goalY = Math.floor(randomDeploy(_newRoomLocal.y, blockHeight));
+                        _enemyCount[i].goalX = Math.floor(randomDeploy(_newRoomLocal.localX, blockWidth));
+                        _enemyCount[i].goalY = Math.floor(randomDeploy(_newRoomLocal.localY, blockHeight));
 
                         _canMovePlay.push(_enemyCount[i]);
-                        _canMoveTargetRoom.push(_targetRoom);
+                        _canMoveTargetRoom.push(_newRoomLocal);
                     }
 
                 }
             }
-
-            console.log("--------------");
-
         }
     }
 
@@ -701,7 +714,10 @@ function findPath(_targetLocalId, _currentLocalId, _lastLocalId, _arrPathRecord,
 
 /*
 尋找目標:眼睛
-
+_currentRoomId: 當下room
+_roomGroup: 同一個空間
+_history:紀錄歷程以免無限迴圈
+---
 result: array[room id]
 */
 function findEnemyByEyes(_currentRoomId, _roomGroup, _history) {
@@ -714,7 +730,7 @@ function findEnemyByEyes(_currentRoomId, _roomGroup, _history) {
 
     _history.push(_currentRoomId);
 
-    //目視十字
+    //get current room
     _currentRoom = getMapInfo(arrMap, {
         room_id: _currentRoomId
     })[0];
@@ -729,7 +745,7 @@ function findEnemyByEyes(_currentRoomId, _roomGroup, _history) {
     var _tempHasPlayer = new Array();
     for (var i = 0; i < _currentPassage.length; i++) {
 
-        var _temp = updateAttribute(arrRoleObj, {
+        var _temp = objectHelp(arrRoleObj, {
             faction: "player",
             local: _currentPassage[i]
         });
@@ -760,6 +776,146 @@ function findEnemyByEyes(_currentRoomId, _roomGroup, _history) {
     return _tempHasPlayer;
 }
 
+/*未完成XD~*/
+function getPanorama(_currentRoomId, _minRange, _maxRange) {
+
+    var _clockwise = [-1, 1, 1, -1]; //四方推演 順時針
+    var _blockOff = [true, true, true, true]; //阻擋紀錄 
+    var _arrReturn = [];
+    var _mapGroupRecord = []; /*增加record*/
+    var _passgeRecord = [];
+    var _currentLocal = getMapInfo(arrMap, {
+        room_id: _currentRoomId
+    })[0];
+
+
+    _mapGroupRecord[0] = _currentLocal.group;
+    _passgeRecord[0] = _currentLocal.room_id;
+
+
+
+    if (typeof(_minRange) == "undefined") {
+        _minRange = 0;
+    }
+
+    if (typeof(_maxRange) == "undefined") {
+        _maxRange = 2;
+    }
+
+    for (var i = _minRange; i < _maxRange + 1; i++) {
+
+        var _tempArray = [];
+        var _tempPassage = [];
+        if (i < 1) {
+            _arrReturn.push(_currentRoomId);
+        } else {
+            //4方擴展 clockwise y-1 x+1 y+1 x-1 
+            for (j = 0; j < 4; j++) {
+                var _tempCurrentLocal = cloneObject(_currentLocal);
+                var _quadrant;
+                if (j % 2 == 0) {
+                    _quadrant = "localY";
+                } else {
+                    _quadrant = "localX";
+                }
+
+                var _quadrantValue = (_clockwise[j] * i) + _currentLocal[_quadrant];
+
+                _tempCurrentLocal[_quadrant] = _quadrantValue;
+                if (_quadrantValue >= 0 && _blockOff[j] && _tempCurrentLocal.localY < arrMap.length) {
+
+                    if (_tempCurrentLocal.localX < arrMap[_tempCurrentLocal.localY].length && arrMap[_tempCurrentLocal.localY][_tempCurrentLocal.localX].visible == true) {
+
+                        var _tempTarget = arrMap[_tempCurrentLocal.localY][_tempCurrentLocal.localX];
+                        var lastGroup;
+                        var lastRoomId;
+
+                        if (i == _minRange) { //先處理I>0的狀況，定位紀錄原始地點
+                            lastGroup = _mapGroupRecord[0][0];
+                            lastRoomId = _passgeRecord;
+                        } else {
+                            if (i == _minRange + 1) {
+                                lastGroup = _mapGroupRecord[0][0];
+                                lastRoomId = _passgeRecord;
+                            } else {
+                                lastGroup = _mapGroupRecord[i - 1][j];
+                                lastRoomId = _passgeRecord[i - 1][j];
+                            }
+                        }
+
+                        //取得passage
+                        console.log(lastRoomId+"/"+_tempTarget.room_id);
+
+                        var _thisPassage = [];
+                   
+                        //比對group
+                        console.log(_thisPassage.length);
+
+
+                        console.log(_tempTarget.room_id);
+
+                        console.log(lastRoomId);
+                        console.log("-+-");
+
+                        if (_thisPassage.length > 0) {
+                            console.log("A");
+                            _tempArray.push(_tempTarget.group);
+                            _arrReturn.push(_tempTarget.room_id);
+                            _tempPassage.push(_tempTarget.room_id);
+
+                        } else {
+
+                            _blockOff[j] = false;
+                            _tempArray.push(false);
+                            _tempPassage.push(false);
+                        }
+
+                        //if (_thisPassage.indexOf(_tempTarget.room_id) > -1 || _tempTarget.group == lastGroup || _tempTarget.group != lastGroup) {
+
+                        /* if (_thisPassage.indexOf(lastRoomId) > -1) {
+                            _tempArray.push(_tempTarget.group);
+                            _arrReturn.push(_tempTarget.room_id);
+                            _tempPassage.push(_tempTarget.room_id);
+
+                            if (_tempTarget.group != lastGroup) {
+                                _blockOff[j] = false;
+                            }
+                        } else {
+                            _blockOff[j] = false;
+                        }
+*/
+
+                        /*  } else {
+                              _blockOff[j] = false;
+                              _tempArray.push(false);
+                          }*/
+                    } else {
+                        _blockOff[j] = false;
+                        _tempArray.push(false);
+                        _tempPassage.push(false);
+                    }
+
+                } else {
+                    _blockOff[j] = false;
+                    _tempArray.push(false);
+                    _tempPassage.push(false);
+                }
+            }
+        }
+
+
+
+        if (i > _minRange) {
+            _mapGroupRecord.push(_tempArray);
+            _passgeRecord.push(_tempPassage);
+        }
+    }
+
+    console.log(_arrReturn);
+    return _arrReturn;
+
+}
+
 /*
 找尋全地圖噪音最大的點(暫)
 
@@ -774,7 +930,7 @@ function findEnemyByNoise() {
         for (var x = 0; x < arrMap[y].length; x++) {
             /*查看該地圖是否有活人*/
             if (arrMap[y][x].visible == true) {
-                var _mens = updateAttribute(arrRoleObj, {
+                var _mens = objectHelp(arrRoleObj, {
                     faction: "player",
                     local: arrMap[y][x].room_id
                 });
@@ -788,7 +944,7 @@ function findEnemyByNoise() {
 
         }
     }
-    return  _tempMap.sort(function(a, b) {
+    return _tempMap.sort(function(a, b) {
         return b.noise - a.noise;
     });
 
