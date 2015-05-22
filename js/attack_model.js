@@ -2,7 +2,7 @@
 function attack(weapon) {
     var _range = false; //判斷是否為遠程武器 //跟攻擊模式有關    
     //current local
-    var _currentLocal = getRoomLocal(currentRole.local); //腳色目前所在位置
+    var _currentLocal = currentRole.local; //腳色目前所在位置
     var _weaponObj = weapon; //武器
     var _minRange = _weaponObj.minRange; //最小射程
     var _maxRange = _weaponObj.maxRange; //最大射程:起始值
@@ -12,11 +12,13 @@ function attack(weapon) {
     var _activeRole = [];
     var _successRange = _weaponObj.successRange; //攻擊成功參數:起始值
     var _numberOfAttack = _weaponObj.numberOfAttack; //攻擊次數
-    var _attackArea =[];
+    var _attackArea = [];
+    var _activeRooms = [];
+
 
     //初始range
     if (_weaponObj.attackType == "range") {
-        _range = true;        
+        _range = true;
     }
     //處理skill    
     if (currentRole.skill.length > 0) {
@@ -34,13 +36,13 @@ function attack(weapon) {
         }
     }
 
-   if(_range){
-        if(currentRole.skill.indexOf(parseInt(70))>-1){
+    if (_range) {
+        if (currentRole.skill.indexOf(parseInt(70)) > -1) {
             _range = false;
-           
+
         }
-   }
-    
+    }
+
 
 
     if (_weaponObj.dual) {
@@ -50,68 +52,82 @@ function attack(weapon) {
         }
     }
 
-   // _attackArea = getPanorama(currentRole.local,_minRange,_maxRange);
-  
+    //get Range
+    _activeRooms = getPanorama(_currentLocal.room_id, _minRange, _maxRange);
+    console.log(_activeRooms);
 
-    for (var i = _minRange; i < _maxRange + 1; i++) {
-
-        if (i < 1) {
-            if (_range) { //是否為範圍攻擊
-                attackButtom.push(_createAttackArea(_currentLocal.x, _currentLocal.y));
-            } else {
-                _showSingleTarget(currentRole.local);
-            }
-
-        } else {
-            //4方擴展 clockwise y-1 x+1 y+1 x-1 
-            for (j = 0; j < 4; j++) {
-                var _tempCurrentLocal = cloneObject(_currentLocal);
-                var _quadrant;
-                if (j % 2 == 0) {
-                    _quadrant = "y";
-                } else {
-                    _quadrant = "x";
-                }
-
-                var _quadrantValue = (_clockwise[j] * i) + _currentLocal[_quadrant];
-                _tempCurrentLocal[_quadrant] = _quadrantValue;
-                if (_quadrantValue >= 0 && _blockOff[j]) {
-                    if (_tempCurrentLocal.y < arrMap.length) {
-                        if (_tempCurrentLocal.x < arrMap[_tempCurrentLocal.y].length) {
-                            var _tempTarget = arrMap[_tempCurrentLocal.y][_tempCurrentLocal.x];
-                            if (_tempTarget.visible == true) {
-
-                                if (_range) { //是否為範圍攻擊
-                                    var _targetLocal = getRoomLocal(_tempTarget.room_id);
-                                    attackButtom.push(_createAttackArea(_targetLocal.x, _targetLocal.y));
-                                } else {
-                                    _showSingleTarget(_tempTarget.room_id);
-                                }
-                            } else {
-                                _blockOff[j] = false;
-                            }
-                        }
-                    }
-
-                } else {
-                    _blockOff[j] = false;
-                }
-            }
+    if (_range) {
+        for (var i = 0; i < _activeRooms.length; i++) {
+            attackButtom.push(_createAttackArea(_activeRooms[i]));
+        }
+    } else {
+        for (var i = 0; i < _activeRooms.length; i++) {
+            _showSingleTarget(_activeRooms[i]);
         }
     }
 
+    // _attackArea = getPanorama(currentRole.local,_minRange,_maxRange);
 
-    function _createAttackArea(_localX, _localY) {
+    /*
+        for (var i = _minRange; i < _maxRange + 1; i++) {
+
+            if (i < 1) {
+                if (_range) { //是否為範圍攻擊
+                    attackButtom.push(_createAttackArea(_currentLocal.x, _currentLocal.y));
+                } else {
+                    _showSingleTarget(currentRole.local);
+                }
+
+            } else {
+                //4方擴展 clockwise y-1 x+1 y+1 x-1 
+                for (j = 0; j < 4; j++) {
+                    var _tempCurrentLocal = cloneObject(_currentLocal);
+                    var _quadrant;
+                    if (j % 2 == 0) {
+                        _quadrant = "y";
+                    } else {
+                        _quadrant = "x";
+                    }
+
+                    var _quadrantValue = (_clockwise[j] * i) + _currentLocal[_quadrant];
+                    _tempCurrentLocal[_quadrant] = _quadrantValue;
+                    if (_quadrantValue >= 0 && _blockOff[j]) {
+                        if (_tempCurrentLocal.y < arrMap.length) {
+                            if (_tempCurrentLocal.x < arrMap[_tempCurrentLocal.y].length) {
+                                var _tempTarget = arrMap[_tempCurrentLocal.y][_tempCurrentLocal.x];
+                                if (_tempTarget.visible == true) {
+
+                                    if (_range) { //是否為範圍攻擊
+                                        var _targetLocal = getRoomLocal(_tempTarget.room_id);
+                                        attackButtom.push(_createAttackArea(_targetLocal.x, _targetLocal.y));
+                                    } else {
+                                        _showSingleTarget(_tempTarget.room_id);
+                                    }
+                                } else {
+                                    _blockOff[j] = false;
+                                }
+                            }
+                        }
+
+                    } else {
+                        _blockOff[j] = false;
+                    }
+                }
+            }
+        }
+
+    */
+    function _createAttackArea(_roomObj) {
         var _tg = new PIXI.Graphics();
         _tg.beginFill(0xFFFFFF);
         _tg.alpha = 0.7;
         _tg.interactive = true;
         _tg.buttonMode = true;
         _tg.on('mousedown', _randomAttack);
-        _tg.local = localToRoom(_localX, _localY).room_id;
+        _tg.local = _roomObj;
         mapContainer.addChild(_tg);
 
-        _tg.drawRect((_localX * blockWidth) + 10, (_localY * blockHeight) + 10, blockWidth - 20, blockHeight - 20);
+        _tg.drawRect((_roomObj.localX * blockWidth) + 10, (_roomObj.localY * blockHeight) + 10, blockWidth - 20, blockHeight - 20);
 
         return _tg;
     }
@@ -178,14 +194,13 @@ function attack(weapon) {
     }
 
     /*單體攻擊目標露出*/
-    function _showSingleTarget(room_id) {
+    function _showSingleTarget(_roomObj) {
 
         for (var i = 0; i < arrRoleObj.length; i++) {
-            if (arrRoleObj[i].local == room_id && arrRoleObj[i].faction == "enemy") {
+            if (arrRoleObj[i].local == _roomObj && arrRoleObj[i].faction == "enemy") {
 
                 arrRoleObj[i].interactive = true;
                 arrRoleObj[i].buttonMode = true;
-
 
                 arrRoleObj[i].on("mousedown", _attackClick);
                 arrRoleObj[i].tint = 0xFFF000;
@@ -279,7 +294,7 @@ function attack(weapon) {
 
             if (currentRole.skill.indexOf(parseInt(i)) > -1) {
                 _returnValue += arrSkills[i].value;
-                  console.log(arrSkills[i]+"/"+i);
+                console.log(arrSkills[i] + "/" + i);
             }
 
         }

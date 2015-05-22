@@ -43,20 +43,21 @@ var attackButtom = new Array();
 
 var attackMode = false;
 //block size
-var blockWidth = 100;
-var blockHeight = 100;
+var blockWidth = 200;
+var blockHeight = 200;
 var t = 0;
 
 
 var displayWidth = 600;
-var displayHeight = 400;
+var displayHeight = 600;
 
 // create the root of the scene graph
 var stage;
 var renderer;
 //增加容器
 var mapContainer;
-
+var mapTexture = PIXI.Texture.fromImage('images/tilemap.png');
+var cameraFollow = true;
 init();
 
 
@@ -71,6 +72,8 @@ t2.process = function(){
 arrTimer.push(t2);
 
 */
+
+
 
 function init() {
 
@@ -89,34 +92,70 @@ function init() {
     var cR = new createRole();
     cR._roleTypeObj = arrRoleType[0];
     cR._faction = "enemy";
-    for (var i = 0; i < 1; i++) {
+    for (var i = 0; i < 40; i++) {
         cR._roleLocal = null;
-        cR.create();
+        var _enemy = cR.create();
+        _enemy.visible = false;
     }
 
     var cR = new createRole();
     cR._roleTypeObj = arrRoleType[1];
     cR._faction = "player";
+    cR._roleLocal = getMapInfo(arrMap, {
+        room_id: "f"
+    })[0];
     var newR = cR.create();
+
+
 
     newR.interactive = true;
     newR.buttonMode = true;
 
-    newR.skill = [0, 10, 20, 30, 40, 50, 60, 70];
+    newR.skill = [];
     newR.equip = {
         main: [0, 1],
         sub: []
     };
+    //取得視野
+    var _currentPanorama = getPanorama(newR.local.room_id, 0, 5);
 
-    newR.oX = newR.position.x;
+    for (var i = 0; i < _currentPanorama.length; i++) {
+       
+        objectHelp(arrRoleObj, {
+            faction: "enemy",
+            local:_currentPanorama[i]
+        }, {
+            visible: true
+        });
+
+    }
+
+
+    console.log(newR.getBounds());
+
+    
+
+    var getInitCurrentPlayer = objectHelp(arrRoleObj, {
+        faction: "player"
+    })[0];
+    moveToTarget(getInitCurrentPlayer.x, getInitCurrentPlayer.y);
+
+    /*
+         var cR = new createRole();
+        cR._roleTypeObj = arrRoleType[1];
+        cR._faction = "player";
+        cR._roleLocal = "q";
+        var newR = cR.create();
+    */
+    /*newR.oX = newR.position.x;
     newR.oY = newR.position.y;
     newR.at = 2000;
     newR.endTime = new Date().getTime() + newR.at;
 
-    newR.startTime = new Date().getTime();
+    newR.startTime = new Date().getTime();*/
 
-
-
+    /* var aass =findEnemyByNoise();
+     console.log(aass);*/
 
 
     $('#e_move').click(function() {
@@ -162,63 +201,30 @@ function animate() {
     for (var i = 0; i < arrRoleObj.length; i++) {
 
 
-        if (arrRoleObj[i].faction == "player") {
+        if (arrRoleObj[i].actionMovement == true) {
 
-            var _de = (new Date().getTime() - arrRoleObj[i].startTime) / arrRoleObj[i].at * 100;
+            //var _de = (new Date().getTime() - arrRoleObj[i].startTime) / arrRoleObj[i].at * 100;
 
+            var _speed = 5;
 
+            var _dy = arrRoleObj[i].goalY - arrRoleObj[i].position.y;
+            var _dx = arrRoleObj[i].goalX - arrRoleObj[i].position.x;
 
-            if (_de) {
-
-
-                var _dy = 0 - arrRoleObj[i].position.y;
-                var _dx = 0 - arrRoleObj[i].position.x;
-
+            var _radian = Math.atan2(_dy, _dx);
 
 
-                var _ro = Math.atan2(_dy, _dx);
-                var _x = Math.cos(_ro);
-                var _y = Math.sin(_ro);
-                /*
-                                if (Math.abs(_x) < 0.1) {
-                                    if (_x < 0) {
-                                        _x = -0.1;
-                                    } else {
-                                        _x = 0.1;
-                                    }
-                                }
-
-                                if (Math.abs(_y) < 0.1) {
-                                    if (_y < 0) {
-                                        _y = -0.1;
-                                    } else {
-                                        _y = 0.1;
-                                    }
-                                }
-
-                */
-
-                arrRoleObj[i].position.x += _x;
-                arrRoleObj[i].position.y += _y;
-                if (_x != 1) {
-
-
-                    if (arrRoleObj[i].position.x < 20) {
-                        arrRoleObj[i].position.x = 20;
-
-                    }
-
-                    if (arrRoleObj[i].position.y < 20) {
-                        arrRoleObj[i].position.y = 20;
-
-                    }
-
-                }
+            if (Math.sqrt(_dy * _dy + _dx * _dx) < _speed) {
+                arrRoleObj[i].position.x = arrRoleObj[i].goalX;
+                arrRoleObj[i].position.y = arrRoleObj[i].goalY;
+                arrRoleObj[i].actionMovement = false;
+            } else {
+                arrRoleObj[i].position.x += Math.cos(_radian) * _speed;
+                arrRoleObj[i].position.y += Math.sin(_radian) * _speed;
             }
 
 
-
         }
+
 
 
         /*  var _rotation = Math.atan2(arrRoleObj[i].position.y - arrRoleObj[i].goalY, arrRoleObj[i].position.x - arrRoleObj[i].goalX);
@@ -226,10 +232,29 @@ function animate() {
         // Move towards the player
         /* arrRoleObj[i].position.x += Math.cos(_rotation);
          arrRoleObj[i].position.y += Math.sin(_rotation);*/
+    }
+
+    if (mapContainer.actionMovement == true) {
+        var _speed = 5;
+
+        var _dy = mapContainer.goalY - mapContainer.position.y;
+        var _dx = mapContainer.goalX - mapContainer.position.x;
+
+        var _radian = Math.atan2(_dy, _dx);
 
 
+        if (Math.sqrt(_dy * _dy + _dx * _dx) < _speed) {
+            mapContainer.position.x = mapContainer.goalX;
+            mapContainer.position.y = mapContainer.goalY;
+            mapContainer.actionMovement = false;
+        } else {
+            mapContainer.position.x += Math.cos(_radian) * _speed;
+            mapContainer.position.y += Math.sin(_radian) * _speed;
+        }
 
     }
+
+
 }
 
 

@@ -170,38 +170,45 @@ condition 條件式 物件
 status 變更狀態 interactiveSwitch
 */
 
-function objectHelp(arrGraphic, condition, attribute) {
+function objectHelp(_arrGraphic, _condition, _attribute) {
 
         var returnObj = new Array();
 
-        if (status == "undefined") {
-            status = true;
-        }
 
 
-        if (typeof(arrGraphic) != "object") {
+
+        if (typeof(_arrGraphic) != "object") {
             return false;
         }
 
-        for (var i = 0; i < arrGraphic.length; i++) {
 
-            var currentMatch = true;
+        for (var i = 0; i < _arrGraphic.length; i++) {
 
-            if (condition != "undefined" || condition != null) {
-                for (var key in condition) {
-                    if (arrGraphic[i][key] != condition[key]) {
-                        currentMatch = false;
+            var _currentMatch = true;
+
+            if (typeof(_condition) != "undefined" || _condition != null) {
+                for (var _key in _condition) {
+                    if (_arrGraphic[i][_key] != _condition[_key]) {
+                        _currentMatch = false;
                         break;
                     }
                 }
             }
 
-            if (currentMatch) {
-                for (var key in attribute) {
-                    arrGraphic[i][key] = attribute[key];
+
+
+
+            if (_currentMatch) {
+
+                if (typeof(_attribute) != "undefined") {
+
+                    for (var _key in _attribute) {
+
+                        _arrGraphic[i][_key] = _attribute[_key];
+                    }
                 }
 
-                returnObj.push(arrGraphic[i]);
+                returnObj.push(_arrGraphic[i]);
             }
         }
 
@@ -386,6 +393,9 @@ function createRole() {
 function createMap() {
 
     mapContainer.interactive = true;
+    mapContainer.goalX = null;
+    mapContainer.goalY = null;
+    mapContainer.actionMovement = false;
     /*
         產生地圖以及連接路徑
     */
@@ -404,6 +414,7 @@ function createMap() {
                 arrMap[y][x].localX = x;
                 arrMap[y][x].localY = y;
                 arrMap[y][x].noise = 0;
+                arrMap[y][x].passage = [];
 
                 //房間文字
                 var _textObj = new PIXI.Text(arrMap[y][x].room_id);
@@ -431,6 +442,18 @@ function createMap() {
                         _doorGraphics.zIndex = 10;
                         arrDoorsDisplayObj.push(_doorGraphics);
                         mapContainer.addChild(_doorGraphics);
+                    }
+
+                    //將passage 紀錄於map object
+                    var _tempRoomId;
+                    var _tempIndex;
+                    if (arrDoors[i].passage.indexOf(arrMap[y][x].room_id) > -1) {
+                        if (arrDoors[i].passage.indexOf(arrMap[y][x].room_id) == 0) {
+                            _tempIndex = 1;
+                        } else {
+                            _tempIndex = 0;
+                        }
+                        arrMap[y][x].passage.push(arrDoors[i].passage[_tempIndex]);
                     }
                 }
             }
@@ -503,6 +526,13 @@ function passageDoor(event) {
         currentRole.goalX = randomDeploy(_roomLocal.localX, blockWidth);
         currentRole.goalY = randomDeploy(_roomLocal.localY, blockWidth);
         currentRole.local = _roomLocal;
+
+
+
+        mapContainer.goalX = (displayWidth / 2) - currentRole.goalX;
+        mapContainer.goalY = (displayHeight / 2) - currentRole.goalY;
+        mapContainer.actionMovement = true;
+
         currentRole.actionMovement = true;
         //locationCheck(currentRole, arrRoleObj, roomLocal);
 
@@ -511,6 +541,28 @@ function passageDoor(event) {
             tint: 0x666666,
             buttonMode: false
         });
+
+        /**/
+        var _currentPanorama = getPanorama(currentRole.local.room_id, 0, 5);
+
+
+        objectHelp(arrRoleObj, {
+            faction: "enemy"
+        }, {
+            visible: false
+        });
+
+        for (var i = 0; i < _currentPanorama.length; i++) {
+
+            objectHelp(arrRoleObj, {
+                faction: "enemy",
+                local: _currentPanorama[i]
+            }, {
+                visible: true
+            });
+
+        }
+
 
         currentRoomDoorActive(_targetRoomId);
 
@@ -776,7 +828,7 @@ function findEnemyByEyes(_currentRoomId, _roomGroup, _history) {
     return _tempHasPlayer;
 }
 
-/*未完成XD~*/
+/*十字視野*/
 function getPanorama(_currentRoomId, _minRange, _maxRange) {
 
     var _clockwise = [-1, 1, 1, -1]; //四方推演 順時針
@@ -792,8 +844,6 @@ function getPanorama(_currentRoomId, _minRange, _maxRange) {
     _mapGroupRecord[0] = _currentLocal.group;
     _passgeRecord[0] = _currentLocal.room_id;
 
-
-
     if (typeof(_minRange) == "undefined") {
         _minRange = 0;
     }
@@ -807,7 +857,7 @@ function getPanorama(_currentRoomId, _minRange, _maxRange) {
         var _tempArray = [];
         var _tempPassage = [];
         if (i < 1) {
-            _arrReturn.push(_currentRoomId);
+            _arrReturn.push(_currentLocal);
         } else {
             //4方擴展 clockwise y-1 x+1 y+1 x-1 
             for (j = 0; j < 4; j++) {
@@ -827,68 +877,35 @@ function getPanorama(_currentRoomId, _minRange, _maxRange) {
                     if (_tempCurrentLocal.localX < arrMap[_tempCurrentLocal.localY].length && arrMap[_tempCurrentLocal.localY][_tempCurrentLocal.localX].visible == true) {
 
                         var _tempTarget = arrMap[_tempCurrentLocal.localY][_tempCurrentLocal.localX];
-                        var lastGroup;
-                        var lastRoomId;
+                        var _lastGroup;
+                        var _lastRoomId;
 
-                        if (i == _minRange) { //先處理I>0的狀況，定位紀錄原始地點
-                            lastGroup = _mapGroupRecord[0][0];
-                            lastRoomId = _passgeRecord;
+                        if (i == _minRange || (_minRange == 0 && i == 1)) { //先處理I>0的狀況，定位紀錄原始地點
+                            _lastGroup = _mapGroupRecord[0][0];
+                            _lastRoomId = _passgeRecord[0][0];
                         } else {
-                            if (i == _minRange + 1) {
-                                lastGroup = _mapGroupRecord[0][0];
-                                lastRoomId = _passgeRecord;
-                            } else {
-                                lastGroup = _mapGroupRecord[i - 1][j];
-                                lastRoomId = _passgeRecord[i - 1][j];
-                            }
+                            _lastGroup = _mapGroupRecord[i - 1][j];
+                            _lastRoomId = _passgeRecord[i - 1][j];
+
                         }
 
-                        //取得passage
-                        console.log(lastRoomId+"/"+_tempTarget.room_id);
+                      
+                        _tempPassage.push(_tempTarget.room_id);
+                        _tempArray.push(_tempTarget.group);
+                        if (_tempTarget.passage.indexOf(_lastRoomId) > -1) {
+                        
+                           
+                              _arrReturn.push(_tempTarget);
 
-                        var _thisPassage = [];
-                   
-                        //比對group
-                        console.log(_thisPassage.length);
 
-
-                        console.log(_tempTarget.room_id);
-
-                        console.log(lastRoomId);
-                        console.log("-+-");
-
-                        if (_thisPassage.length > 0) {
-                            console.log("A");
-                            _tempArray.push(_tempTarget.group);
-                            _arrReturn.push(_tempTarget.room_id);
-                            _tempPassage.push(_tempTarget.room_id);
-
-                        } else {
-
-                            _blockOff[j] = false;
-                            _tempArray.push(false);
-                            _tempPassage.push(false);
-                        }
-
-                        //if (_thisPassage.indexOf(_tempTarget.room_id) > -1 || _tempTarget.group == lastGroup || _tempTarget.group != lastGroup) {
-
-                        /* if (_thisPassage.indexOf(lastRoomId) > -1) {
-                            _tempArray.push(_tempTarget.group);
-                            _arrReturn.push(_tempTarget.room_id);
-                            _tempPassage.push(_tempTarget.room_id);
-
-                            if (_tempTarget.group != lastGroup) {
+                            if (_tempTarget.group != _lastGroup) {
                                 _blockOff[j] = false;
                             }
+
                         } else {
                             _blockOff[j] = false;
                         }
-*/
 
-                        /*  } else {
-                              _blockOff[j] = false;
-                              _tempArray.push(false);
-                          }*/
                     } else {
                         _blockOff[j] = false;
                         _tempArray.push(false);
@@ -903,17 +920,13 @@ function getPanorama(_currentRoomId, _minRange, _maxRange) {
             }
         }
 
-
-
-        if (i > _minRange) {
+        if (i != 0) {
             _mapGroupRecord.push(_tempArray);
             _passgeRecord.push(_tempPassage);
         }
     }
-
-    console.log(_arrReturn);
+   
     return _arrReturn;
-
 }
 
 /*
@@ -950,6 +963,15 @@ function findEnemyByNoise() {
 
 }
 
+/*將畫面目標移動到中心點*/
+function moveToTarget(_tx, _ty) {
+    mapContainer.goalX = (displayWidth / 2) - mapContainer.x - _tx;
+    mapContainer.goalY = (displayHeight / 2) - mapContainer.y - _ty;
+    mapContainer.actionMovement = true;
+}
+
+
+
 
 /*拖拉地圖*/
 
@@ -983,6 +1005,7 @@ function onDragEnd() {
 }
 
 function onDragMove() {
+
     if (this.dragging) {
         var newPosition = this.data.getLocalPosition(this.parent);
         this.position.x = newPosition.x - this.sx;
@@ -992,7 +1015,7 @@ function onDragMove() {
 }
 
 function onWheel(event) {
-    console.log(event);
+    // console.log(event);
     if (event.wheelDelta < 1) {
         mapContainer.scale.x -= 0.1;
         mapContainer.scale.y -= 0.1;
@@ -1002,6 +1025,17 @@ function onWheel(event) {
     }
 }
 
+function myIndexOf(_obj, _solution) {
+    _result = -1;
+    for (var _i = 0; _i < _obj.length; _i++) {
+        if (_obj[_i] == _solution) {
+            _result = _i;
+            break;
+        }
+    }
+
+    return _result;
+}
 
 /* requestAnimFrame */
 window.requestAnimFrame = (function() {

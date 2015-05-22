@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>game</title>
+</head>
+<div id="gameView"></div>
+<div id="bbb">123</div>
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script src="js/pixi.js/bin/pixi.min.js"></script>
+<script>
+var renderer = PIXI.autoDetectRenderer(600, 400, {
+    backgroundColor: 0x1099bb
+});
+document.body.appendChild(renderer.view);
+
+// create the root of the scene graph
+var stage = new PIXI.Container();
+
+
+
+//or
+
+var mySpriteSheetImage = new PIXI.BaseTexture.fromImage("images/aias_greatknight_axe.gif");
+
+//if (mySpriteSheetImage.hasLoaded) {
+
+var spriteTexture1 = new PIXI.Texture(mySpriteSheetImage, new PIXI.Rectangle(157, 2, 49, 61));
+var spriteTexture2 = new PIXI.Texture(mySpriteSheetImage, new PIXI.Rectangle(405, 2, 61, 64));
+var spriteTexture3 = new PIXI.Texture(mySpriteSheetImage, new PIXI.Rectangle(212, 3, 53, 63));
+
+var spriteTexture4 = new PIXI.Texture(mySpriteSheetImage, new PIXI.Rectangle(333, 3, 66, 62));
+var spriteTexture5 = new PIXI.Texture(mySpriteSheetImage, new PIXI.Rectangle(55, 4, 45, 58));
+var spriteTexture6 = new PIXI.Texture(mySpriteSheetImage, new PIXI.Rectangle(106, 4, 46, 57));
+/*var mySprite1 = new PIXI.Sprite(spriteTexture1);
+var mySprite2 = new PIXI.Sprite(spriteTexture2);
+var mySprite3 = new PIXI.Sprite(spriteTexture3);*/
+var frames = [spriteTexture2, spriteTexture1, spriteTexture3];
+var frames2 = [spriteTexture4, spriteTexture5, spriteTexture6];
+
+var mc = new PIXI.extras.MovieClip(frames);
+mc.play();
+mc.animationSpeed = 0.1;
+mc.loop = true;
+/*mc.onComplete=function(){
+    console.log("A");
+}*/
+var mc2 = new PIXI.extras.MovieClip(frames2);
+var aaa = new PIXI.Container();
+mc2.onComplete = function() {
+     aaa.removeChild(mc2);
+        aaa.addChild(mc);
+        mc.play();
+}
+mc2.loop = false;
+mc2.animationSpeed = 0.1;
+aaa.addChild(mc);
+stage.addChild(aaa);
+
+
+$('#bbb').click(function() {
+        aaa.removeChild(mc);
+        aaa.addChild(mc2);
+        mc2.play();
+    })
+    //console.log("A");
+    //}
+    /**/
+
+function onAssetsLoaded(result) {
+
+    var thisF = this.resources['images/sprites.json']['data']['frames'];
+    console.log(thisF.length);
+    for (var i = 1; i < 30; i++) {
+
+
+        // magically works since the spritesheet was loaded with the pixi loader
+        frames.push(thisF[i]);
+    }
+    console.log(frames);
+
+    /*
+        stage.addChild(mc);*/
+
+}
+
+
+
+// create a texture from an image path
+/*
+var aa = ['images/bunny.png', 'images/p2.jpeg'];
+var textureArray = [];
+console.log(aa[1]);
+
+for (var i = 0; i < aa.length; i++) {
+   var texture = PIXI.Texture.fromImage(aa[i]);
+   textureArray.push(texture);
+};
+
+
+
+var mc = new PIXI.extras.MovieClip(textureArray);
+
+stage.addChild(mc);
+
+
+
+mc.play();
+
+*/
+
+window.requestAnimFrame = (function() {
+    return window.requestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        function(callback) {
+            window.setTimeout(callback, 1000 / 60);
+        };
+})();
+
+animate();
+
+function animate() {
+    requestAnimFrame(animate);
+    renderer.render(stage);
+
+}
+</script>
+</body>
+
+</html>
