@@ -34,35 +34,6 @@ function countdown() {
 
 }
 
-/*clone Object*/
-
-function cloneObject(obj) {
-    if (obj === null || typeof obj !== 'object') {
-        return obj;
-    }
-
-    var temp = obj.constructor(); // give temp the original obj's constructor
-    for (var key in obj) {
-        temp[key] = cloneObject(obj[key]);
-    }
-
-    return temp;
-}
-
-
-/* 碰撞測試 */
-
-function hitTest(r1, r2) {
-
-    if (r1.x + r1.width > r2.x &&
-        r1.y + r1.height > r2.y &&
-        r1.x < r2.x + r2.width &&
-        r1.y < r2.y + r2.height) {
-        return true;
-    } else {
-        return false;
-    }
-}
 
 
 /* 隨機位置不重疊
@@ -120,36 +91,6 @@ function getRandomRoom(roomCount) {
 }
 
 
-
-
-/* get room local */
-/*
-function getRoomObject(room_id) {
-    var _getRoom = false;
-    var _returnObj ;
-
-    for (var y = 0; y < arrMap.length; y++) {
-
-        for (var x = 0; x < arrMap[y].length; x++) {
-            if (arrMap[y][x].room_id == room_id) {
-                getRoom = true;
-                returnObj = {
-                    x: x,
-                    y: y
-                };
-                break;
-            }
-        }
-
-        if (getRoom) {
-            break;
-        }
-    }
-
-    return returnObj;
-
-}
-*/
 /*隨機
     level:倍數 
     space:寬
@@ -163,107 +104,19 @@ function randomDeploy(level, space) {
 }
 
 
-/*
---物件按鈕模式的啟用--
-arrGraphic 物件陣列
-condition 條件式 物件
-status 變更狀態 interactiveSwitch
-*/
-
-function objectHelp(_arrGraphic, _condition, _attribute) {
-
-        var returnObj = new Array();
-
-
-
-
-        if (typeof(_arrGraphic) != "object") {
-            return false;
-        }
-
-
-        for (var i = 0; i < _arrGraphic.length; i++) {
-
-            var _currentMatch = true;
-
-            if (typeof(_condition) != "undefined" || _condition != null) {
-                for (var _key in _condition) {
-                    if (_arrGraphic[i][_key] != _condition[_key]) {
-                        _currentMatch = false;
-                        break;
-                    }
-                }
-            }
-
-
-
-
-            if (_currentMatch) {
-
-                if (typeof(_attribute) != "undefined") {
-
-                    for (var _key in _attribute) {
-
-                        _arrGraphic[i][_key] = _attribute[_key];
-                    }
-                }
-
-                returnObj.push(_arrGraphic[i]);
-            }
-        }
-
-        return returnObj;
-    }
-    //二維
-function getMapInfo(_arrMap, _condition) {
-
-    var _returnObj = new Array();
-
-    if (status == "undefined") {
-        status = true;
-    }
-
-
-    if (typeof(_arrMap) != "object") {
-        return false;
-    }
-
-    for (var y = 0; y < _arrMap.length; y++) {
-        for (var x = 0; x < _arrMap[y].length; x++) {
-            var currentMatch = true;
-
-            if (_condition != "undefined" || _condition != null) {
-                for (var key in _condition) {
-                    if (_arrMap[y][x][key] != _condition[key]) {
-                        currentMatch = false;
-                        break;
-                    }
-                }
-            }
-
-            if (currentMatch) {
-
-                _returnObj.push(_arrMap[y][x]);
-            }
-        }
-    }
-
-    return _returnObj;
-}
-
 function getRoomPassage(_roomId) {
     var _returnPassage = new Array();
-    for (var i = 0; i < arrDoorsDisplayObj.length; i++) {
-        var _thisPassageIndex = arrDoorsDisplayObj[i].passage.indexOf(_roomId)
+    for (var i = 0; i < passageLayer.children.length; i++) {
+        var _thisPassageIndex = passageLayer.children[i].passage.indexOf(_roomId)
         if (_thisPassageIndex > -1) {
-            if (arrDoorsDisplayObj[i].open == true) {
+            if (passageLayer.children[i].open == true) {
                 if (_thisPassageIndex == 0) {
                     _thisPassageIndex = 1;
                 } else {
                     _thisPassageIndex = 0;
                 }
 
-                _returnPassage.push(arrDoorsDisplayObj[i].passage[_thisPassageIndex]);
+                _returnPassage.push(passageLayer.children[i].passage[_thisPassageIndex]);
 
             }
         }
@@ -283,36 +136,8 @@ function removeAttackRangeArea() {
 }
 
 
-
-
-
-/*座標推房間ID*/
-
-function localToRoom(lx, ly) {
-    var _room;
-    var _match = false;
-    for (var y = 0; y < arrMap.length; y++) {
-        for (var x = 0; x < arrMap[y].length; x++) {
-            if (ly == y && lx == x) {
-                _room = arrMap[y][x];
-                _match = true;
-                break;
-            }
-        }
-
-        if (_match) {
-            break;
-        }
-    }
-
-    return _room;
-}
-
-
 /**/
 function languageCombination(event) {
-
-
 
     if (arrLanguage[event.keyCode] != "undefined" && arrLanguage[event.keyCode] != null) {
 
@@ -380,11 +205,6 @@ function createRole() {
         _role.actionMovement = false;
         _role.goalX = null;
         _role.goalY = null;
-
-        arrRoleObj.push(_role);
-        locationCheck(_role, arrRoleObj, this._roleLocal);
-        mapContainer.addChild(_role);
-
         return _role;
     }
 }
@@ -392,10 +212,10 @@ function createRole() {
 /*產生地圖*/
 function createMap() {
 
-    mapContainer.interactive = true;
-    mapContainer.goalX = null;
-    mapContainer.goalY = null;
-    mapContainer.actionMovement = false;
+    /* mapLayer.interactive = true;
+     mapLayer.goalX = null;
+     mapLayer.goalY = null;
+     mapLayer.actionMovement = false;*/
     /*
         產生地圖以及連接路徑
     */
@@ -410,7 +230,7 @@ function createMap() {
                 _tilingSprite.tilePosition.x = (blockWidth * arrMap[y][x].tx) * -1;
                 _tilingSprite.tilePosition.y = (blockWidth * arrMap[y][x].ty) * -1;
                 _tilingSprite.zIndex = 20;
-                mapContainer.addChild(_tilingSprite);
+                mapLayer.addChild(_tilingSprite);
                 arrMap[y][x].localX = x;
                 arrMap[y][x].localY = y;
                 arrMap[y][x].noise = 0;
@@ -420,7 +240,7 @@ function createMap() {
                 var _textObj = new PIXI.Text(arrMap[y][x].room_id);
                 _textObj.x = x * blockWidth + 5;
                 _textObj.y = y * blockHeight + 5;
-                mapContainer.addChild(_textObj);
+                mapLayer.addChild(_textObj);
 
                 //門
                 for (var i = 0; i < arrDoors.length; i++) {
@@ -440,8 +260,7 @@ function createMap() {
 
                         _doorGraphics.on('mousedown', passageDoor);
                         _doorGraphics.zIndex = 10;
-                        arrDoorsDisplayObj.push(_doorGraphics);
-                        mapContainer.addChild(_doorGraphics);
+                        passageLayer.addChild(_doorGraphics);
                     }
 
                     //將passage 紀錄於map object
@@ -459,23 +278,13 @@ function createMap() {
             }
         }
     }
-    //z-index排序
-    mapContainer.updateLayersOrder = function() {
-        mapContainer.children.sort(function(a, b) {
-            a.zIndex = a.zIndex || 0;
-            b.zIndex = b.zIndex || 0;
-            return b.zIndex - a.zIndex
-        });
-    };
-
-    mapContainer.updateLayersOrder();
-
 }
 
 
 /*角色被選取時*/
 function roleClick(event) {
     //console.log(this.objectName);
+    this.interactive = false;
     this.tint = 0xFF0000;
 
     currentRoomDoorActive(this.local.room_id);
@@ -491,6 +300,72 @@ function roleClick(event) {
     strEquip += "</ul>";
 
     $('#equip').html(strEquip).find('li').on('click', choseWeapon);
+
+    for (var i = 0; i < currentRole.equip.main.length; i++) {
+        var _btn = new PIXI.Graphics();
+        _btn.beginFill(0x990000, 1);
+        _btn.drawCircle(0, 0, 50);
+        _btn.endFill();
+        _btn.x = currentRole.x;
+        _btn.y = currentRole.y;
+        _btn.alpha = 0;
+        _btn.interactive = true;
+        _btn.buttonMode = true;
+        _btn.weaponId = currentRole.equip.main[i];
+        _btn.myId = Math.floor(Math.random()*1000)+"_"+Math.floor(Math.random()*1000);
+        console.log( _btn );
+        var _textObj = new PIXI.Text(arrItems[currentRole.equip.main[i]].name, {
+            fill: 0xffffff
+        });
+
+        _textObj.anchor = {
+            x: 0.5,
+            y: 0.5
+        };
+
+        _btn.addChild(_textObj);
+
+        if (i % 2 != 0) {
+            var _x = currentRole.x - 70;
+        } else {
+            var _x = currentRole.x + 70;
+        }
+
+        var tween = new TweenLite(_btn, 0.5, {
+            x: _x,
+            alpha: 1
+        });
+
+        actionUiLayer.addChild(_btn);
+
+        _btn.on("mousedown", attack);
+    }
+
+
+
+}
+
+/*關閉選項*/
+function closeAttackBtn() {
+    for (var i = 0; i < actionUiLayer.children.length; i++) {
+     //   if (actionUiLayer.children[i].btnClass == "attackBtn") {
+            var tween = new TweenLite(actionUiLayer.children[i], 0.3, {
+                x: currentRole.x,
+                alpha: 0,
+                onComplete: function() {
+                    var _target = this.target;
+                    
+                 
+                  for (var j = 0; j < actionUiLayer.children.length; j++) {
+                        if (actionUiLayer.children[j].myId == _target.myId) {
+                           actionUiLayer.children.splice(j,1);
+                        }
+                    }
+
+                }
+            });
+     //   }
+    }
 
 }
 
@@ -509,6 +384,7 @@ function choseWeapon() {
 /*通過房間*/
 function passageDoor(event) {
     //currentRole
+    closeAttackBtn();
     var _targetRoomId = false;
     for (var i = 0; i < this.passage.length; i++) {
         if (this.passage[i] != currentRole.local.room_id) {
@@ -523,39 +399,46 @@ function passageDoor(event) {
             room_id: _targetRoomId
         })[0];
 
-        currentRole.goalX = randomDeploy(_roomLocal.localX, blockWidth);
-        currentRole.goalY = randomDeploy(_roomLocal.localY, blockWidth);
+        var _x = randomDeploy(_roomLocal.localX, blockWidth);
+        var _y = randomDeploy(_roomLocal.localY, blockWidth);
         currentRole.local = _roomLocal;
 
+        var tween = new TweenLite(currentRole, 0.5, {
+            x: _x,
+            y: _y,
+            onUpdate: function() {
+                //console.log(currentRole.x+"/"+currentRole.y);
+                gameStage.x = (displayWidth / 2) - currentRole.x;
+                gameStage.y = (displayWidth / 2) - currentRole.y;
+            }
+        });
 
-
-        mapContainer.goalX = (displayWidth / 2) - currentRole.goalX;
-        mapContainer.goalY = (displayHeight / 2) - currentRole.goalY;
-        mapContainer.actionMovement = true;
-
-        currentRole.actionMovement = true;
         //locationCheck(currentRole, arrRoleObj, roomLocal);
 
-        objectHelp(arrDoorsDisplayObj, null, {
+        objectHelp(passageLayer.children, null, {
             interactive: false,
             tint: 0x666666,
             buttonMode: false
         });
 
+        /*
+            扣除Action
+        */
+
         /**/
         var _currentPanorama = getPanorama(currentRole.local.room_id, 0, 5);
 
+        currentRole.panorama = _currentPanorama;
 
-        objectHelp(arrRoleObj, {
-            faction: "enemy"
+        objectHelp(enemyLayer.children, {
+
         }, {
             visible: false
         });
 
         for (var i = 0; i < _currentPanorama.length; i++) {
 
-            objectHelp(arrRoleObj, {
-                faction: "enemy",
+            objectHelp(enemyLayer.children, {
                 local: _currentPanorama[i]
             }, {
                 visible: true
@@ -563,9 +446,13 @@ function passageDoor(event) {
 
         }
 
+        currentRole.actionPoint--;
+        if (currentRole.actionPoint > 0) {
+            currentRole.interactive = true;
+            currentRoomDoorActive(_targetRoomId);
+        }
 
-        currentRoomDoorActive(_targetRoomId);
-
+        checkActionPoint();
 
     }
 
@@ -576,12 +463,12 @@ function passageDoor(event) {
 
 /*被選取的腳色，啟用當下房間的門*/
 function currentRoomDoorActive(room_id) {
-    for (var i = 0; i < arrDoorsDisplayObj.length; i++) {
+    for (var i = 0; i < passageLayer.children.length; i++) {
 
-        if (arrDoorsDisplayObj[i].passage.indexOf(room_id) > -1) {
-            arrDoorsDisplayObj[i].interactive = true;
-            arrDoorsDisplayObj[i].buttonMode = true;
-            arrDoorsDisplayObj[i].tint = 0x00FF00;
+        if (passageLayer.children[i].passage.indexOf(room_id) > -1) {
+            passageLayer.children[i].interactive = true;
+            passageLayer.children[i].buttonMode = true;
+            passageLayer.children[i].tint = 0x00FF00;
         }
 
     }
@@ -595,13 +482,13 @@ function currentRoomDoorActive(room_id) {
 function enemyMove() {
     var _canMovePlay = new Array();
     var _canMoveTargetRoom = new Array();
-    var _player = objectHelp(arrRoleObj, {
-        faction: "player"
-    });
+    var _player = objectHelp(playerLayer.children);
 
     if (_player.length > 0) {
         _player = _player[0];
     }
+
+
 
     var _playerLocal = _player.local;
 
@@ -612,8 +499,7 @@ function enemyMove() {
             var _resultPaths;
             var _targetRoom;
             var _newRoomLocal;
-            var _enemyCount = objectHelp(arrRoleObj, {
-                faction: "enemy",
+            var _enemyCount = objectHelp(enemyLayer.children, {
                 local: _roomObject
             });
 
@@ -647,8 +533,51 @@ function enemyMove() {
 
     for (var i = 0; i < _canMovePlay.length; i++) {
         _canMovePlay[i].local = _canMoveTargetRoom[i];
-        _canMovePlay[i].actionMovement = true;
+        //_canMovePlay[i].actionMovement = true;
+
+        var tween = new TweenLite(_canMovePlay[i], ((Math.random() * 5) + 4) / 10, {
+            x: _canMovePlay[i].goalX,
+            y: _canMovePlay[i].goalY
+        });
+
+
     }
+
+
+    //取得所有玩家
+
+    objectHelp(enemyLayer.children, {
+
+    }, {
+        visible: false
+    });
+
+    var _players = objectHelp(playerLayer.children, {
+        faction: "player"
+    });
+
+
+
+
+    for (var i = 0; i < _players.length; i++) {
+        for (var j = 0; j < _players[i].panorama.length; j++) {
+
+            objectHelp(enemyLayer.children, {
+                local: _players[i].panorama[j]
+            }, {
+                visible: true
+            });
+        }
+
+    }
+
+
+
+    objectHelp(playerLayer.children, {}, {
+        interactive: true,
+        actionPoint: 3
+    });
+
 }
 
 /*search path 
@@ -687,16 +616,18 @@ function findPath(_targetLocalId, _currentLocalId, _lastLocalId, _arrPathRecord,
     //找出此房間的門，則可判斷出通往的房間
     var _thisRoomDoors = new Array();
     //search door
-    for (var i = 0; i < arrDoorsDisplayObj.length; i++) {
-        var _indexOf = arrDoorsDisplayObj[i].passage.indexOf(_currentLocalId);
-        if (_indexOf > -1 && arrDoorsDisplayObj[i].open == true) {
+    for (var i = 0; i < passageLayer.children.length; i++) {
+        var _indexOf = passageLayer.children[i].passage.indexOf(_currentLocalId);
+
+
+        if (_indexOf > -1 && passageLayer.children[i].open == true) {
             if (_indexOf == 0) {
                 _indexOf = 1;
             } else {
                 _indexOf = 0;
             }
 
-            _thisRoomDoors.push(arrDoorsDisplayObj[i].passage[_indexOf]);
+            _thisRoomDoors.push(passageLayer.children[i].passage[_indexOf]);
         }
     }
 
@@ -707,6 +638,8 @@ function findPath(_targetLocalId, _currentLocalId, _lastLocalId, _arrPathRecord,
     if (_thisRoomDoors.indexOf(_lastLocalId) > -1) {
         _thisRoomDoors.splice(_thisRoomDoors.indexOf(_lastLocalId), 1);
     }
+
+
 
     if (_thisRoomDoors.length >= 2) {
         _arrStamp.push("r");
@@ -889,13 +822,13 @@ function getPanorama(_currentRoomId, _minRange, _maxRange) {
 
                         }
 
-                      
+
                         _tempPassage.push(_tempTarget.room_id);
                         _tempArray.push(_tempTarget.group);
                         if (_tempTarget.passage.indexOf(_lastRoomId) > -1) {
-                        
-                           
-                              _arrReturn.push(_tempTarget);
+
+
+                            _arrReturn.push(_tempTarget);
 
 
                             if (_tempTarget.group != _lastGroup) {
@@ -925,7 +858,7 @@ function getPanorama(_currentRoomId, _minRange, _maxRange) {
             _passgeRecord.push(_tempPassage);
         }
     }
-   
+
     return _arrReturn;
 }
 
@@ -963,86 +896,22 @@ function findEnemyByNoise() {
 
 }
 
-/*將畫面目標移動到中心點*/
-function moveToTarget(_tx, _ty) {
-    mapContainer.goalX = (displayWidth / 2) - mapContainer.x - _tx;
-    mapContainer.goalY = (displayHeight / 2) - mapContainer.y - _ty;
-    mapContainer.actionMovement = true;
-}
+/*
+判斷是否還有action process.inherits();
 
+*/
 
+function checkActionPoint() {
+    if (currentRole.actionPoint == 0) {
+        currentRole.interactive = false;
+        currentRole.tint = arrRoleType[1].color;
 
+        objectHelp(passageLayer.children, null, {
+            interactive: false,
+            tint: 0x666666,
+            buttonMode: false
+        });
 
-/*拖拉地圖*/
-
-//stage.on('mousewheel',onWheel);
-
-document.getElementById('gameView').addEventListener("mousewheel", onWheel, false);
-
-// gridLayer.anchor.set(0.5);// graphics.pivot , sprite.anchor    
-
-
-function onDragStart(event) {
-    // store a reference to the data
-    // the reason for this is because of multitouch
-    // we want to track the movement of this particular touch
-    this.data = event.data;
-    //this.alpha = 0.5;
-    this.dragging = true;
-    this.sx = this.data.getLocalPosition(this).x * this.scale.x;
-    this.sy = this.data.getLocalPosition(this).y * this.scale.y;
-
-
-}
-
-function onDragEnd() {
-    this.alpha = 1;
-
-    this.dragging = false;
-
-    // set the interaction data to null
-    this.data = null;
-}
-
-function onDragMove() {
-
-    if (this.dragging) {
-        var newPosition = this.data.getLocalPosition(this.parent);
-        this.position.x = newPosition.x - this.sx;
-        this.position.y = newPosition.y - this.sy;
-
+        //currentRole = null;
     }
 }
-
-function onWheel(event) {
-    // console.log(event);
-    if (event.wheelDelta < 1) {
-        mapContainer.scale.x -= 0.1;
-        mapContainer.scale.y -= 0.1;
-    } else {
-        mapContainer.scale.x += 0.1;
-        mapContainer.scale.y += 0.1;
-    }
-}
-
-function myIndexOf(_obj, _solution) {
-    _result = -1;
-    for (var _i = 0; _i < _obj.length; _i++) {
-        if (_obj[_i] == _solution) {
-            _result = _i;
-            break;
-        }
-    }
-
-    return _result;
-}
-
-/* requestAnimFrame */
-window.requestAnimFrame = (function() {
-    return window.requestAnimationFrame ||
-        window.webkitRequestAnimationFrame ||
-        window.mozRequestAnimationFrame ||
-        function(callback) {
-            window.setTimeout(callback, 1000 / 60);
-        };
-})();

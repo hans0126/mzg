@@ -1,13 +1,14 @@
 /**/
-function attack(weapon) {
+function attack() {
+    closeAttackBtn();
     var _range = false; //判斷是否為遠程武器 //跟攻擊模式有關    
     //current local
     var _currentLocal = currentRole.local; //腳色目前所在位置
-    var _weaponObj = weapon; //武器
+    var _weaponObj = arrItems[this.weaponId]; //武器
+    console.log(_weaponObj);
     var _minRange = _weaponObj.minRange; //最小射程
     var _maxRange = _weaponObj.maxRange; //最大射程:起始值
-    var _clockwise = [-1, 1, 1, -1]; //四方推演 順時針
-    var _blockOff = [true, true, true, true]; //阻擋紀錄   
+
     var _attackCounter = 0;
     var _activeRole = [];
     var _successRange = _weaponObj.successRange; //攻擊成功參數:起始值
@@ -66,57 +67,6 @@ function attack(weapon) {
         }
     }
 
-    // _attackArea = getPanorama(currentRole.local,_minRange,_maxRange);
-
-    /*
-        for (var i = _minRange; i < _maxRange + 1; i++) {
-
-            if (i < 1) {
-                if (_range) { //是否為範圍攻擊
-                    attackButtom.push(_createAttackArea(_currentLocal.x, _currentLocal.y));
-                } else {
-                    _showSingleTarget(currentRole.local);
-                }
-
-            } else {
-                //4方擴展 clockwise y-1 x+1 y+1 x-1 
-                for (j = 0; j < 4; j++) {
-                    var _tempCurrentLocal = cloneObject(_currentLocal);
-                    var _quadrant;
-                    if (j % 2 == 0) {
-                        _quadrant = "y";
-                    } else {
-                        _quadrant = "x";
-                    }
-
-                    var _quadrantValue = (_clockwise[j] * i) + _currentLocal[_quadrant];
-                    _tempCurrentLocal[_quadrant] = _quadrantValue;
-                    if (_quadrantValue >= 0 && _blockOff[j]) {
-                        if (_tempCurrentLocal.y < arrMap.length) {
-                            if (_tempCurrentLocal.x < arrMap[_tempCurrentLocal.y].length) {
-                                var _tempTarget = arrMap[_tempCurrentLocal.y][_tempCurrentLocal.x];
-                                if (_tempTarget.visible == true) {
-
-                                    if (_range) { //是否為範圍攻擊
-                                        var _targetLocal = getRoomLocal(_tempTarget.room_id);
-                                        attackButtom.push(_createAttackArea(_targetLocal.x, _targetLocal.y));
-                                    } else {
-                                        _showSingleTarget(_tempTarget.room_id);
-                                    }
-                                } else {
-                                    _blockOff[j] = false;
-                                }
-                            }
-                        }
-
-                    } else {
-                        _blockOff[j] = false;
-                    }
-                }
-            }
-        }
-
-    */
     function _createAttackArea(_roomObj) {
         var _tg = new PIXI.Graphics();
         _tg.beginFill(0xFFFFFF);
@@ -125,10 +75,10 @@ function attack(weapon) {
         _tg.buttonMode = true;
         _tg.on('mousedown', _randomAttack);
         _tg.local = _roomObj;
-        mapContainer.addChild(_tg);
+
 
         _tg.drawRect((_roomObj.localX * blockWidth) + 10, (_roomObj.localY * blockHeight) + 10, blockWidth - 20, blockHeight - 20);
-
+        actionUiLayer.addChild(_tg);
         return _tg;
     }
 
@@ -149,10 +99,9 @@ function attack(weapon) {
             }
         }
         //該房間的敵人
-        for (var i = 0; i < arrRoleObj.length; i++) {
-            if (arrRoleObj[i].local == this.local && arrRoleObj[i] != currentRole) {
-
-                _arrTemp.push(arrRoleObj[i]);
+        for (var i = 0; i < enemyLayer.children.length; i++) {
+            if (enemyLayer.children[i].local == this.local && enemyLayer.children[i] != currentRole) {
+                _arrTemp.push(enemyLayer.children[i]);
             }
         }
 
@@ -182,9 +131,9 @@ function attack(weapon) {
 
         for (var i = 0; i < _arrRemoveTemp.length; i++) {
             _arrRemoveTemp[i].clear();
-            for (var j = 0; j < arrRoleObj.length; j++) {
-                if (_arrRemoveTemp[i] == arrRoleObj[j]) {
-                    arrRoleObj.splice(j, 1);
+            for (var j = 0; j < enemyLayer.children.length; j++) {
+                if (_arrRemoveTemp[i] == enemyLayer.children[j]) {
+                    enemyLayer.children.splice(j, 1);
                     break;
                 }
             }
@@ -196,15 +145,15 @@ function attack(weapon) {
     /*單體攻擊目標露出*/
     function _showSingleTarget(_roomObj) {
 
-        for (var i = 0; i < arrRoleObj.length; i++) {
-            if (arrRoleObj[i].local == _roomObj && arrRoleObj[i].faction == "enemy") {
+        for (var i = 0; i < enemyLayer.children.length; i++) {
+            if (enemyLayer.children[i].local == _roomObj) {
 
-                arrRoleObj[i].interactive = true;
-                arrRoleObj[i].buttonMode = true;
+                enemyLayer.children[i].interactive = true;
+                enemyLayer.children[i].buttonMode = true;
 
-                arrRoleObj[i].on("mousedown", _attackClick);
-                arrRoleObj[i].tint = 0xFFF000;
-                _activeRole.push(arrRoleObj[i]);
+                enemyLayer.children[i].on("mousedown", _attackClick);
+                enemyLayer.children[i].tint = 0xFFF000;
+                _activeRole.push(enemyLayer.children[i]);
             }
 
         }
@@ -224,9 +173,9 @@ function attack(weapon) {
             console.log(_weaponObj.name + " 對 " + this.objectName + " 攻擊成功");
             this.clear();
 
-            for (var i = 0; i < arrRoleObj.length; i++) {
-                if (arrRoleObj[i].objectName == this.objectName) {
-                    arrRoleObj.splice(i, 1);
+            for (var i = 0; i < enemyLayer.children.length; i++) {
+                if (enemyLayer.children[i].objectName == this.objectName) {
+                    enemyLayer.children.splice(i, 1);
                     break;
                 }
             }
@@ -271,6 +220,10 @@ function attack(weapon) {
         }
         $('#attack_count').html(0);
         attackMode = false;
+        currentRole.actionPoint--;
+        currentRole.interactive = true;
+        checkActionPoint();
+
     }
 
     function _attackRoll() {
