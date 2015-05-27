@@ -3,7 +3,9 @@ var arrDoors = new Array(); //門資訊
 var arrRoleType = new Array(); //角色類別
 var arrItems = new Array(); //武器資訊
 var arrSkills = new Array(); //人物技能
+var arrSkillType = new Array(); //技能範圍區間
 var arrLanguage = new Array(); //說話
+
 
 
 arrMap = [
@@ -330,6 +332,20 @@ arrSkills[70] = {
     name: "sniper",
     value: null
 };
+
+/*技能範圍區間*/
+
+arrSkillType["combatTarget"] = [0, 9];
+arrSkillType["combatSuccessRange"] = [10, 19];
+arrSkillType["meleeTarget"] = [20, 29];
+arrSkillType["meleeSuccessRange"] = [30, 39];
+arrSkillType["rangeTarget"] = [40, 49];
+arrSkillType["rangeSuccessRange"] = [50, 59];
+arrSkillType["rangeDistance"] = [60, 69];
+
+/**/
+
+
 
 
 arrLanguage["49"] = {

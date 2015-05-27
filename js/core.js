@@ -290,7 +290,7 @@ function roleClick(event) {
     currentRoomDoorActive(this.local.room_id);
     currentRole = this;
 
-
+    updateAp(currentRole.actionPoint);
     $('#name').html(this.objectName);
     var strEquip = "<ul>";
     for (var i = 0; i < this.equip.main.length; i++) {
@@ -312,8 +312,11 @@ function roleClick(event) {
         _btn.interactive = true;
         _btn.buttonMode = true;
         _btn.weaponId = currentRole.equip.main[i];
-        _btn.myId = Math.floor(Math.random()*1000)+"_"+Math.floor(Math.random()*1000);
-        console.log( _btn );
+        _btn.btnClass = "attackBtn";
+        
+
+        _btn.myId = Math.floor(Math.random() * 1000) + "_" + Math.floor(Math.random() * 1000);
+        // console.log( _btn );
         var _textObj = new PIXI.Text(arrItems[currentRole.equip.main[i]].name, {
             fill: 0xffffff
         });
@@ -331,7 +334,7 @@ function roleClick(event) {
             var _x = currentRole.x + 70;
         }
 
-        var tween = new TweenLite(_btn, 0.5, {
+        var tween = new TweenMax(_btn, 0.5, {
             x: _x,
             alpha: 1
         });
@@ -348,25 +351,23 @@ function roleClick(event) {
 /*關閉選項*/
 function closeAttackBtn() {
     for (var i = 0; i < actionUiLayer.children.length; i++) {
-     //   if (actionUiLayer.children[i].btnClass == "attackBtn") {
-            var tween = new TweenLite(actionUiLayer.children[i], 0.3, {
+        if (actionUiLayer.children[i].btnClass == "attackBtn") {
+            var tween = new TweenMax(actionUiLayer.children[i], 0.3, {
                 x: currentRole.x,
                 alpha: 0,
                 onComplete: function() {
                     var _target = this.target;
-                    
-                 
-                  for (var j = 0; j < actionUiLayer.children.length; j++) {
+
+                    for (var j = 0; j < actionUiLayer.children.length; j++) {
                         if (actionUiLayer.children[j].myId == _target.myId) {
-                           actionUiLayer.children.splice(j,1);
+                            actionUiLayer.children.splice(j, 1);
                         }
                     }
 
                 }
             });
-     //   }
+        }
     }
-
 }
 
 /*選擇武器*/
@@ -403,7 +404,7 @@ function passageDoor(event) {
         var _y = randomDeploy(_roomLocal.localY, blockWidth);
         currentRole.local = _roomLocal;
 
-        var tween = new TweenLite(currentRole, 0.5, {
+        var tween = new TweenMax(currentRole, 0.5, {
             x: _x,
             y: _y,
             onUpdate: function() {
@@ -447,6 +448,7 @@ function passageDoor(event) {
         }
 
         currentRole.actionPoint--;
+        updateAp(currentRole.actionPoint);
         if (currentRole.actionPoint > 0) {
             currentRole.interactive = true;
             currentRoomDoorActive(_targetRoomId);
@@ -535,7 +537,7 @@ function enemyMove() {
         _canMovePlay[i].local = _canMoveTargetRoom[i];
         //_canMovePlay[i].actionMovement = true;
 
-        var tween = new TweenLite(_canMovePlay[i], ((Math.random() * 5) + 4) / 10, {
+        var tween = new TweenMax(_canMovePlay[i], ((Math.random() * 5) + 4) / 10, {
             x: _canMovePlay[i].goalX,
             y: _canMovePlay[i].goalY
         });
@@ -577,6 +579,9 @@ function enemyMove() {
         interactive: true,
         actionPoint: 3
     });
+
+
+    
 
 }
 
@@ -895,6 +900,53 @@ function findEnemyByNoise() {
     });
 
 }
+
+/*create current ap at main layer*/
+function displayAp() {
+
+    var _textObj = new PIXI.Text('AP:', {
+        font: '50px Arial',
+        fill: 0xff1010,
+        dropShadow: true
+    });
+
+    _textObj.x = 10;
+    _textObj.y = displayHeight - _textObj.height - 10;
+    var _apWidth = _textObj.width + 10;
+    mainUiLayer.addChild(_textObj);
+
+    var _textObj = new PIXI.Text('0', {
+        font: '100px Arial',
+        fill: 0xff1010,
+        dropShadow: true
+    });
+    _textObj.myId = "num";
+    _textObj.x = _apWidth;
+    _textObj.y = displayHeight - _textObj.height;
+    mainUiLayer.addChild(_textObj);
+
+}
+
+function updateAp(_num) {
+
+    var _obj = objectHelp(mainUiLayer.children, {
+        myId: "num"
+    })[0];
+
+    _obj.text = _num;
+    _obj.alpha = 0.5;
+    _obj.scale.x = 0.5;
+    _obj.scale.y = 0.5;
+
+
+    new TimelineLite().to(_obj.scale, 0.2, {
+        x: 1,
+        y: 1
+    }).to(_obj, 0.2, {
+        alpha: 1
+    });
+}
+
 
 /*
 判斷是否還有action process.inherits();

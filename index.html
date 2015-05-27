@@ -24,6 +24,9 @@
 <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 <script src="js/pixi.js/bin/pixi.min.js"></script>
 <script src="js/greensock-js/src/minified/TweenLite.min.js"></script>
+<script src="js/greensock-js/src/minified/TweenMax.min.js"></script>
+
+<script src="js/greensock-js/src/minified/easing/EasePack.min.js"></script>
 <script src="js/datas.js"></script>
 <script src="js/helps.js"></script>
 <script src="js/core.js"></script>
@@ -61,13 +64,16 @@ var cameraFollow = true;
 
 var dragMap = false;
 var stage = new PIXI.Container();
+/*game stage*/
 var gameStage = new PIXI.Container(); //主場景
 var mapLayer = new PIXI.Container(); //地圖
 var enemyLayer = new PIXI.Container(); //敵人
 var playerLayer = new PIXI.Container(); //玩家
 var itemLayer = new PIXI.Container(); //物件
 var passageLayer = new PIXI.Container(); //物件
-var actionUiLayer = new PIXI.Container(); //ui
+var actionUiLayer = new PIXI.Container(); //人物ui
+/*main ui*/
+var mainUiLayer = new PIXI.Container();
 
 gameStage.updateLayersOrder = function() {
     gameStage.children.sort(function(a, b) {
@@ -84,6 +90,7 @@ gameStage.updateLayersOrder = function() {
 gameStage.interactive = true;
 
 stage.addChild(gameStage);
+stage.addChild(mainUiLayer);
 
 mapLayer.zIndex = 10;
 itemLayer.zIndex = 20;
@@ -101,7 +108,7 @@ gameStage.addChild(mapLayer);
 
 
 gameStage.updateLayersOrder();
-
+displayAp();
 
 
 init();
@@ -121,7 +128,7 @@ arrTimer.push(t2);
 
 
 function init() {
-
+   
     renderer = PIXI.autoDetectRenderer(displayWidth, displayHeight, {
         backgroundColor: 0x1099bb
     });

@@ -1,6 +1,8 @@
 /**/
 function attack() {
     closeAttackBtn();
+    currentRole.actionPoint--;
+    updateAp(currentRole.actionPoint);
     var _range = false; //判斷是否為遠程武器 //跟攻擊模式有關    
     //current local
     var _currentLocal = currentRole.local; //腳色目前所在位置
@@ -55,7 +57,7 @@ function attack() {
 
     //get Range
     _activeRooms = getPanorama(_currentLocal.room_id, _minRange, _maxRange);
-    console.log(_activeRooms);
+
 
     if (_range) {
         for (var i = 0; i < _activeRooms.length; i++) {
@@ -67,6 +69,8 @@ function attack() {
         }
     }
 
+
+
     function _createAttackArea(_roomObj) {
         var _tg = new PIXI.Graphics();
         _tg.beginFill(0xFFFFFF);
@@ -75,10 +79,34 @@ function attack() {
         _tg.buttonMode = true;
         _tg.on('mousedown', _randomAttack);
         _tg.local = _roomObj;
+        _tg.btnClass = "attackArea";
+        _tg.alpha = 0.5;
+        _tg.myId = Math.floor(Math.random() * 1000) + "_" + Math.floor(Math.random() * 1000);
 
+        var _x = (_roomObj.localX * blockWidth) + 10;
+        var _y = (_roomObj.localY * blockHeight) + 10;
 
-        _tg.drawRect((_roomObj.localX * blockWidth) + 10, (_roomObj.localY * blockHeight) + 10, blockWidth - 20, blockHeight - 20);
+        _tg.drawRect(0, 0, blockWidth - 20, blockHeight - 20);
+
+        _tg.x = (_currentLocal.localX * blockWidth);
+        _tg.y = (_currentLocal.localY * blockHeight);
+
+        var tween = new TweenMax(_tg, 0.3, {
+            x: _x,
+            y: _y,
+            alpha: 0.5,
+            onComplete: function() {
+                var _target = this.target;
+                for (var j = 0; j < actionUiLayer.children.length; j++) {
+                    if (actionUiLayer.children[j].myId == _target.myId) {
+                        actionUiLayer.children[j].interactive = true;
+                    }
+                }
+
+            }
+        });
         actionUiLayer.addChild(_tg);
+
         return _tg;
     }
 
@@ -88,6 +116,7 @@ function attack() {
         var _arrRemoveTemp = []; //被殺死的敵人
         var _arrAttackResult = []; //攻擊結果
         var _attackCount = 0; //算攻擊次數
+        var _anime = [];
 
         //判斷攻擊次數以及成功
         for (var i = 0; i < _numberOfAttack; i++) {
@@ -111,15 +140,91 @@ function attack() {
 
                 var _success = false;
 
+                var _textObj = new PIXI.Text('', {
+                    font: '20px Arial',
+                    fill: 0x000000
+                });
+
+                _textObj.myId = Math.floor(Math.random() * 1000) + "_" + Math.floor(Math.random() * 1000);
+
+
+
+
                 if (_arrAttackResult[_attackCount]) {
                     console.log(_weaponObj.name + " 對 " + _arrTemp[i].objectName + " 攻擊成功");
                     _success = true;
+                    _textObj.text = "KILL";
                     _arrRemoveTemp.push(_arrTemp[i]);
+
+
+
+
+
 
                 } else {
                     console.log(_weaponObj.name + " 對 " + _arrTemp[i].objectName + " 攻擊失誤");
+                    _textObj.text = "MISS";
 
                 }
+
+                actionUiLayer.addChild(_textObj);
+                _textObj.x = _arrTemp[i].x - _textObj.width / 2;
+                _textObj.y = _arrTemp[i].y - _textObj.height / 2;
+                _textObj.alpha = 0;
+                /*  new TweenMax(_textObj, 0.3, {
+                      y: _textObj.y - 30,
+                      alpha: 0,
+                      delay: (_attackCount * 0.3)
+
+                  })*/
+
+                var _ani = new TimelineLite().to(_textObj, 0.2, {
+                    y: _textObj.y - 30,
+                    alpha: 1,
+                    delay: (_attackCount * 0.3)
+                }).to(_textObj, 0.1, {
+                    alpha: 0,
+                    onComplete: function(_obj, _obj2) {
+
+                        for (var i = 0; i < actionUiLayer.children.length; i++) {
+                            if (actionUiLayer.children[i].myId == _obj.target.myId) {
+                                actionUiLayer.children.splice(i, 1);
+                            }
+                        }
+
+
+                        var _allComplete = false;
+                        for (var i = 0; i < _obj2.length; i++) {
+                            console.log(_obj2[i].progress());
+                            if (_obj2[i].progress()!=1) {
+                                _allComplete = false;
+                                break;
+                            } else {
+                                _allComplete = true;                                 
+                            }
+                        }
+
+                        //console.log(_obj2);
+                        
+                        if (_allComplete) {                                               
+                            for (var i = 0; i < _arrRemoveTemp.length; i++) {
+                                _arrRemoveTemp[i].clear();
+                                for (var j = 0; j < enemyLayer.children.length; j++) {
+                                    if (_arrRemoveTemp[i] == enemyLayer.children[j]) {
+                                          enemyLayer.children.splice(j, 1);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+
+                    },
+                    onCompleteParams: ["{self}", _anime]
+                });
+
+                _anime.push(_ani);
+
 
                 _attackCount++;
 
@@ -129,17 +234,63 @@ function attack() {
             }
         }
 
-        for (var i = 0; i < _arrRemoveTemp.length; i++) {
-            _arrRemoveTemp[i].clear();
-            for (var j = 0; j < enemyLayer.children.length; j++) {
-                if (_arrRemoveTemp[i] == enemyLayer.children[j]) {
-                    enemyLayer.children.splice(j, 1);
-                    break;
+
+        //清除陣列
+        _attackEnd(_range);
+        /*
+                var tween = new TweenMax(this, 0.5, {
+                    alpha: 0,
+                    ease: RoughEase.ease.config({
+                        points: 10,
+                        randomize: false
+                    }),
+                    onComplete: function() {
+                     
+
+                    }
+                });
+
+        */
+
+        for (var i = 0; i < actionUiLayer.children.length; i++) {
+            if (actionUiLayer.children[i].btnClass == "attackArea") {
+                if (actionUiLayer.children[i].myId == this.myId) {
+                    var tween = new TweenMax(actionUiLayer.children[i], 0.6, {
+                        alpha: 0,
+                        ease: RoughEase.ease.config({
+                            points: 10,
+                            randomize: false
+                        }),
+                        onComplete: _tweenComplete,
+                        onCompleteParams: ["{self}"]
+                    });
+                } else {
+
+                    var tween = new TweenMax(actionUiLayer.children[i], 0.2, {
+                        alpha: 0,
+                        x: (_currentLocal.localX * blockWidth) + 10,
+                        y: (_currentLocal.localY * blockWidth) + 10,
+                        onComplete: _tweenComplete,
+                        onCompleteParams: ["{self}"]
+                    });
                 }
             }
         }
-        //清除陣列
-        _attackEnd(_range);
+
+        function _tweenComplete(obj) {
+            console.log(obj);
+            var _target = obj.target;
+
+            for (var j = 0; j < actionUiLayer.children.length; j++) {
+                if (actionUiLayer.children[j].myId == _target.myId) {
+                    actionUiLayer.children.splice(j, 1);
+                }
+            }
+        }
+
+
+
+
     }
 
     /*單體攻擊目標露出*/
@@ -167,11 +318,19 @@ function attack() {
 
         _attackCounter--;;
         $('#attack_count').html(_attackCounter);
+        //
+        var _textObj = new PIXI.Text('', {
+            font: '20px Arial',
+            fill: 0x000000
+        });
+
+        _textObj.myId = Math.floor(Math.random() * 1000) + "_" + Math.floor(Math.random() * 1000);
 
         //計算攻擊
         if (_attackRoll() >= _successRange) {
             console.log(_weaponObj.name + " 對 " + this.objectName + " 攻擊成功");
             this.clear();
+            _textObj.text = "KILL";
 
             for (var i = 0; i < enemyLayer.children.length; i++) {
                 if (enemyLayer.children[i].objectName == this.objectName) {
@@ -179,6 +338,8 @@ function attack() {
                     break;
                 }
             }
+
+
 
             for (var i = 0; i < _activeRole.length; i++) {
                 if (_activeRole[i].objectName == this.objectName) {
@@ -188,10 +349,28 @@ function attack() {
             }
 
         } else {
+            _textObj.text = "MISS";
             console.log(_weaponObj.name + " 對 " + this.objectName + " 攻擊失誤");
         }
 
+        actionUiLayer.addChild(_textObj);
+        _textObj.x = this.x - _textObj.width / 2;
+        _textObj.y = this.y - _textObj.height / 2;
 
+        new TweenMax(_textObj, 0.5, {
+            y: _textObj.y - 30,
+            alpha: 0,
+            onComplete: function(_obj) {
+
+                for (var i = 0; i < actionUiLayer.children.length; i++) {
+                    if (actionUiLayer.children[i].myId == _obj.target.myId) {
+                        actionUiLayer.children.splice(i, 1);
+                    }
+                }
+
+            },
+            onCompleteParams: ["{self}"]
+        })
 
         if (_attackCounter == 0 || _activeRole.length <= 0) {
             _attackEnd(_range);
@@ -203,11 +382,11 @@ function attack() {
     function _attackEnd(attackType) {
 
         if (attackType) { //is range true
-            for (var i = 0; i < attackButtom.length; i++) {
-                attackButtom[i].clear();
-            }
+            /*  for (var i = 0; i < attackButtom.length; i++) {
+                  attackButtom[i].clear();
+              }
 
-            attackButtom = [];
+              attackButtom = [];*/
 
         } else {
             console.log("end");
@@ -220,7 +399,7 @@ function attack() {
         }
         $('#attack_count').html(0);
         attackMode = false;
-        currentRole.actionPoint--;
+
         currentRole.interactive = true;
         checkActionPoint();
 
@@ -233,20 +412,14 @@ function attack() {
     //讀取技能參數
 
     function _getSkillValue(_skillType) {
-        var _arrSkillType = new Array();
-        var _returnValue = 0;
-        _arrSkillType["combatTarget"] = [0, 9];
-        _arrSkillType["combatSuccessRange"] = [10, 19];
-        _arrSkillType["meleeTarget"] = [20, 29];
-        _arrSkillType["meleeSuccessRange"] = [30, 39];
-        _arrSkillType["rangeTarget"] = [40, 49];
-        _arrSkillType["rangeSuccessRange"] = [50, 59];
-        _arrSkillType["rangeDistance"] = [60, 69];
 
-        for (var i = _arrSkillType[_skillType][0]; i < _arrSkillType[_skillType][1] + 1; i++) {
+        var _returnValue = 0;
+
+
+        for (var i = arrSkillType[_skillType][0]; i < arrSkillType[_skillType][1] + 1; i++) {
 
             if (currentRole.skill.indexOf(parseInt(i)) > -1) {
-                _returnValue += arrSkills[i].value;
+                returnValue += arrSkills[i].value;
                 console.log(arrSkills[i] + "/" + i);
             }
 

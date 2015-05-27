@@ -124,7 +124,7 @@ function moveToTarget(_tx, _ty) {
     var _x = (displayWidth / 2) - mapLayer.x - _tx;
     var _y = (displayHeight / 2) - mapLayer.y - _ty
 
-    var tween = new TweenLite(gameStage, 0.5, {
+    var tween = new TweenMax(gameStage, 0.5, {
         x: _x,
         y: _y
     });
