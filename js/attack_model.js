@@ -7,7 +7,7 @@ function attack() {
     //current local
     var _currentLocal = currentRole.local; //腳色目前所在位置
     var _weaponObj = arrItems[this.weaponId]; //武器
-    console.log(_weaponObj);
+   
     var _minRange = _weaponObj.minRange; //最小射程
     var _maxRange = _weaponObj.maxRange; //最大射程:起始值
 
@@ -192,10 +192,10 @@ function attack() {
                             }
                         }
 
-
+                        // 判斷所有動畫都撥完畢之後再刪除物件
                         var _allComplete = false;
                         for (var i = 0; i < _obj2.length; i++) {
-                            console.log(_obj2[i].progress());
+                           
                             if (_obj2[i].progress()!=1) {
                                 _allComplete = false;
                                 break;

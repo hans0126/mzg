@@ -51,8 +51,8 @@ var blockHeight = 200;
 var t = 0;
 
 
-var displayWidth = 600;
-var displayHeight = 600;
+var displayWidth = 750;
+var displayHeight = 500;
 
 // create the root of the scene graph
 var gameStage;
@@ -60,9 +60,9 @@ var renderer;
 //增加容器
 var mapLayer;
 var mapTexture = PIXI.Texture.fromImage('images/tilemap.png');
-var cameraFollow = true;
+var cameraFollow = false;
 
-var dragMap = false;
+var dragMap = true;
 var stage = new PIXI.Container();
 /*game stage*/
 var gameStage = new PIXI.Container(); //主場景
@@ -72,8 +72,10 @@ var playerLayer = new PIXI.Container(); //玩家
 var itemLayer = new PIXI.Container(); //物件
 var passageLayer = new PIXI.Container(); //物件
 var actionUiLayer = new PIXI.Container(); //人物ui
+
 /*main ui*/
 var mainUiLayer = new PIXI.Container();
+var statusLayer = new PIXI.Container();//
 
 gameStage.updateLayersOrder = function() {
     gameStage.children.sort(function(a, b) {
@@ -84,13 +86,11 @@ gameStage.updateLayersOrder = function() {
 };
 
 
-
-
-
 gameStage.interactive = true;
 
 stage.addChild(gameStage);
 stage.addChild(mainUiLayer);
+stage.addChild(statusLayer);
 
 mapLayer.zIndex = 10;
 itemLayer.zIndex = 20;
@@ -109,7 +109,7 @@ gameStage.addChild(mapLayer);
 
 gameStage.updateLayersOrder();
 displayAp();
-
+createUiBtn();
 
 init();
 
@@ -186,6 +186,8 @@ function init() {
 
     }
 
+    currentRole = newR;
+    createStatus();
     /*
         var menu = new PIXI.Container();
         menu
@@ -280,7 +282,7 @@ function init() {
 
     //gameStage.on('mousewheel',onWheel);
 
-    document.getElementById('gameView').addEventListener("mousewheel", onWheel, false);
+   // document.getElementById('gameView').addEventListener("mousewheel", onWheel, false);
 
     // gridLayer.anchor.set(0.5);// graphics.pivot , sprite.anchor    
 
@@ -353,7 +355,7 @@ function animate() {
 
     for (var i = 0; i < arrRoleObj.length; i++) {
 
-
+/*
         if (arrRoleObj[i].actionMovement == true) {
 
             //var _de = (new Date().getTime() - arrRoleObj[i].startTime) / arrRoleObj[i].at * 100;
@@ -377,7 +379,7 @@ function animate() {
 
 
         }
-
+*/
 
 
         /*  var _rotation = Math.atan2(arrRoleObj[i].position.y - arrRoleObj[i].goalY, arrRoleObj[i].position.x - arrRoleObj[i].goalX);
