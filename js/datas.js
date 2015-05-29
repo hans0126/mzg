@@ -247,8 +247,19 @@ arrRoleType = [{
     color: 0xFFFF00
 }];
 
+arrItems[0] = { //空物件
+    category: "item",
+    name: "empty",
+    attackType: null,
+    power: null,
+    minRange: null,
+    maxRange: null,
+    successRange: null,
+    numberOfAttack: null,
+    dual: null
+};
 
-arrItems[0] = {
+arrItems[1] = {
     category: "weapon",
     name: "pistal",
     attackType: "range",
@@ -259,7 +270,7 @@ arrItems[0] = {
     numberOfAttack: 5,
     dual: true
 };
-arrItems[1] = {
+arrItems[2] = {
     category: "weapon",
     name: "knife",
     attackType: "melee",
@@ -270,7 +281,7 @@ arrItems[1] = {
     numberOfAttack: 2,
     dual: true
 };
-arrItems[2] = {
+arrItems[3] = {
     category: "item",
     name: "food",
     attackType: "null",

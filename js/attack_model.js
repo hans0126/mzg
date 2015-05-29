@@ -49,7 +49,7 @@ function attack() {
 
 
     if (_weaponObj.dual) {
-        if (currentRole.equip.main[0] == currentRole.equip.main[1]) {
+        if (currentRole.equip[0][0] == currentRole.equip[0][1]) {
             _numberOfAttack = _numberOfAttack * 2;
             console.log('dual weapons');
         }

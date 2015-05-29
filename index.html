@@ -25,7 +25,6 @@
 <script src="js/pixi.js/bin/pixi.min.js"></script>
 <script src="js/greensock-js/src/minified/TweenLite.min.js"></script>
 <script src="js/greensock-js/src/minified/TweenMax.min.js"></script>
-
 <script src="js/greensock-js/src/minified/easing/EasePack.min.js"></script>
 <script src="js/datas.js"></script>
 <script src="js/helps.js"></script>
@@ -38,6 +37,8 @@ window.addEventListener('keydown', languageCombination);
 
 var arrTimer = new Array(); //時間倒數物件
 var arrRoleObj = new Array(); //角色物件
+
+var arrLayerManager = [];
 
 var totalRoom = 0; //總房間數
 
@@ -62,7 +63,7 @@ var mapLayer;
 var mapTexture = PIXI.Texture.fromImage('images/tilemap.png');
 var cameraFollow = false;
 
-var dragMap = true;
+var dragMap = false;
 var stage = new PIXI.Container();
 /*game stage*/
 var gameStage = new PIXI.Container(); //主場景
@@ -75,10 +76,19 @@ var actionUiLayer = new PIXI.Container(); //人物ui
 
 /*main ui*/
 var mainUiLayer = new PIXI.Container();
-var statusLayer = new PIXI.Container();//
+var statusLayer = new PIXI.Container(); //
 
 gameStage.updateLayersOrder = function() {
-    gameStage.children.sort(function(a, b) {
+    this.children.sort(function(a, b) {
+        a.zIndex = a.zIndex || 0;
+        b.zIndex = b.zIndex || 0;
+        return a.zIndex - b.zIndex
+    });
+};
+
+statusLayer.updateLayersOrder = function() {
+
+    this.children.sort(function(a, b) {
         a.zIndex = a.zIndex || 0;
         b.zIndex = b.zIndex || 0;
         return a.zIndex - b.zIndex
@@ -87,6 +97,8 @@ gameStage.updateLayersOrder = function() {
 
 
 gameStage.interactive = true;
+
+statusLayer.visible = false;
 
 stage.addChild(gameStage);
 stage.addChild(mainUiLayer);
@@ -128,7 +140,7 @@ arrTimer.push(t2);
 
 
 function init() {
-   
+
     renderer = PIXI.autoDetectRenderer(displayWidth, displayHeight, {
         backgroundColor: 0x1099bb
     });
@@ -164,10 +176,9 @@ function init() {
     newR.buttonMode = true;
 
     newR.skill = [];
-    newR.equip = {
-        main: [0, 1],
-        sub: []
-    };
+    newR.equip = [[1, 2],[0, 3, 0]];
+    //[0] = hand 
+    //[1] = backpack
 
 
 
@@ -282,7 +293,7 @@ function init() {
 
     //gameStage.on('mousewheel',onWheel);
 
-   // document.getElementById('gameView').addEventListener("mousewheel", onWheel, false);
+    // document.getElementById('gameView').addEventListener("mousewheel", onWheel, false);
 
     // gridLayer.anchor.set(0.5);// graphics.pivot , sprite.anchor    
 
@@ -355,31 +366,31 @@ function animate() {
 
     for (var i = 0; i < arrRoleObj.length; i++) {
 
-/*
-        if (arrRoleObj[i].actionMovement == true) {
+        /*
+                if (arrRoleObj[i].actionMovement == true) {
 
-            //var _de = (new Date().getTime() - arrRoleObj[i].startTime) / arrRoleObj[i].at * 100;
+                    //var _de = (new Date().getTime() - arrRoleObj[i].startTime) / arrRoleObj[i].at * 100;
 
-            var _speed = 5;
+                    var _speed = 5;
 
-            var _dy = arrRoleObj[i].goalY - arrRoleObj[i].position.y;
-            var _dx = arrRoleObj[i].goalX - arrRoleObj[i].position.x;
+                    var _dy = arrRoleObj[i].goalY - arrRoleObj[i].position.y;
+                    var _dx = arrRoleObj[i].goalX - arrRoleObj[i].position.x;
 
-            var _radian = Math.atan2(_dy, _dx);
-
-
-            if (Math.sqrt(_dy * _dy + _dx * _dx) < _speed) {
-                arrRoleObj[i].position.x = arrRoleObj[i].goalX;
-                arrRoleObj[i].position.y = arrRoleObj[i].goalY;
-                arrRoleObj[i].actionMovement = false;
-            } else {
-                arrRoleObj[i].position.x += Math.cos(_radian) * _speed;
-                arrRoleObj[i].position.y += Math.sin(_radian) * _speed;
-            }
+                    var _radian = Math.atan2(_dy, _dx);
 
 
-        }
-*/
+                    if (Math.sqrt(_dy * _dy + _dx * _dx) < _speed) {
+                        arrRoleObj[i].position.x = arrRoleObj[i].goalX;
+                        arrRoleObj[i].position.y = arrRoleObj[i].goalY;
+                        arrRoleObj[i].actionMovement = false;
+                    } else {
+                        arrRoleObj[i].position.x += Math.cos(_radian) * _speed;
+                        arrRoleObj[i].position.y += Math.sin(_radian) * _speed;
+                    }
+
+
+                }
+        */
 
 
         /*  var _rotation = Math.atan2(arrRoleObj[i].position.y - arrRoleObj[i].goalY, arrRoleObj[i].position.x - arrRoleObj[i].goalX);
