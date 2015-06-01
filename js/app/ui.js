@@ -1,0 +1,310 @@
+define(['enemy'],function(enemy) {
+
+    function _createUiBtn() {
+
+        var _mouseEvent = [enemy.enemyMove, _statusOpen];
+        var _btnName = ['End Turn', 'Status'];
+        var _tempHeight = 0;
+
+        /*turn end*/
+        for (var i = 0; i < _mouseEvent.length; i++) {
+            var _textObj = new PIXI.Text(_btnName[i], {
+                font: '30px Arial',
+                fill: 0xff1010
+            });
+            _textObj.x = displayWidth - _textObj.width - 10;
+            _textObj.y = displayHeight - _textObj.height - 10 - _tempHeight;
+            _textObj.interactive = true;
+            _textObj.buttonMode = true;
+            _textObj.on("mousedown", _mouseEvent[i]);
+            _textObj.mouseover = function() {
+                this.style = {
+                    fill: 0xffffff
+                };
+            }
+
+            _textObj.mouseout = function() {
+                this.style = {
+                    fill: 0xff1010
+                };
+            }
+
+            mainUiLayer.addChild(_textObj);
+
+            if (i == 0) {
+                _tempHeight = _textObj.height + 10;
+            }
+        }
+
+      
+
+    }
+
+
+    function _createDisplayAp() {
+
+        var _textObj = new PIXI.Text('AP:', {
+            font: '50px Arial',
+            fill: 0xff1010,
+            dropShadow: true
+        });
+
+        _textObj.x = 10;
+        _textObj.y = displayHeight - _textObj.height - 10;
+        var _apWidth = _textObj.width + 10;
+        mainUiLayer.addChild(_textObj);
+
+        var _textObj = new PIXI.Text('0', {
+            font: '100px Arial',
+            fill: 0xff1010,
+            dropShadow: true
+        });
+
+        _textObj.myId = "num";
+        _textObj.x = _apWidth;
+        _textObj.y = displayHeight - _textObj.height;
+        mainUiLayer.addChild(_textObj);
+
+    }
+
+
+    function _updateAp(_num) {
+
+        var _obj = objectHelp(mainUiLayer.children, {
+            myId: "num"
+        })[0];
+
+        _obj.text = _num;
+        _obj.alpha = 0.5;
+        _obj.scale.x = 0.5;
+        _obj.scale.y = 0.5;
+
+
+        new TimelineLite().to(_obj.scale, 0.2, {
+            x: 1,
+            y: 1
+        }).to(_obj, 0.2, {
+            alpha: 1
+        });
+    }
+
+    /*create status interface*/
+    function _createStatus() {
+
+
+        _createItemStatusLayer();
+
+        var _closeBtn = new PIXI.Graphics();
+        _closeBtn.beginFill(0x990000, 1);
+        _closeBtn.drawCircle(0, 0, 15);
+        _closeBtn.endFill();
+        _closeBtn.btnClass = "attackBtn";
+
+        var _textObj = new PIXI.Text("X", {
+            fill: 0xffffff,
+            font: '24px Arial'
+        });
+
+        _textObj.anchor = {
+            x: 0.5,
+            y: 0.5
+        };
+
+        _closeBtn.addChild(_textObj);
+        _closeBtn.interactive = true;
+        _closeBtn.buttonMode = true;
+        _closeBtn.on("mousedown", _statusClose);
+        statusLayer.addChild(_closeBtn);
+        _closeBtn.x = 15;
+        _closeBtn.y = 15;
+
+        function _createItemStatusLayer() {
+            var _cardBaseX = 0;
+            var _row2BaseX;
+            var _row2BaseY;
+            var _itemLayer = new PIXI.Container();
+
+            for (i = 0; i < 5; i++) {
+                var _itemCaseParent = new PIXI.Container();
+                var _itemCase = new PIXI.Graphics();
+                _itemCase.beginFill(0x666666, 1);
+                _itemCase.drawRect(0, 0, 150, 225);
+                _itemCase.lineStyle(0, 0x0000FF, 1);
+                _itemCaseParent.zIndex = i;
+                _itemCaseParent.addChild(_itemCase);
+                _itemLayer.addChild(_itemCaseParent);
+
+                if (i < 3) {
+                    _itemCaseParent.x = _cardBaseX + i * _itemCaseParent.width + 20 * i;
+                    _itemCaseParent.y = 20;
+                    _itemCaseParent.myRow = 1;
+                    _itemCaseParent.myId = i;
+                    if (i == 0) {
+                        _row2BaseX = _itemCaseParent.x + _itemCaseParent.width / 2 + 10;
+                        _row2BaseY = _itemCaseParent.y + _itemCaseParent.height + 10;
+                    }
+                } else {
+                    _itemCaseParent.x = _row2BaseX + (i - 3) * _itemCaseParent.width + 20 * (i - 3);
+                    _itemCaseParent.y = _row2BaseY;
+                    _itemCaseParent.myRow = 0;
+                    _itemCaseParent.myId = i - 3;
+                }
+
+                var _textObj = new PIXI.Text("empty", {
+                    font: '30px Arial',
+                    fill: 0xffffff
+                });
+                _textObj.x = 0;
+                _textObj.y = 0;
+
+                _itemCaseParent.addChild(_textObj);
+
+                _itemCaseParent.originX = _itemCaseParent.x;
+                _itemCaseParent.originY = _itemCaseParent.y;
+
+                /*bind drag event*/
+                _itemCaseParent.interactive = true;
+                _itemCaseParent.buttonMode = true;
+
+                _itemCaseParent.on('mousedown', _onDragStart)
+                    // events for drag end
+                    .on('mouseup', _onDragEnd)
+                    .on('mouseupoutside', _onDragEnd)
+                    // events for drag move
+                    .on('mousemove', _onDragMove)
+
+            }
+
+            statusLayer.addChild(_itemLayer);
+            _itemLayer.myId = "itemLayer";
+            _itemLayer.x = displayWidth - _itemLayer.width - 20;
+            //record layer index   
+            arrLayerManager['itemLayer'] = statusLayer.getChildIndex(_itemLayer);
+
+            function _onDragStart(event) {
+                _zIndexUpFirst(this);
+                this.data = event.data;
+                this.dragging = true;
+                this.sx = this.data.getLocalPosition(this).x * this.scale.x;
+                this.sy = this.data.getLocalPosition(this).y * this.scale.y;
+            }
+
+            function _onDragEnd() {
+                this.alpha = 1;
+                this.dragging = false;
+                // set the interaction data to null
+                this.data = null;
+                _checkHit(this)
+                var tween = new TweenMax(this, 0.5, {
+                    x: this.originX,
+                    y: this.originY,
+                    alpha: 1
+                });
+            }
+
+            function _onDragMove() {
+                if (this.dragging) {
+                    var newPosition = this.data.getLocalPosition(this.parent);
+                    this.position.x = newPosition.x - this.sx;
+                    this.position.y = newPosition.y - this.sy;
+                }
+            }
+
+            /*
+                current drag obj zindex go to top
+            */
+            function _zIndexUpFirst(_obj) {
+                for (var i = 0; i < _itemLayer.children.length; i++) {
+                    _itemLayer.children[i].zIndex = 1;
+                }
+
+                _obj.zIndex = 10;
+                _itemLayer.updateLayersOrder();
+            }
+
+            /*
+            touch area 60%+ triggle change
+            */
+            function _checkHit(_obj) {
+                var _iL = _itemLayer.children;
+
+                for (var i = 0; i < _iL.length; i++) {
+                    if (hitTest(_iL[i], _obj) && _iL[i] != _obj) {
+
+                        var _recWidth = ((_obj.width - Math.abs(_obj.x - _iL[i].x)) / _obj.width) * 100;
+                        var _recHeight = ((_obj.height - Math.abs(_obj.y - _iL[i].y)) / _obj.height) * 100;
+
+                        if (_recWidth > 60 && _recHeight > 60) {
+                            var _targetObj = _iL[i];
+                            var _currentItemId = _obj.myItemId;
+                            var _changeElement = [];
+
+                            _obj.children[1].text = arrItems[_targetObj.myItemId].name;
+                            _obj.myItemId = _targetObj.myItemId;
+
+                            _targetObj.children[1].text = arrItems[_currentItemId].name;
+                            _targetObj.myItemId = _currentItemId;
+                            console.log(_targetObj.children);
+                            _changeElement.push(_obj, _targetObj);
+
+                            for (j = 0; j < _changeElement.length; j++) {
+                                currentRole.equip[_changeElement[j].myRow][_changeElement[j].myId] = _changeElement[j].myItemId;
+                            }
+                            console.log(currentRole.equip[0]);
+                            console.log(currentRole.equip[1]);
+                            return true;
+                            break;
+
+                        }
+                    }
+                }
+            }
+        }
+
+        //updateStatusItem();
+    }
+
+    function _updateStatusItem() {
+        if (currentRole == null) {
+            return false;
+        }
+        var _item = currentRole.equip;
+        var _itemLayer = statusLayer.children[0].children;
+
+        for (var i = 0; i < _item.length; i++) {
+            for (var j = 0; j < _item[i].length; j++) {
+                for (var k = 0; k < _itemLayer.length; k++) {
+                    if (_itemLayer[k].myRow == i && _itemLayer[k].myId == j) {
+
+                        _itemLayer[k].children[1].text = arrItems[_item[i][j]].name;
+                        _itemLayer[k].myItemId = _item[i][j];
+
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+      /*statusOpen*/
+        function _statusOpen() {
+                gameStage.visible = false;
+                _updateStatusItem();
+                statusLayer.visible = true;
+            }
+            /*statusClose*/
+        function _statusClose() {
+            gameStage.visible = true;
+            statusLayer.visible = false;
+        }
+
+
+
+    return {
+        createUiBtn: _createUiBtn,
+        createAp: _createDisplayAp,
+        updateAp: _updateAp,
+        createStatus: _createStatus,
+        updateStatusItem: _updateStatusItem
+    }
+})
