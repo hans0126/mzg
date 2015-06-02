@@ -5,6 +5,7 @@ var arrItems = new Array(); //武器資訊
 var arrSkills = new Array(); //人物技能
 var arrSkillType = new Array(); //技能範圍區間
 var arrLanguage = new Array(); //說話
+var levelRange = new Array(); //等級區間
 
 
 
@@ -241,10 +242,17 @@ arrDoors = [{
 
 arrRoleType = [{
     typeName: "Zombie",
-    color: 0x33FFCC
+    color: 0x33FFCC,
+    skillTree: []
 }, {
     typeName: "survivor",
-    color: 0xFFFF00
+    color: 0xFFFF00,
+    skillTree: [
+        [0],
+        [10],
+        [20, 30],
+        [40, 50, 70]
+    ]
 }];
 
 arrItems[0] = { //空物件
@@ -354,9 +362,9 @@ arrSkillType["rangeTarget"] = [40, 49];
 arrSkillType["rangeSuccessRange"] = [50, 59];
 arrSkillType["rangeDistance"] = [60, 69];
 
+/*level Range*/
+levelRange = [6,18,38];
 /**/
-
-
 
 
 arrLanguage["49"] = {

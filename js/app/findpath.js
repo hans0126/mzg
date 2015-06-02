@@ -77,7 +77,7 @@ define(function() {
             _doorMemory.push(_thisRoomDoors);
 
 
-            findPath(_targetLocalId, _getDoorTogo, _currentLocalId, _arrPathRecord, _arrStamp, _doorMemory, _successPath);
+            _getPath(_targetLocalId, _getDoorTogo, _currentLocalId, _arrPathRecord, _arrStamp, _doorMemory, _successPath);
         } else {
             _doorMemory.push(new Array());
 

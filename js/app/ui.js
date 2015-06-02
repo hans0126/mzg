@@ -1,4 +1,4 @@
-define(['enemy'],function(enemy) {
+define(['enemy'], function(enemy) {
 
     function _createUiBtn() {
 
@@ -36,7 +36,7 @@ define(['enemy'],function(enemy) {
             }
         }
 
-      
+
 
     }
 
@@ -86,6 +86,103 @@ define(['enemy'],function(enemy) {
         }).to(_obj, 0.2, {
             alpha: 1
         });
+
+
+
+    }
+
+
+    function _createScore() {
+        var _graphic = new PIXI.Graphics();
+        _graphic.beginFill(0x99FFFF, 1);
+        _graphic.drawRect(10, 10, displayWidth - 20, 15);
+
+        mainUiLayer.addChild(_graphic);
+
+        var _graphicSpace = _graphic.width / 4;
+
+        for (var i = 0; i < 5; i++) {
+
+            var _textObj = new PIXI.Text(i + '0', {
+                font: '15px Arial',
+                fill: 0x000000
+            });
+
+            _textObj.x = _graphic.x + (i * _graphicSpace);
+            _textObj.y = 25;
+            mainUiLayer.addChild(_textObj);
+        }
+
+        var _arrow = new PIXI.Graphics();
+
+        _arrow.beginFill(0xFF0000);
+
+        // draw a triangle using lines
+        _arrow.moveTo(0, 0);
+
+        _arrow.lineTo(-7, -10);
+        _arrow.lineTo(7, -10);
+
+        _arrow.x = 10;
+        _arrow.y = 20;
+        // end the fill
+        _arrow.endFill();
+        arrCommonObj['arrow'] = _arrow;
+        mainUiLayer.addChild(_arrow);
+    }
+
+
+    function _updateScore(num) {
+        var _scoreWidth = (displayWidth - 20) / 40;
+
+        var tween = new TweenMax(arrCommonObj['arrow'], 0.5, {
+            x: (_scoreWidth * num) + 10,
+            ease: Elastic.easeOut
+        });
+
+
+
+        if (score > currentRole.skillHistory) {
+            var _nextIndex = levelRange.indexOf(currentRole.skillHistory) + 1;
+            var _skillId;
+            if (_nextIndex < 2) {
+                _skillId = currentRole.skillTree[_nextIndex][0];
+                currentRole.skill.push(_skillId);
+                arrCommonObj['msgbox'].children = [];
+
+                var _textObj = new PIXI.Text(arrSkills[_skillId].name+"\n test", {
+                    fill: 0x000000,
+                    font: '24px Arial'
+                });
+
+                arrCommonObj['msgbox'].addChild(_textObj);
+
+
+            } else {
+
+            }
+
+            currentRole.skillHistory = _nextIndex;
+            arrCommonObj['msgbox'].visible = true;
+            console.log(currentRole.skill);
+        }
+    }
+
+    /*create message Box*/
+
+    function _createMsgBox() {
+        var _graphic = new PIXI.Graphics();
+        _graphic.beginFill(0x99FFFF, 1);
+        _graphic.lineStyle(2, 0x660000);
+        _graphic.drawRect(0, 0, displayWidth / 2, displayHeight / 2);
+
+        arrCommonObj['msgbox'] = _graphic;
+        mainUiLayer.addChild(_graphic);
+
+        _graphic.x = _graphic.width / 2;
+        _graphic.y = _graphic.height / 2;
+
+        _graphic.visible = false;
     }
 
     /*create status interface*/
@@ -286,25 +383,56 @@ define(['enemy'],function(enemy) {
         }
     }
 
-      /*statusOpen*/
-        function _statusOpen() {
-                gameStage.visible = false;
-                _updateStatusItem();
-                statusLayer.visible = true;
-            }
-            /*statusClose*/
-        function _statusClose() {
-            gameStage.visible = true;
-            statusLayer.visible = false;
+    /*statusOpen*/
+    function _statusOpen() {
+            gameStage.visible = false;
+            _updateStatusItem();
+            statusLayer.visible = true;
+            mainUiLayer.visible = false;
+
         }
+        /*statusClose*/
+    function _statusClose() {
+        gameStage.visible = true;
+        statusLayer.visible = false;
+        mainUiLayer.visible = true;
+    }
 
 
+    /*關閉選項*/
+    function _closeAttackBtn() {
+        for (var i = 0; i < actionUiLayer.children.length; i++) {
+            if (actionUiLayer.children[i].btnClass == "attackBtn") {
+
+                actionUiLayer.children[i].interactive = false;
+                var tween = new TweenMax(actionUiLayer.children[i], 0.3, {
+                    x: currentRole.x,
+                    y: currentRole.y,
+                    alpha: 0,
+                    onComplete: function() {
+                        var _target = this.target;
+
+                        for (var j = 0; j < actionUiLayer.children.length; j++) {
+                            if (actionUiLayer.children[j].myId == _target.myId) {
+                                actionUiLayer.children.splice(j, 1);
+                            }
+                        }
+
+                    }
+                });
+            }
+        }
+    }
 
     return {
         createUiBtn: _createUiBtn,
         createAp: _createDisplayAp,
         updateAp: _updateAp,
         createStatus: _createStatus,
-        updateStatusItem: _updateStatusItem
+        updateStatusItem: _updateStatusItem,
+        closeAttackBtn: _closeAttackBtn,
+        createScore: _createScore,
+        updateScore: _updateScore,
+        createMsgBox: _createMsgBox
     }
 })

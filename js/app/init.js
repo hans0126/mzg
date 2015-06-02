@@ -1,7 +1,6 @@
-define(['ui', 'map', 'role','findpath',"help",'datas'], function(ui, map, role,findpath) {
+define(['ui', 'map', 'role', 'findpath', 'help', 'datas', 'meter'], function(ui, map, role, findpath) {
 
-	
-    function init() {       
+    function init() {
 
         PIXI.Container.prototype.updateLayersOrder = function() {
             this.children.sort(function(a, b) {
@@ -11,10 +10,24 @@ define(['ui', 'map', 'role','findpath',"help",'datas'], function(ui, map, role,f
             });
         }
 
+        stats = new Stats();
+        stats.setMode(0); // 0: fps, 1: ms
 
-     /*   tempLanguageCombination = ''; //語言組合
+        // align top-left
+        stats.domElement.style.position = 'absolute';
+        stats.domElement.style.right = '0px';
+        stats.domElement.style.top = '0px';
 
-        window.addEventListener('keydown', languageCombination);*/
+        document.body.appendChild(stats.domElement);
+
+
+        /*   tempLanguageCombination = ''; //語言組合
+
+           window.addEventListener('keydown', languageCombination);*/
+
+        //常用物件 
+        arrCommonObj = [];
+        score = 0;
 
         arrTimer = new Array(); //時間倒數物件  
 
@@ -39,7 +52,7 @@ define(['ui', 'map', 'role','findpath',"help",'datas'], function(ui, map, role,f
             backgroundColor: 0x1099bb
         });
 
-         document.getElementById("gameView").appendChild(renderer.view);
+        document.getElementById("gameView").appendChild(renderer.view);
         // create the root of the scene graph
 
         //增加容器
@@ -90,6 +103,8 @@ define(['ui', 'map', 'role','findpath',"help",'datas'], function(ui, map, role,f
         ui.createUiBtn();
         ui.createAp();
         ui.createStatus();
+        ui.createScore();
+        ui.createMsgBox();
         /*create map*/
         map.createMap();
 
@@ -117,12 +132,18 @@ define(['ui', 'map', 'role','findpath',"help",'datas'], function(ui, map, role,f
             room_id: "f"
         })[0];
         var newR = cR.create();
+        newR.skillTree = arrRoleType[1].skillTree;
         playerLayer.addChild(newR);
 
         newR.interactive = true;
         newR.buttonMode = true;
 
         newR.skill = [];
+        newR.skillHistory = levelRange[0];
+        newR.skill.push(newR.skillTree[0][0]);
+
+        console.log(newR.skill);
+
         newR.equip = [
             [1, 2],
             [1, 3, 0]
@@ -161,7 +182,7 @@ define(['ui', 'map', 'role','findpath',"help",'datas'], function(ui, map, role,f
             enemyMove();
         })
 
-        
+
 
         //enemyMove();
         if (dragMap) {
@@ -234,8 +255,13 @@ define(['ui', 'map', 'role','findpath',"help",'datas'], function(ui, map, role,f
     }
 
     function animate() {
-        requestAnimFrame(animate);
+
+        stats.begin();
+
         renderer.render(stage);
+
+        stats.end();
+        requestAnimFrame(animate);
 
         /*  tilingSprite.tilePosition.x += 1;
           tilingSprite.tilePosition.y += 1;*/

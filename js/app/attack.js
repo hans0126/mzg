@@ -1,9 +1,12 @@
-define(['findpath'],function(findpath) {
-    /**/
+define(['findpath','ui'],function(findpath,ui) {    /**/
+
+
+
     function _attack() {
-        closeAttackBtn();
+       
+        ui.closeAttackBtn();
         currentRole.actionPoint--;
-        updateAp(currentRole.actionPoint);
+        ui.updateAp(currentRole.actionPoint);
         var _range = false; //判斷是否為遠程武器 //跟攻擊模式有關    
         //current local
         var _currentLocal = currentRole.local; //腳色目前所在位置
@@ -124,6 +127,7 @@ define(['findpath'],function(findpath) {
 
                 if (_attackRoll() >= _successRange) {
                     _arrAttackResult.push(true);
+                    score++;
                 } else {
                     _arrAttackResult.push(false);
                 }
@@ -156,11 +160,6 @@ define(['findpath'],function(findpath) {
                         _success = true;
                         _textObj.text = "KILL";
                         _arrRemoveTemp.push(_arrTemp[i]);
-
-
-
-
-
 
                     } else {
                         console.log(_weaponObj.name + " 對 " + _arrTemp[i].objectName + " 攻擊失誤");
@@ -196,7 +195,7 @@ define(['findpath'],function(findpath) {
                             // 判斷所有動畫都撥完畢之後再刪除物件
                             var _allComplete = false;
                             for (var i = 0; i < _obj2.length; i++) {
-
+                              
                                 if (_obj2[i].progress() != 1) {
                                     _allComplete = false;
                                     break;
@@ -205,9 +204,13 @@ define(['findpath'],function(findpath) {
                                 }
                             }
 
-                            //console.log(_obj2);
+
+                          
 
                             if (_allComplete) {
+
+                                  ui.updateScore(score);
+                                
                                 for (var i = 0; i < _arrRemoveTemp.length; i++) {
                                     _arrRemoveTemp[i].clear();
                                     for (var j = 0; j < enemyLayer.children.length; j++) {
@@ -217,8 +220,10 @@ define(['findpath'],function(findpath) {
                                         }
                                     }
                                 }
-                            }
 
+                             
+                              
+                            }
 
                         },
                         onCompleteParams: ["{self}", _anime]
@@ -238,20 +243,7 @@ define(['findpath'],function(findpath) {
 
             //清除陣列
             _attackEnd(_range);
-            /*
-                    var tween = new TweenMax(this, 0.5, {
-                        alpha: 0,
-                        ease: RoughEase.ease.config({
-                            points: 10,
-                            randomize: false
-                        }),
-                        onComplete: function() {
-                         
-
-                        }
-                    });
-
-            */
+       
 
             for (var i = 0; i < actionUiLayer.children.length; i++) {
                 if (actionUiLayer.children[i].btnClass == "attackArea") {
@@ -279,7 +271,7 @@ define(['findpath'],function(findpath) {
             }
 
             function _tweenComplete(obj) {
-                console.log(obj);
+              
                 var _target = obj.target;
 
                 for (var j = 0; j < actionUiLayer.children.length; j++) {
@@ -287,6 +279,8 @@ define(['findpath'],function(findpath) {
                         actionUiLayer.children.splice(j, 1);
                     }
                 }
+
+              
             }
 
 
@@ -332,7 +326,7 @@ define(['findpath'],function(findpath) {
                 console.log(_weaponObj.name + " 對 " + this.objectName + " 攻擊成功");
                 this.clear();
                 _textObj.text = "KILL";
-
+                score++;
                 for (var i = 0; i < enemyLayer.children.length; i++) {
                     if (enemyLayer.children[i].objectName == this.objectName) {
                         enemyLayer.children.splice(i, 1);
@@ -366,6 +360,7 @@ define(['findpath'],function(findpath) {
                     for (var i = 0; i < actionUiLayer.children.length; i++) {
                         if (actionUiLayer.children[i].myId == _obj.target.myId) {
                             actionUiLayer.children.splice(i, 1);
+                             ui.updateScore(score);
                         }
                     }
 
@@ -420,7 +415,7 @@ define(['findpath'],function(findpath) {
             for (var i = arrSkillType[_skillType][0]; i < arrSkillType[_skillType][1] + 1; i++) {
 
                 if (currentRole.skill.indexOf(parseInt(i)) > -1) {
-                    returnValue += arrSkills[i].value;
+                    _returnValue += arrSkills[i].value;
                     console.log(arrSkills[i] + "/" + i);
                 }
 

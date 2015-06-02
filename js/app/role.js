@@ -1,7 +1,5 @@
-define(['attack'],function(attack) {
+define(['attack','ui','findpath'], function(attack,ui,findpath) {
 
-	
-	
     function _createRole() {
         this._roleLocal; //Object
         this._roleTypeObj;
@@ -50,7 +48,7 @@ define(['attack'],function(attack) {
         _currentRoomDoorActive(this.local.room_id);
         currentRole = this;
 
-        updateAp(currentRole.actionPoint);
+        ui.updateAp(currentRole.actionPoint);
 
         for (var i = 0; i < currentRole.equip[0].length; i++) {
             if (arrItems[currentRole.equip[0][i]].category == "weapon") {
@@ -136,41 +134,18 @@ define(['attack'],function(attack) {
 
 
         function _closeArrackBtn() {
-            _closeAttackBtn();
+            ui.closeAttackBtn();
             currentRole.interactive = true;
         }
 
     }
 
-    /*關閉選項*/
-    function _closeAttackBtn() {
-        for (var i = 0; i < actionUiLayer.children.length; i++) {
-            if (actionUiLayer.children[i].btnClass == "attackBtn") {
-
-                actionUiLayer.children[i].interactive = false;
-                var tween = new TweenMax(actionUiLayer.children[i], 0.3, {
-                    x: currentRole.x,
-                    y: currentRole.y,
-                    alpha: 0,
-                    onComplete: function() {
-                        var _target = this.target;
-
-                        for (var j = 0; j < actionUiLayer.children.length; j++) {
-                            if (actionUiLayer.children[j].myId == _target.myId) {
-                                actionUiLayer.children.splice(j, 1);
-                            }
-                        }
-
-                    }
-                });
-            }
-        }
-    }
+   
 
     /*通過房間*/
     function _passageDoor(event) {
         //currentRole
-        _closeAttackBtn();
+        ui.closeAttackBtn();
         var _targetRoomId = false;
         for (var i = 0; i < this.passage.length; i++) {
             if (this.passage[i] != currentRole.local.room_id) {
@@ -193,7 +168,7 @@ define(['attack'],function(attack) {
                 x: _x,
                 y: _y,
                 onUpdate: function() {
-              
+
                     TweenLite.to(gameStage, 0.5, {
                         x: (displayWidth / 2) - currentRole.x,
                         y: (displayHeight / 2) - currentRole.y
@@ -216,7 +191,7 @@ define(['attack'],function(attack) {
             */
 
             /**/
-            var _currentPanorama = getPanorama(currentRole.local.room_id, 0, 5);
+            var _currentPanorama = findpath.getPanorama(currentRole.local.room_id, 0, 5);
 
             currentRole.panorama = _currentPanorama;
 
@@ -237,7 +212,7 @@ define(['attack'],function(attack) {
             }
 
             currentRole.actionPoint--;
-            updateAp(currentRole.actionPoint);
+            ui.updateAp(currentRole.actionPoint);
             if (currentRole.actionPoint > 0) {
                 currentRole.interactive = true;
                 _currentRoomDoorActive(_targetRoomId);
@@ -271,7 +246,7 @@ define(['attack'],function(attack) {
     return {
         createRole: _createRole,
         roleClick: _roleClick,
-        passageDoor:_passageDoor
+        passageDoor: _passageDoor
     }
 
 })

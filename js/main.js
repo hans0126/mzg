@@ -16,13 +16,14 @@ requirejs.config({
         role:"app/role",
         attack:"app/attack",
         findpath:"app/findpath",
-        enemy:"app/enemy"
+        enemy:"app/enemy",
+        meter:"lib/stats.js-master/build/stats.min"
     }
 })
 
 
-requirejs(['init', 'jquery', 'pixi', 'TweenMax', 'EasePack',"help"], function(init) {
-
+requirejs(['init', 'jquery', 'pixi', 'TweenMax', 'EasePack'], function(init) {
+   
     init.init();
     /*
     var t2 = new countdown();
