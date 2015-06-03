@@ -2,13 +2,7 @@ define(['ui', 'map', 'role', 'findpath', 'help', 'datas', 'meter'], function(ui,
 
     function init() {
 
-        PIXI.Container.prototype.updateLayersOrder = function() {
-            this.children.sort(function(a, b) {
-                a.zIndex = a.zIndex || 0;
-                b.zIndex = b.zIndex || 0;
-                return a.zIndex - b.zIndex
-            });
-        }
+      
 
         stats = new Stats();
         stats.setMode(0); // 0: fps, 1: ms
@@ -49,7 +43,7 @@ define(['ui', 'map', 'role', 'findpath', 'help', 'datas', 'meter'], function(ui,
 
 
         renderer = PIXI.autoDetectRenderer(displayWidth, displayHeight, {
-            backgroundColor: 0x1099bb
+            backgroundColor: 0x000000
         });
 
         document.getElementById("gameView").appendChild(renderer.view);
@@ -60,7 +54,7 @@ define(['ui', 'map', 'role', 'findpath', 'help', 'datas', 'meter'], function(ui,
         mapTexture = PIXI.Texture.fromImage('images/tilemap.png');
         cameraFollow = false;
 
-        dragMap = false;
+        dragMap = true;
         stage = new PIXI.Container();
         /*game stage*/
         gameStage = new PIXI.Container(); //主場景
@@ -138,11 +132,11 @@ define(['ui', 'map', 'role', 'findpath', 'help', 'datas', 'meter'], function(ui,
         newR.interactive = true;
         newR.buttonMode = true;
 
-        newR.skill = [];
-        newR.skillHistory = levelRange[0];
+        newR.skill = [];     
+        newR.level = 1;
         newR.skill.push(newR.skillTree[0][0]);
 
-        console.log(newR.skill);
+        
 
         newR.equip = [
             [1, 2],
@@ -176,7 +170,7 @@ define(['ui', 'map', 'role', 'findpath', 'help', 'datas', 'meter'], function(ui,
             faction: "player"
         })[0];
 
-        moveToTarget(getInitCurrentPlayer.x, getInitCurrentPlayer.y);
+       moveToTarget(getInitCurrentPlayer.x, getInitCurrentPlayer.y);
 
         $('#e_move').click(function() {
             enemyMove();
@@ -201,9 +195,9 @@ define(['ui', 'map', 'role', 'findpath', 'help', 'datas', 'meter'], function(ui,
 
         /*拖拉地圖*/
 
-        //gameStage.on('mousewheel',onWheel);
+      /* gameStage.on('mousewheel',onWheel);
 
-        // document.getElementById('gameView').addEventListener("mousewheel", onWheel, false);
+        document.getElementById('gameView').addEventListener("mousewheel", onWheel, false);*/
 
         // gridLayer.anchor.set(0.5);// graphics.pivot , sprite.anchor    
 

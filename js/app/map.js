@@ -1,21 +1,36 @@
-define(['role'],function(role) {
+define(['role'], function(role) {
 
-    function _createMap() {      
+    function _createMap() {
         /*
             產生地圖以及連接路徑
         */
+
         for (var y = 0; y < arrMap.length; y++) {
             for (var x = 0; x < arrMap[y].length; x++) {
                 totalRoom++;
                 if (arrMap[y][x].visible == true) {
-                    //   _graphics.drawRect(x * blockWidth, y * blockHeight, blockWidth, blockHeight);
-                    var _tilingSprite = new PIXI.extras.TilingSprite(mapTexture, blockWidth, blockWidth);
-                    _tilingSprite.x = x * blockWidth;
-                    _tilingSprite.y = y * blockWidth;
-                    _tilingSprite.tilePosition.x = (blockWidth * arrMap[y][x].tx) * -1;
-                    _tilingSprite.tilePosition.y = (blockWidth * arrMap[y][x].ty) * -1;
-                    _tilingSprite.zIndex = 20;
-                    mapLayer.addChild(_tilingSprite);
+
+                    var _mapSpace = new PIXI.Container();
+                    _mapSpace.x = x * blockWidth;
+                    _mapSpace.y = y * blockWidth;
+                    _mapSpace.zIndex = 20;
+
+                    for (var i = 0; i < 4; i++) {
+                        for (var j = 0; j < 4; j++) {
+                            var _mTile = PIXI.Sprite.fromFrame("map" + arrMapType[arrMap[y][x].maptype][i][j]);
+                           
+                            _mTile.x = (j * 50);
+                            _mTile.y = (i * 50);
+
+                            console.log(_mTile.x + "/" + _mTile.x + _mTile.width);
+
+                            _mapSpace.addChild(_mTile);
+                        }
+                    }
+
+
+                    mapLayer.addChild(_mapSpace);
+                    console.log(_mapSpace.width);
                     arrMap[y][x].localX = x;
                     arrMap[y][x].localY = y;
                     arrMap[y][x].noise = 0;
@@ -67,7 +82,7 @@ define(['role'],function(role) {
 
 
     return {
-    	createMap : _createMap
+        createMap: _createMap
     }
 
 

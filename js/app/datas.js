@@ -6,6 +6,7 @@ var arrSkills = new Array(); //人物技能
 var arrSkillType = new Array(); //技能範圍區間
 var arrLanguage = new Array(); //說話
 var levelRange = new Array(); //等級區間
+var arrMapType = new Array();
 
 
 
@@ -15,102 +16,208 @@ arrMap = [
         room_id: "a",
         tx: 0,
         ty: 0,
-        group: "1"
+        group: "1",
+        maptype: 0,
     }, {
         visible: false,
         room_id: "b",
         tx: 0,
         ty: 0,
-        group: null
+        group: null,
+        maptype: 0,
     }, {
         visible: true,
         room_id: "c",
         tx: 2,
         ty: 2,
-        group: "2"
+        group: "2",
+        maptype: 6,
     }, {
         visible: true,
         room_id: "d",
         tx: 3,
         ty: 2,
-        group: "2"
+        group: "2",
+        maptype: 7,
     }],
     [{
         visible: true,
         room_id: "e",
         tx: 2,
         ty: 1,
-        group: "3"
+        group: "3",
+        maptype: 1,
     }, {
         visible: true,
         room_id: "f",
         tx: 3,
         ty: 1,
-        group: "3"
+        group: "3",
+        maptype: 2,
     }, {
         visible: true,
         room_id: "g",
         tx: 0,
         ty: 2,
-        group: "2"
+        group: "2",
+        maptype: 9,
     }, {
         visible: true,
         room_id: "h",
         tx: 1,
         ty: 2,
-        group: "2"
+        group: "2",
+        maptype: 8,
     }],
     [{
         visible: false,
         room_id: "i",
         tx: null,
         ty: 0,
-        group: null
+        group: null,
+        maptype: 0,
     }, {
         visible: true,
         room_id: "j",
         tx: 0,
         ty: 0,
-        group: "4"
+        group: "4",
+        maptype: 0,
     }, {
         visible: false,
         room_id: "k",
         tx: null,
         ty: 0,
-        group: null
+        group: null,
+        maptype: 0,
     }, {
         visible: true,
         room_id: "l",
         tx: 1,
         ty: 1,
-        group: "5"
+        group: "5",
+        maptype: 4,
     }],
     [{
         visible: true,
         room_id: "m",
         tx: 2,
         ty: 1,
-        group: "6"
+        group: "6",
+        maptype: 1,
     }, {
         visible: true,
         room_id: "o",
         tx: 2,
         ty: 0,
-        group: "6"
+        group: "6",
+        maptype: 3,
     }, {
         visible: true,
         room_id: "p",
         tx: 3,
         ty: 1,
-        group: "6"
+        group: "6",
+        maptype: 2,
     }, {
         visible: true,
         room_id: "q",
         tx: 0,
         ty: 1,
-        group: "5"
+        group: "5",
+        maptype: 5,
     }]
 ];
+
+//口
+arrMapType[0] = [
+    [0, 1, 1, 2],
+    [3, 4, 4, 5],
+    [3, 4, 4, 5],
+    [6, 7, 7, 8]
+]
+
+//|=
+arrMapType[1] = [
+    [0, 1, 1, 1],
+    [3, 4, 4, 4],
+    [3, 4, 4, 4],
+    [6, 7, 7, 7]
+];
+
+//=|
+arrMapType[2] = [
+    [1, 1, 1, 2],
+    [4, 4, 4, 5],
+    [4, 4, 4, 5],
+    [7, 7, 7, 8]
+];
+
+//=
+arrMapType[3] = [
+    [1, 1, 1, 1],
+    [4, 4, 4, 4],
+    [4, 4, 4, 4],
+    [7, 7, 7, 7]
+];
+
+// ㄇ
+arrMapType[4] = [
+    [0, 1, 1, 2],
+    [3, 4, 4, 5],
+    [3, 4, 4, 5],
+    [3, 4, 4, 5]
+];
+
+// 反ㄇ
+arrMapType[5] = [
+    [3, 4, 4, 5],
+    [3, 4, 4, 5],
+    [3, 4, 4, 5],
+    [6, 7, 7, 8]
+];
+
+//|-
+arrMapType[6] = [
+    [0, 1, 1, 1],
+    [3, 4, 4, 4],
+    [3, 4, 4, 4],
+    [3, 4, 4, 4]
+];
+
+//-|
+arrMapType[7] = [
+    [1, 1, 1, 2],
+    [4, 4, 4, 5],
+    [4, 4, 4, 5],
+    [4, 4, 4, 5]
+];
+
+//_|
+arrMapType[8] = [
+    [4, 4, 4, 5],
+    [4, 4, 4, 5],
+    [4, 4, 4, 5],
+    [7, 7, 7, 8]
+];
+
+//|_
+arrMapType[9] = [
+    [3, 4, 4, 4],
+    [3, 4, 4, 4],
+    [3, 4, 4, 4],
+    [6, 7, 7, 7]
+];
+
+
+
+
+
+
+
+
+
+
 
 arrDoors = [{
         root_room: "a",
@@ -363,7 +470,7 @@ arrSkillType["rangeSuccessRange"] = [50, 59];
 arrSkillType["rangeDistance"] = [60, 69];
 
 /*level Range*/
-levelRange = [6,18,38];
+levelRange = [0, 6, 18, 38];
 /**/
 
 

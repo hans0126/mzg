@@ -35,9 +35,6 @@ define(['enemy'], function(enemy) {
                 _tempHeight = _textObj.height + 10;
             }
         }
-
-
-
     }
 
 
@@ -86,8 +83,6 @@ define(['enemy'], function(enemy) {
         }).to(_obj, 0.2, {
             alpha: 1
         });
-
-
 
     }
 
@@ -140,31 +135,85 @@ define(['enemy'], function(enemy) {
             ease: Elastic.easeOut
         });
 
+        /*判斷有沒有升級*/
+        var _targetLevel;
+        var _levelRange;
+        var _currentLevel;
 
 
-        if (score > currentRole.skillHistory) {
-            var _nextIndex = levelRange.indexOf(currentRole.skillHistory) + 1;
-            var _skillId;
-            if (_nextIndex < 2) {
-                _skillId = currentRole.skillTree[_nextIndex][0];
-                currentRole.skill.push(_skillId);
-                arrCommonObj['msgbox'].children = [];
+        for (var i = 0; i < levelRange.length; i++) {
+            var _levelUp = false;
+            if (i != levelRange.length - 1) {
+                if (score >= levelRange[i] && score < levelRange[i + 1] && currentRole.level != i + 1) {
+                    _levelUp = true;
+                }
+            } else {
+                if (score >= levelRange[i] && currentRole.level != i + 1) {
+                    _levelUp = true;
+                }
+            }
 
-                var _textObj = new PIXI.Text(arrSkills[_skillId].name+"\n test", {
+            if (_levelUp) {
+                _targetLevel = i + 1;
+                break;
+            }
+        }
+
+        if (_levelUp) {
+            var _messageSequence = [];
+            //深及幅度、有可能一次跳兩級
+            _currentLevel = currentRole.level;
+            _levelRange = _targetLevel - currentRole.level;
+
+            for (var i = 0; i < _levelRange; i++) {
+                _messageSequence.push(currentRole.skillTree[_currentLevel + i]);
+            }
+
+            currentRole.level = _targetLevel;
+
+            _renderMsgBox(_messageSequence);
+
+        }
+
+        function _renderMsgBox(_sequence, idx) {
+            if (typeof(idx) == "undefined") {
+                idx = 0;
+            }
+
+            arrCommonObj['msgbox'].children = [];
+
+            for (var i = 0; i < _messageSequence[idx].length; i++) {
+                _skillId = _messageSequence[idx][i];
+
+                var _textObj = new PIXI.Text(arrSkills[_skillId].name, {
                     fill: 0x000000,
                     font: '24px Arial'
                 });
 
+                _textObj.y = _textObj.height * i + 10 * i;
+
+                _textObj.interactive = true;
+                _textObj.buttonMode = true;
+
+                _textObj.skillId = _skillId;
+
+                _textObj.on('mousedown', _addSkillToRole)
+
                 arrCommonObj['msgbox'].addChild(_textObj);
-
-
-            } else {
 
             }
 
-            currentRole.skillHistory = _nextIndex;
             arrCommonObj['msgbox'].visible = true;
-            console.log(currentRole.skill);
+
+            function _addSkillToRole() {
+                console.log(this.skillId);
+                currentRole.skill.push(this.skillId);
+                arrCommonObj['msgbox'].visible = false;
+                idx++;
+                if (idx < _sequence.length) {
+                    _renderMsgBox(_sequence, idx);
+                }
+            }
         }
     }
 
@@ -190,6 +239,7 @@ define(['enemy'], function(enemy) {
 
 
         _createItemStatusLayer();
+        _createSkillStatusLayer();
 
         var _closeBtn = new PIXI.Graphics();
         _closeBtn.beginFill(0x990000, 1);
@@ -215,11 +265,24 @@ define(['enemy'], function(enemy) {
         _closeBtn.x = 15;
         _closeBtn.y = 15;
 
+
+        function _createSkillStatusLayer() {
+            var _skillLayer = new PIXI.Container();
+            _skillLayer.y = 30;
+            arrCommonObj['skillLayer'] = _skillLayer;
+            statusLayer.addChild(_skillLayer);
+        }
+
+
+
+
+
         function _createItemStatusLayer() {
             var _cardBaseX = 0;
             var _row2BaseX;
             var _row2BaseY;
             var _itemLayer = new PIXI.Container();
+
 
             for (i = 0; i < 5; i++) {
                 var _itemCaseParent = new PIXI.Container();
@@ -383,10 +446,26 @@ define(['enemy'], function(enemy) {
         }
     }
 
+    function _updateSkill() {
+        for (var i = 0; i < currentRole.skill.length; i++) {
+
+            var _textObj = new PIXI.Text(arrSkills[currentRole.skill[i]].name, {
+                font: '20px Arial',
+                fill: 0x00ff00
+            });
+
+            _textObj.y = i * _textObj.height + 10 * i;
+
+            arrCommonObj['skillLayer'].addChild(_textObj);
+
+        }
+    }
+
     /*statusOpen*/
     function _statusOpen() {
             gameStage.visible = false;
             _updateStatusItem();
+            _updateSkill();
             statusLayer.visible = true;
             mainUiLayer.visible = false;
 

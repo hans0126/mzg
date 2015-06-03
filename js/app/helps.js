@@ -123,7 +123,9 @@ function moveToTarget(_tx, _ty) {
 
     var tween = new TweenMax(gameStage, 0.5, {
         x: _x,
-        y: _y
+        y: _y,
+        roundProps:"x,y" //最後值為整數地圖才不會破格
+        
     });
 }
 

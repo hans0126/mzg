@@ -171,7 +171,8 @@ define(['attack','ui','findpath'], function(attack,ui,findpath) {
 
                     TweenLite.to(gameStage, 0.5, {
                         x: (displayWidth / 2) - currentRole.x,
-                        y: (displayHeight / 2) - currentRole.y
+                        y: (displayHeight / 2) - currentRole.y,
+                         roundProps:"x,y"
                     });
                 }
             });
