@@ -34,14 +34,14 @@ requirejs(['init', 'jquery', 'pixi', 'TweenMax', 'EasePack'], function(init) {
 
     loader = new PIXI.loaders.Loader();
     loader.add("map", "images/map.json");
+    loader.add("police_bg","images/police_bg.jpg");
+    loader.add("skill_bg","images/skill_bg.png");
     loader.on("complete", complete);
     loader.load();
 
 
-    function complete() {
-
-       
-
+    function complete(loader,re) {
+        resource = re; 
         init.init();
     }
 

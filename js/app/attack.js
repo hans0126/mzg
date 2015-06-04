@@ -77,7 +77,7 @@ define(['findpath','ui'],function(findpath,ui) {    /**/
 
         function _createAttackArea(_roomObj) {
             var _tg = new PIXI.Graphics();
-            _tg.beginFill(0xFFFFFF);
+            _tg.beginFill(0x3333FF);
             _tg.alpha = 0.7;
             _tg.interactive = true;
             _tg.buttonMode = true;
@@ -202,10 +202,7 @@ define(['findpath','ui'],function(findpath,ui) {    /**/
                                 } else {
                                     _allComplete = true;
                                 }
-                            }
-
-
-                          
+                            }                          
 
                             if (_allComplete) {
 
@@ -220,18 +217,12 @@ define(['findpath','ui'],function(findpath,ui) {    /**/
                                         }
                                     }
                                 }
-
-                             
-                              
                             }
-
                         },
                         onCompleteParams: ["{self}", _anime]
                     });
 
                     _anime.push(_ani);
-
-
                     _attackCount++;
 
                     if (_success) {
@@ -282,10 +273,6 @@ define(['findpath','ui'],function(findpath,ui) {    /**/
 
               
             }
-
-
-
-
         }
 
         /*單體攻擊目標露出*/
@@ -334,8 +321,6 @@ define(['findpath','ui'],function(findpath,ui) {    /**/
                     }
                 }
 
-
-
                 for (var i = 0; i < _activeRole.length; i++) {
                     if (_activeRole[i].objectName == this.objectName) {
                         _activeRole.splice(i, 1);
@@ -363,7 +348,6 @@ define(['findpath','ui'],function(findpath,ui) {    /**/
                              ui.updateScore(score);
                         }
                     }
-
                 },
                 onCompleteParams: ["{self}"]
             })

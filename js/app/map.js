@@ -18,19 +18,16 @@ define(['role'], function(role) {
                     for (var i = 0; i < 4; i++) {
                         for (var j = 0; j < 4; j++) {
                             var _mTile = PIXI.Sprite.fromFrame("map" + arrMapType[arrMap[y][x].maptype][i][j]);
-                           
+
                             _mTile.x = (j * 50);
                             _mTile.y = (i * 50);
-
-                            console.log(_mTile.x + "/" + _mTile.x + _mTile.width);
-
                             _mapSpace.addChild(_mTile);
                         }
                     }
 
 
                     mapLayer.addChild(_mapSpace);
-                    console.log(_mapSpace.width);
+
                     arrMap[y][x].localX = x;
                     arrMap[y][x].localY = y;
                     arrMap[y][x].noise = 0;
@@ -38,20 +35,18 @@ define(['role'], function(role) {
 
                     //房間文字
                     var _textObj = new PIXI.Text(arrMap[y][x].room_id);
-                    _textObj.x = x * blockWidth + 5;
-                    _textObj.y = y * blockHeight + 5;
-                    mapLayer.addChild(_textObj);
+
+                    _textObj.x = blockWidth / 2 - _textObj.width / 2;
+                    _textObj.y = blockHeight / 2 - _textObj.height / 2;
+                    _textObj.alpha = 0.5;
+                    _mapSpace.addChild(_textObj);
 
                     //門
                     for (var i = 0; i < arrDoors.length; i++) {
                         if (arrDoors[i].root_room == arrMap[y][x].room_id) {
                             var _doorGraphics = new PIXI.Graphics();
-                            if (arrDoors[i].open) {
-                                _doorGraphics.beginFill(0x666666, 1);
-                            } else {
-                                _doorGraphics.beginFill(0x99FFFF, 1);
-                            }
 
+                            _doorGraphics.beginFill(0x666666, 1);
                             _doorGraphics.drawRect((x * blockWidth) + arrDoors[i].x, (y * blockWidth) + arrDoors[i].y, arrDoors[i].width, arrDoors[i].height);
                             _doorGraphics.lineStyle(1, 0x0000FF, 1);
 
@@ -78,7 +73,26 @@ define(['role'], function(role) {
                 }
             }
         }
+        //create Item Box
+        for (var i = 0; i < 10; i++) {
+            var _room = getRandomRoom(totalRoom);
+            
+            var _itemBox = new PIXI.Graphics();
+            _itemBox.beginFill(0x000066, 1);
+            _itemBox.drawRect(0, 0, 30, 30);
+            _itemBox.x = randomDeploy(_room.localX, blockWidth);
+            _itemBox.y = randomDeploy(_room.localY, blockHeight);
+            _itemBox.local = _room;
+            _itemBox.on('mousedown', role.searchItem);
+            
+            _itemBox.buttonMode = true;
+
+            _itemBox.lineStyle(1, 0x0000FF, 1);
+            itemLayer.addChild(_itemBox);
+        }
+
     }
+
 
 
     return {

@@ -240,7 +240,20 @@ define(['enemy'], function(enemy) {
 
         _createItemStatusLayer();
         _createSkillStatusLayer();
+        _createStatusCloseBtn();
 
+
+        /*create bg*/
+
+        var _bg = new PIXI.Sprite(resource.police_bg.texture);
+        _bg.zIndex = 0;
+        statusLayer.addChild(_bg);
+        statusLayer.updateLayersOrder();
+
+        //updateStatusItem();
+    }
+
+    function _createStatusCloseBtn() {
         var _closeBtn = new PIXI.Graphics();
         _closeBtn.beginFill(0x990000, 1);
         _closeBtn.drawCircle(0, 0, 15);
@@ -264,165 +277,216 @@ define(['enemy'], function(enemy) {
         statusLayer.addChild(_closeBtn);
         _closeBtn.x = 15;
         _closeBtn.y = 15;
+        _closeBtn.zIndex = 99;
+    }
+
+    function _createSkillStatusLayer() {
+        var _skillLayer = new PIXI.Container();
+
+        arrCommonObj['skillLayer'] = _skillLayer;
+
+        var _bg = new PIXI.Sprite(resource.skill_bg.texture);
+        _bg.zIndex = 0;
+        _skillLayer.addChild(_bg);
+
+        statusLayer.addChild(_skillLayer);
+        _skillLayer.zIndex = 50;
+        _skillLayer.x = 10;
+        _skillLayer.y = displayHeight - _skillLayer.height - 20;
+
+        var _skillList = new PIXI.Container();
+        var _skillMask = new PIXI.Graphics();
+        var _touchArea = new PIXI.Graphics();
+        _skillMask.beginFill(0x006666, 1); //first important
+        _skillMask.drawRect(0, 0, 190, 150);
+
+        _skillMask.x = 12;
+        _skillMask.y = 47;
+        _skillMask.lineStyle(1, 0x000000, 1);
+
+        _skillLayer.addChild(_skillMask);
+        _skillLayer.addChild(_skillList);
+
+        _skillList.x = _skillMask.x;
+        _skillList.y = _skillMask.y;
+
+        _skillList.mask = _skillMask;
+
+        arrCommonObj['skillList'] = _skillList;
+        // _updateSkill();
+
+        _touchArea.beginFill(0x000000, 0); //first important
+        _touchArea.drawRect(0, 0, 190, 150);
+
+        _touchArea.x = _skillList.x;
+        _touchArea.y = _skillList.y;
+
+        _touchArea.interactive = true;
+        _touchArea.buttonMode = true;
+
+        arrCommonObj['skillTouchArea'] = _touchArea;
+        _touchArea.mask = _skillMask;
+
+        _skillLayer.addChild(_touchArea);
+
+    }
 
 
-        function _createSkillStatusLayer() {
-            var _skillLayer = new PIXI.Container();
-            _skillLayer.y = 30;
-            arrCommonObj['skillLayer'] = _skillLayer;
-            statusLayer.addChild(_skillLayer);
+    function _createItemStatusLayer() {
+
+        var _row2BaseX;
+        var _row2BaseY;
+        var _itemLayer = new PIXI.Container();
+        _itemLayer.zIndex = 60;
+
+        for (i = 0; i < 6; i++) {
+            var _itemCaseParent = new PIXI.Container();
+            var _itemCase = new PIXI.Graphics();
+            _itemCase.beginFill(0x666666, 1);
+            _itemCase.drawRect(0, 0, 150, 225);
+            _itemCase.lineStyle(0, 0x0000FF, 1);
+            _itemCaseParent.zIndex = i;
+            _itemCaseParent.addChild(_itemCase);
+            _itemLayer.addChild(_itemCaseParent);
+            _itemCaseParent.myItemId = 0; //初始
+
+            if (i < 3) {
+                _itemCaseParent.x = i * _itemCaseParent.width + 20 * i;
+                _itemCaseParent.y = 20;
+                _itemCaseParent.myRow = 1;
+                _itemCaseParent.myId = i;
+                if (i == 0) {
+
+                    _row2BaseY = _itemCaseParent.y + _itemCaseParent.height + 10;
+                }
+            } else {
+                _itemCaseParent.x = (i - 3) * _itemCaseParent.width + 20 * (i - 3);
+                _itemCaseParent.y = _row2BaseY;
+                _itemCaseParent.myRow = 0;
+                _itemCaseParent.myId = i - 3;
+
+                if (i == 5) {
+                    _itemCaseParent.children[0].tint = 0xFF0000;
+                    arrCommonObj['trashCard'] = _itemCaseParent;
+                }
+            }
+
+            var _textObj = new PIXI.Text("empty", {
+                font: '30px Arial',
+                fill: 0xffffff
+            });
+            _textObj.x = 0;
+            _textObj.y = 0;
+
+            _itemCaseParent.addChild(_textObj);
+
+            _itemCaseParent.originX = _itemCaseParent.x;
+            _itemCaseParent.originY = _itemCaseParent.y;
+
+            /*bind drag event*/
+            _itemCaseParent.interactive = true;
+            _itemCaseParent.buttonMode = true;
+
+            _itemCaseParent.on('mousedown', _onDragStart)
+                // events for drag end
+                .on('mouseup', _onDragEnd)
+                .on('mouseupoutside', _onDragEnd)
+                // events for drag move
+                .on('mousemove', _onDragMove)
+
         }
 
+        statusLayer.addChild(_itemLayer);
+        _itemLayer.myId = "itemLayer";
+        _itemLayer.x = displayWidth - _itemLayer.width - 20;
+        //record layer index   
+        arrLayerManager['itemLayer'] = statusLayer.getChildIndex(_itemLayer);
 
+        function _onDragStart(event) {
+            _zIndexUpFirst(this);
+            this.data = event.data;
+            this.dragging = true;
+            this.sx = this.data.getLocalPosition(this).x * this.scale.x;
+            this.sy = this.data.getLocalPosition(this).y * this.scale.y;
+        }
 
+        function _onDragEnd() {
+            this.alpha = 1;
+            this.dragging = false;
+            // set the interaction data to null
+            this.data = null;
+            _checkHit(this)
+            var tween = new TweenMax(this, 0.5, {
+                x: this.originX,
+                y: this.originY,
+                alpha: 1
+            });
+        }
 
+        function _onDragMove() {
+            if (this.dragging) {
+                var newPosition = this.data.getLocalPosition(this.parent);
+                this.position.x = newPosition.x - this.sx;
+                this.position.y = newPosition.y - this.sy;
+            }
+        }
 
-        function _createItemStatusLayer() {
-            var _cardBaseX = 0;
-            var _row2BaseX;
-            var _row2BaseY;
-            var _itemLayer = new PIXI.Container();
-
-
-            for (i = 0; i < 5; i++) {
-                var _itemCaseParent = new PIXI.Container();
-                var _itemCase = new PIXI.Graphics();
-                _itemCase.beginFill(0x666666, 1);
-                _itemCase.drawRect(0, 0, 150, 225);
-                _itemCase.lineStyle(0, 0x0000FF, 1);
-                _itemCaseParent.zIndex = i;
-                _itemCaseParent.addChild(_itemCase);
-                _itemLayer.addChild(_itemCaseParent);
-
-                if (i < 3) {
-                    _itemCaseParent.x = _cardBaseX + i * _itemCaseParent.width + 20 * i;
-                    _itemCaseParent.y = 20;
-                    _itemCaseParent.myRow = 1;
-                    _itemCaseParent.myId = i;
-                    if (i == 0) {
-                        _row2BaseX = _itemCaseParent.x + _itemCaseParent.width / 2 + 10;
-                        _row2BaseY = _itemCaseParent.y + _itemCaseParent.height + 10;
-                    }
-                } else {
-                    _itemCaseParent.x = _row2BaseX + (i - 3) * _itemCaseParent.width + 20 * (i - 3);
-                    _itemCaseParent.y = _row2BaseY;
-                    _itemCaseParent.myRow = 0;
-                    _itemCaseParent.myId = i - 3;
-                }
-
-                var _textObj = new PIXI.Text("empty", {
-                    font: '30px Arial',
-                    fill: 0xffffff
-                });
-                _textObj.x = 0;
-                _textObj.y = 0;
-
-                _itemCaseParent.addChild(_textObj);
-
-                _itemCaseParent.originX = _itemCaseParent.x;
-                _itemCaseParent.originY = _itemCaseParent.y;
-
-                /*bind drag event*/
-                _itemCaseParent.interactive = true;
-                _itemCaseParent.buttonMode = true;
-
-                _itemCaseParent.on('mousedown', _onDragStart)
-                    // events for drag end
-                    .on('mouseup', _onDragEnd)
-                    .on('mouseupoutside', _onDragEnd)
-                    // events for drag move
-                    .on('mousemove', _onDragMove)
-
+        /*
+            current drag obj zindex go to top
+        */
+        function _zIndexUpFirst(_obj) {
+            for (var i = 0; i < _itemLayer.children.length; i++) {
+                _itemLayer.children[i].zIndex = 1;
             }
 
-            statusLayer.addChild(_itemLayer);
-            _itemLayer.myId = "itemLayer";
-            _itemLayer.x = displayWidth - _itemLayer.width - 20;
-            //record layer index   
-            arrLayerManager['itemLayer'] = statusLayer.getChildIndex(_itemLayer);
+            _obj.zIndex = 10;
+            _itemLayer.updateLayersOrder();
+        }
 
-            function _onDragStart(event) {
-                _zIndexUpFirst(this);
-                this.data = event.data;
-                this.dragging = true;
-                this.sx = this.data.getLocalPosition(this).x * this.scale.x;
-                this.sy = this.data.getLocalPosition(this).y * this.scale.y;
-            }
+        /*
+        touch area 60%+ triggle change
+        */
+        function _checkHit(_obj) {
+            var _iL = _itemLayer.children;
 
-            function _onDragEnd() {
-                this.alpha = 1;
-                this.dragging = false;
-                // set the interaction data to null
-                this.data = null;
-                _checkHit(this)
-                var tween = new TweenMax(this, 0.5, {
-                    x: this.originX,
-                    y: this.originY,
-                    alpha: 1
-                });
-            }
+            for (var i = 0; i < _iL.length; i++) {
+                if (hitTest(_iL[i], _obj) && _iL[i] != _obj) {
 
-            function _onDragMove() {
-                if (this.dragging) {
-                    var newPosition = this.data.getLocalPosition(this.parent);
-                    this.position.x = newPosition.x - this.sx;
-                    this.position.y = newPosition.y - this.sy;
-                }
-            }
+                    var _recWidth = ((_obj.width - Math.abs(_obj.x - _iL[i].x)) / _obj.width) * 100;
+                    var _recHeight = ((_obj.height - Math.abs(_obj.y - _iL[i].y)) / _obj.height) * 100;
 
-            /*
-                current drag obj zindex go to top
-            */
-            function _zIndexUpFirst(_obj) {
-                for (var i = 0; i < _itemLayer.children.length; i++) {
-                    _itemLayer.children[i].zIndex = 1;
-                }
+                    if (_recWidth > 60 && _recHeight > 60) {
+                        var _targetObj = _iL[i];
+                        var _currentItemId = _obj.myItemId;
+                        var _changeElement = [];
 
-                _obj.zIndex = 10;
-                _itemLayer.updateLayersOrder();
-            }
+                        _obj.children[1].text = arrItems[_targetObj.myItemId].name;
+                        _obj.myItemId = _targetObj.myItemId;
 
-            /*
-            touch area 60%+ triggle change
-            */
-            function _checkHit(_obj) {
-                var _iL = _itemLayer.children;
+                        _targetObj.children[1].text = arrItems[_currentItemId].name;
+                        _targetObj.myItemId = _currentItemId;
 
-                for (var i = 0; i < _iL.length; i++) {
-                    if (hitTest(_iL[i], _obj) && _iL[i] != _obj) {
+                        _changeElement.push(_obj, _targetObj);
 
-                        var _recWidth = ((_obj.width - Math.abs(_obj.x - _iL[i].x)) / _obj.width) * 100;
-                        var _recHeight = ((_obj.height - Math.abs(_obj.y - _iL[i].y)) / _obj.height) * 100;
+                        for (j = 0; j < _changeElement.length; j++) {
+                            console.log(_changeElement[j].myRow + "/" + _changeElement[j].myId);
+                            if (_changeElement[j].myRow != 0 || _changeElement[j].myId != 2) {
 
-                        if (_recWidth > 60 && _recHeight > 60) {
-                            var _targetObj = _iL[i];
-                            var _currentItemId = _obj.myItemId;
-                            var _changeElement = [];
-
-                            _obj.children[1].text = arrItems[_targetObj.myItemId].name;
-                            _obj.myItemId = _targetObj.myItemId;
-
-                            _targetObj.children[1].text = arrItems[_currentItemId].name;
-                            _targetObj.myItemId = _currentItemId;
-                            console.log(_targetObj.children);
-                            _changeElement.push(_obj, _targetObj);
-
-                            for (j = 0; j < _changeElement.length; j++) {
                                 currentRole.equip[_changeElement[j].myRow][_changeElement[j].myId] = _changeElement[j].myItemId;
                             }
-                            console.log(currentRole.equip[0]);
-                            console.log(currentRole.equip[1]);
-                            return true;
-                            break;
-
                         }
+
+                        console.log(currentRole.equip);
+
+                        return true;
+                        break;
+
                     }
                 }
             }
         }
-
-        //updateStatusItem();
     }
+
 
     function _updateStatusItem() {
         if (currentRole == null) {
@@ -430,7 +494,7 @@ define(['enemy'], function(enemy) {
         }
         var _item = currentRole.equip;
         var _itemLayer = statusLayer.children[0].children;
-
+        console.log(_itemLayer.length);
         for (var i = 0; i < _item.length; i++) {
             for (var j = 0; j < _item[i].length; j++) {
                 for (var k = 0; k < _itemLayer.length; k++) {
@@ -450,13 +514,13 @@ define(['enemy'], function(enemy) {
         for (var i = 0; i < currentRole.skill.length; i++) {
 
             var _textObj = new PIXI.Text(arrSkills[currentRole.skill[i]].name, {
-                font: '20px Arial',
+                font: '16px Arial',
                 fill: 0x00ff00
             });
 
             _textObj.y = i * _textObj.height + 10 * i;
 
-            arrCommonObj['skillLayer'].addChild(_textObj);
+            arrCommonObj['skillList'].addChild(_textObj);
 
         }
     }
@@ -475,6 +539,8 @@ define(['enemy'], function(enemy) {
         gameStage.visible = true;
         statusLayer.visible = false;
         mainUiLayer.visible = true;
+        arrCommonObj['trashCard'].myItemId = 0;
+        arrCommonObj['trashCard'].children[1].text = "empty";
     }
 
 
@@ -512,6 +578,8 @@ define(['enemy'], function(enemy) {
         closeAttackBtn: _closeAttackBtn,
         createScore: _createScore,
         updateScore: _updateScore,
-        createMsgBox: _createMsgBox
+        createMsgBox: _createMsgBox,
+        statusOpen: _statusOpen,
+        statusClose: _statusClose
     }
 })

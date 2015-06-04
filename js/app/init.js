@@ -132,7 +132,7 @@ define(['ui', 'map', 'role', 'findpath', 'help', 'datas', 'meter'], function(ui,
         newR.interactive = true;
         newR.buttonMode = true;
 
-        newR.skill = [];     
+        newR.skill = [0,10,20,30,40,50,60,70];     
         newR.level = 1;
         newR.skill.push(newR.skillTree[0][0]);
 
