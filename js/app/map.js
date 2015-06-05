@@ -34,11 +34,11 @@ define(['role'], function(role) {
                     arrMap[y][x].passage = [];
 
                     //房間文字
-                    var _textObj = new PIXI.Text(arrMap[y][x].room_id);
-
+                    //var _textObj = new PIXI.Text(arrMap[y][x].room_id);
+                    var _textObj = new PIXI.extras.BitmapText(arrMap[y][x].room_id, {font: "50px Crackhouse",tint:0x000000});
                     _textObj.x = blockWidth / 2 - _textObj.width / 2;
                     _textObj.y = blockHeight / 2 - _textObj.height / 2;
-                    _textObj.alpha = 0.5;
+                    _textObj.alpha = 1;
                     _mapSpace.addChild(_textObj);
 
                     //門

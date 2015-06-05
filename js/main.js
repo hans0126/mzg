@@ -36,12 +36,16 @@ requirejs(['init', 'jquery', 'pixi', 'TweenMax', 'EasePack'], function(init) {
     loader.add("map", "images/map.json");
     loader.add("police_bg","images/police_bg.jpg");
     loader.add("skill_bg","images/skill_bg.png");
+    loader.add("crackhouse","images/crackhouse.fnt");
+    loader.add("card_bg","images/card.jpg");
     loader.on("complete", complete);
     loader.load();
 
 
     function complete(loader,re) {
         resource = re; 
+      
+        
         init.init();
     }
 

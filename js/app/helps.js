@@ -124,8 +124,8 @@ function moveToTarget(_tx, _ty) {
     var tween = new TweenMax(gameStage, 0.5, {
         x: _x,
         y: _y,
-        roundProps:"x,y" //最後值為整數地圖才不會破格
-        
+        roundProps: "x,y" //最後值為整數地圖才不會破格
+
     });
 }
 
@@ -395,8 +395,22 @@ function languageCombination(event) {
 */
 
 
+function findGameObjfromMouse(_x, _y, _gameObj) {
 
-/*產生地圖*/
+    var _match = false;
+
+    if (_x > _gameObj.x &&
+        _x < _gameObj.x + _gameObj.width &&
+        _y > _gameObj.y &&
+        _y < _gameObj.y + _gameObj.height) {
+
+        _match = true;     
+
+    }
+
+    return _match;
+
+}
 
 
 

@@ -309,7 +309,7 @@ define(['enemy'], function(enemy) {
 
         _skillList.x = _skillMask.x;
         _skillList.y = _skillMask.y;
-
+        _skillList.zIndex = 30;
         _skillList.mask = _skillMask;
 
         arrCommonObj['skillList'] = _skillList;
@@ -317,17 +317,98 @@ define(['enemy'], function(enemy) {
 
         _touchArea.beginFill(0x000000, 0); //first important
         _touchArea.drawRect(0, 0, 190, 150);
-
+        _touchArea.maskHeight = _touchArea.height;
         _touchArea.x = _skillList.x;
         _touchArea.y = _skillList.y;
 
         _touchArea.interactive = true;
         _touchArea.buttonMode = true;
 
+        _touchArea.zIndex = 40;
+
         arrCommonObj['skillTouchArea'] = _touchArea;
         _touchArea.mask = _skillMask;
+        _touchArea.maskHeight = 150;
+
 
         _skillLayer.addChild(_touchArea);
+
+        _skillLayer.updateLayersOrder();
+
+        _touchArea.on('mousedown', _onDragStart)
+            // events for drag end
+            .on('mouseup', _onDragEnd)
+            .on('mouseupoutside', _onDragEnd)
+            // events for drag move
+            .on('mousemove', _onDragMove);
+
+        /*scroll*/
+        function _onDragStart(event) {
+            this.data = event.data;
+            this.dragging = true;
+            this.sy = this.data.getLocalPosition(this).y * this.scale.y;
+            this.sx = this.data.getLocalPosition(this).x * this.scale.x;
+            var _cB = this;
+
+            this.oy = this.y;
+
+            this.timeOut = setTimeout(function() {
+                if (_cB.oy == _cB.y) {
+                    _getSkillDetail(_cB.data.getLocalPosition(arrCommonObj['skillList']));
+                } else {
+                    console.log("Move");
+                }
+            }, 1500);
+
+
+        }
+
+        function _onDragEnd() {
+            this.alpha = 1;
+            this.dragging = false;
+            // set the interaction data to null
+            this.data = null;
+            clearTimeout(this.timeOut);
+        }
+
+        function _onDragMove() {
+
+            //this.y+this.height > _skillMask.y+_skillMask.height 
+            if (this.dragging) {
+                var newPosition = this.data.getLocalPosition(this.parent);
+
+                this.position.y = newPosition.y - this.sy;
+
+
+                if (this.y > _skillMask.y) {
+                    this.y = _skillMask.y;
+                }
+
+                if (this.y + this.height <= parseInt(_skillMask.y + this.maskHeight)) {
+
+                    this.y = _skillMask.y + this.maskHeight - this.height;
+                }
+                this.ny = this.y;
+
+                _skillList.y = this.position.y;
+
+            }
+        }
+
+        function _getSkillDetail(_position) {
+            var _sk = arrCommonObj['skillList'].children
+            for (var i = 0; i < _sk.length; i++) {
+
+                if (findGameObjfromMouse(_position.x, _position.y, _sk[i])) {
+                    console.log(i);
+                    break;
+                }
+
+            }
+
+        }
+
+
 
     }
 
@@ -341,10 +422,13 @@ define(['enemy'], function(enemy) {
 
         for (i = 0; i < 6; i++) {
             var _itemCaseParent = new PIXI.Container();
-            var _itemCase = new PIXI.Graphics();
-            _itemCase.beginFill(0x666666, 1);
+            // var _itemCase = new PIXI.Graphics();
+            var _itemCase = new PIXI.Sprite(resource.card_bg.texture);
+            /*_itemCase.beginFill(0x666666, 1);
             _itemCase.drawRect(0, 0, 150, 225);
-            _itemCase.lineStyle(0, 0x0000FF, 1);
+            _itemCase.lineStyle(0, 0x0000FF, 1);*/
+            _itemCase.width = 150;
+            _itemCase.height = 225;
             _itemCaseParent.zIndex = i;
             _itemCaseParent.addChild(_itemCase);
             _itemLayer.addChild(_itemCaseParent);
@@ -371,12 +455,16 @@ define(['enemy'], function(enemy) {
                 }
             }
 
-            var _textObj = new PIXI.Text("empty", {
+         /*   var _textObj = new PIXI.Text("empty", {
                 font: '30px Arial',
                 fill: 0xffffff
-            });
-            _textObj.x = 0;
-            _textObj.y = 0;
+            });*/
+
+           var _textObj = new PIXI.extras.BitmapText("Empty", {font: "30px Crackhouse",tint:0x000000});
+
+            _textObj.x = 20;
+            _textObj.y = 10;
+           
 
             _itemCaseParent.addChild(_textObj);
 
@@ -400,7 +488,8 @@ define(['enemy'], function(enemy) {
         _itemLayer.myId = "itemLayer";
         _itemLayer.x = displayWidth - _itemLayer.width - 20;
         //record layer index   
-        arrLayerManager['itemLayer'] = statusLayer.getChildIndex(_itemLayer);
+        arrCommonObj['itemLayer'] = _itemLayer;
+       
 
         function _onDragStart(event) {
             _zIndexUpFirst(this);
@@ -408,10 +497,11 @@ define(['enemy'], function(enemy) {
             this.dragging = true;
             this.sx = this.data.getLocalPosition(this).x * this.scale.x;
             this.sy = this.data.getLocalPosition(this).y * this.scale.y;
+
         }
 
         function _onDragEnd() {
-            this.alpha = 1;
+
             this.dragging = false;
             // set the interaction data to null
             this.data = null;
@@ -493,11 +583,15 @@ define(['enemy'], function(enemy) {
             return false;
         }
         var _item = currentRole.equip;
-        var _itemLayer = statusLayer.children[0].children;
-        console.log(_itemLayer.length);
+        var _itemLayer =   arrCommonObj['itemLayer'].children;
+
+        console.log(_itemLayer);
+        
+      
         for (var i = 0; i < _item.length; i++) {
             for (var j = 0; j < _item[i].length; j++) {
                 for (var k = 0; k < _itemLayer.length; k++) {
+
                     if (_itemLayer[k].myRow == i && _itemLayer[k].myId == j) {
 
                         _itemLayer[k].children[1].text = arrItems[_item[i][j]].name;
@@ -515,14 +609,24 @@ define(['enemy'], function(enemy) {
 
             var _textObj = new PIXI.Text(arrSkills[currentRole.skill[i]].name, {
                 font: '16px Arial',
-                fill: 0x00ff00
+                fill: 0xFFFFFF
             });
 
             _textObj.y = i * _textObj.height + 10 * i;
+            _textObj.skill = arrSkills[currentRole.skill[i]];         
 
             arrCommonObj['skillList'].addChild(_textObj);
 
         }
+
+        arrCommonObj['skillTouchArea'].height = arrCommonObj['skillList'].height;
+
+        if (arrCommonObj['skillTouchArea'].height > arrCommonObj['skillTouchArea'].maskHeight) {
+            arrCommonObj['skillTouchArea'].interactive = true;
+        } else {
+            arrCommonObj['skillTouchArea'].interactive = false;
+        } 
+
     }
 
     /*statusOpen*/

@@ -332,7 +332,7 @@ arrRoleType = [{
 
 arrItems[0] = { //空物件
     category: "item",
-    name: "empty",
+    name: "Empty",
     attackType: null,
     power: null,
     minRange: null,
@@ -344,7 +344,7 @@ arrItems[0] = { //空物件
 
 arrItems[1] = {
     category: "weapon",
-    name: "pistal",
+    name: "Pistal",
     attackType: "range",
     power: 1,
     minRange: 0,
@@ -355,7 +355,7 @@ arrItems[1] = {
 };
 arrItems[2] = {
     category: "weapon",
-    name: "knife",
+    name: "Knife",
     attackType: "melee",
     power: 1,
     minRange: 0,
@@ -366,7 +366,7 @@ arrItems[2] = {
 };
 arrItems[3] = {
     category: "item",
-    name: "food",
+    name: "Food",
     attackType: "null",
     power: null,
     minRange: null,
