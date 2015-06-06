@@ -414,6 +414,8 @@ define(['enemy'], function(enemy) {
 
 
     function _createItemStatusLayer() {
+        //create global variable
+        itemSelected = [];
 
         var _row2BaseX;
         var _row2BaseY;
@@ -455,16 +457,19 @@ define(['enemy'], function(enemy) {
                 }
             }
 
-         /*   var _textObj = new PIXI.Text("empty", {
-                font: '30px Arial',
-                fill: 0xffffff
-            });*/
+            /*   var _textObj = new PIXI.Text("empty", {
+                   font: '30px Arial',
+                   fill: 0xffffff
+               });*/
 
-           var _textObj = new PIXI.extras.BitmapText("Empty", {font: "30px Crackhouse",tint:0x000000});
+            var _textObj = new PIXI.extras.BitmapText("Empty", {
+                font: "30px Crackhouse",
+                tint: 0x000000
+            });
 
             _textObj.x = 20;
             _textObj.y = 10;
-           
+
 
             _itemCaseParent.addChild(_textObj);
 
@@ -475,12 +480,14 @@ define(['enemy'], function(enemy) {
             _itemCaseParent.interactive = true;
             _itemCaseParent.buttonMode = true;
 
-            _itemCaseParent.on('mousedown', _onDragStart)
-                // events for drag end
-                .on('mouseup', _onDragEnd)
-                .on('mouseupoutside', _onDragEnd)
-                // events for drag move
-                .on('mousemove', _onDragMove)
+            /* _itemCaseParent.on('mousedown', _onDragStart)
+                 // events for drag end
+                 .on('mouseup', _onDragEnd)
+                 .on('mouseupoutside', _onDragEnd)
+                 // events for drag move
+                 .on('mousemove', _onDragMove)*/
+
+            _itemCaseParent.on("mousedown", _itemClick);
 
         }
 
@@ -489,8 +496,59 @@ define(['enemy'], function(enemy) {
         _itemLayer.x = displayWidth - _itemLayer.width - 20;
         //record layer index   
         arrCommonObj['itemLayer'] = _itemLayer;
-       
+        /*click process*/
+        function _itemClick(event) {
+           
 
+            if (itemSelected.length < 2) {
+                if (itemSelected.indexOf(this) == -1) {
+                    itemSelected.push(this);
+                    this.alpha = 0.5;
+                    this.interactive = false;
+                }
+            }
+
+            if (itemSelected.length == 2) {
+              
+                for (var i = 0; i < itemSelected.length; i++) {
+                    // i = current
+                    // convers i
+                    var _target;
+                    if (i == 0) {
+                        _target = 1;
+                    } else {
+                        _target = 0;
+                    }
+
+                    var tween = new TweenMax(itemSelected[i], 0.5, {
+                        x: itemSelected[_target].originX,
+                        y: itemSelected[_target].originY,
+                        alpha: 1,
+                        onComplete: function(_obj,_target) {
+                            _obj.originX = _obj.x;
+                            _obj.originY = _obj.y;
+                            _obj.interactive = true;
+                            _obj.myId = _target.myId;
+                            _obj.myRow = _target.myRow;                          
+
+                        },
+                        onCompleteParams: [itemSelected[i],itemSelected[_target]]
+
+                    });
+
+                    currentRole.equip[itemSelected[_target].myRow][itemSelected[_target].myId] = itemSelected[i].myItemId;
+
+                }
+
+                
+                 console.log(currentRole.equip);
+                itemSelected = [];
+
+
+            }
+        }
+
+        /*drag process*/
         function _onDragStart(event) {
             _zIndexUpFirst(this);
             this.data = event.data;
@@ -583,11 +641,10 @@ define(['enemy'], function(enemy) {
             return false;
         }
         var _item = currentRole.equip;
-        var _itemLayer =   arrCommonObj['itemLayer'].children;
+        var _itemLayer = arrCommonObj['itemLayer'].children;
 
-        console.log(_itemLayer);
-        
-      
+
+
         for (var i = 0; i < _item.length; i++) {
             for (var j = 0; j < _item[i].length; j++) {
                 for (var k = 0; k < _itemLayer.length; k++) {
@@ -613,7 +670,7 @@ define(['enemy'], function(enemy) {
             });
 
             _textObj.y = i * _textObj.height + 10 * i;
-            _textObj.skill = arrSkills[currentRole.skill[i]];         
+            _textObj.skill = arrSkills[currentRole.skill[i]];
 
             arrCommonObj['skillList'].addChild(_textObj);
 
@@ -625,7 +682,7 @@ define(['enemy'], function(enemy) {
             arrCommonObj['skillTouchArea'].interactive = true;
         } else {
             arrCommonObj['skillTouchArea'].interactive = false;
-        } 
+        }
 
     }
 
