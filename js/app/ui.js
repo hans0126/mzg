@@ -416,51 +416,62 @@ define(['enemy'], function(enemy) {
     function _createItemStatusLayer() {
         //create global variable
         itemSelected = [];
-
+        itemSelectedTarget = []
+        itemMode = '';
         var _row2BaseX;
         var _row2BaseY;
         var _itemLayer = new PIXI.Container();
+        var _itemTouchLayer = new PIXI.Container();
+
+        _itemLayer.zIndex = 30;
+        _itemTouchLayer.zIndex = 10;
+
         _itemLayer.zIndex = 60;
 
         for (i = 0; i < 6; i++) {
             var _itemCaseParent = new PIXI.Container();
-            // var _itemCase = new PIXI.Graphics();
+            var _itemBtn = new PIXI.Graphics();
             var _itemCase = new PIXI.Sprite(resource.card_bg.texture);
-            /*_itemCase.beginFill(0x666666, 1);
-            _itemCase.drawRect(0, 0, 150, 225);
-            _itemCase.lineStyle(0, 0x0000FF, 1);*/
+
+
+            _itemBtn.beginFill(0x666666, 0.5);
+            _itemBtn.drawRect(0, 0, 150, 225);
+            _itemBtn.lineStyle(0, 0x0000FF, 1);
+            _itemTouchLayer.addChild(_itemBtn);
+
             _itemCase.width = 150;
             _itemCase.height = 225;
+
             _itemCaseParent.zIndex = i;
             _itemCaseParent.addChild(_itemCase);
             _itemLayer.addChild(_itemCaseParent);
             _itemCaseParent.myItemId = 0; //初始
 
             if (i < 3) {
-                _itemCaseParent.x = i * _itemCaseParent.width + 20 * i;
-                _itemCaseParent.y = 20;
-                _itemCaseParent.myRow = 1;
-                _itemCaseParent.myId = i;
+                _itemBtn.x = i * _itemCaseParent.width + 20 * i;
+                _itemBtn.y = 20;
+                _itemBtn.myRow = 1;
+                _itemBtn.myId = i;
+
                 if (i == 0) {
 
-                    _row2BaseY = _itemCaseParent.y + _itemCaseParent.height + 10;
+                    _row2BaseY = _itemBtn.y + _itemBtn.height + 10;
                 }
             } else {
-                _itemCaseParent.x = (i - 3) * _itemCaseParent.width + 20 * (i - 3);
-                _itemCaseParent.y = _row2BaseY;
-                _itemCaseParent.myRow = 0;
-                _itemCaseParent.myId = i - 3;
+                _itemBtn.x = (i - 3) * _itemBtn.width + 20 * (i - 3);
+                _itemBtn.y = _row2BaseY;
+                _itemBtn.myRow = 0;
+                _itemBtn.myId = i - 3;
 
                 if (i == 5) {
                     _itemCaseParent.children[0].tint = 0xFF0000;
-                    arrCommonObj['trashCard'] = _itemCaseParent;
+                    arrCommonObj['trashCard'] = _itemBtn;
                 }
             }
 
-            /*   var _textObj = new PIXI.Text("empty", {
-                   font: '30px Arial',
-                   fill: 0xffffff
-               });*/
+            _itemCaseParent.x = _itemBtn.x;
+            _itemCaseParent.y = _itemBtn.y;
+
 
             var _textObj = new PIXI.extras.BitmapText("Empty", {
                 font: "30px Crackhouse",
@@ -475,41 +486,78 @@ define(['enemy'], function(enemy) {
 
             _itemCaseParent.originX = _itemCaseParent.x;
             _itemCaseParent.originY = _itemCaseParent.y;
-
+            _itemCaseParent.visible = false;
+            //_itemCaseParent.visible = false;
             /*bind drag event*/
-            _itemCaseParent.interactive = true;
-            _itemCaseParent.buttonMode = true;
+            _itemBtn.interactive = true;
+            _itemBtn.buttonMode = true;
 
-            /* _itemCaseParent.on('mousedown', _onDragStart)
-                 // events for drag end
-                 .on('mouseup', _onDragEnd)
-                 .on('mouseupoutside', _onDragEnd)
-                 // events for drag move
-                 .on('mousemove', _onDragMove)*/
+            _itemBtn.targetObj = _itemCaseParent;
 
-            _itemCaseParent.on("mousedown", _itemClick);
+
+
+            _itemBtn.on("mousedown", _onItemClick);
+            /* // events for drag end
+             .on('mouseup', _onDragEnd)
+             .on('mouseupoutside', _onDragEnd)
+             // events for drag move
+             .on('mousemove', _onDragMove);*/
 
         }
 
         statusLayer.addChild(_itemLayer);
-        _itemLayer.myId = "itemLayer";
-        _itemLayer.x = displayWidth - _itemLayer.width - 20;
+        statusLayer.addChild(_itemTouchLayer);
+
+        _itemLayer.x = 250;
+        _itemTouchLayer.x = _itemLayer.x;
         //record layer index   
         arrCommonObj['itemLayer'] = _itemLayer;
+        arrCommonObj['itemTouchLayer'] = _itemTouchLayer;
+
+        statusLayer.updateLayersOrder();
+
         /*click process*/
-        function _itemClick(event) {
-           
+
+        function _onItemClick(event) {
+            //has rwo mode 1.traslate  2. combine item
+
+            var _obj = this.targetObj;
+
+
+            /*
+                        this.timer = setTimeout(function() {
+                            itemMode = "drag";
+                            _zIndexUpFirst(_obj);
+                            _obj.data = event.data;
+                            _obj.dragging = true;
+                            _obj.sx = _obj.data.getLocalPosition(_obj).x * _obj.scale.x;
+                            _obj.sy = _obj.data.getLocalPosition(_obj).y * _obj.scale.y;
+                            _obj.alpha = 0.5;
+                            itemSelected = [];
+
+                            var tween = new TweenMax(_obj.scale, 0.2, {
+                                x: 1.1,
+                                y: 1.1,
+                                ease: Back.easeInOut
+                            });
+
+                        }, 300);
+
+            */
 
             if (itemSelected.length < 2) {
                 if (itemSelected.indexOf(this) == -1) {
+                    _obj.alpha = 0.5;
                     itemSelected.push(this);
-                    this.alpha = 0.5;
-                    this.interactive = false;
+                    itemSelectedTarget.push({
+                        targetObj: _obj,
+                        itemId: this.myItemId
+                    });
                 }
             }
 
             if (itemSelected.length == 2) {
-              
+
                 for (var i = 0; i < itemSelected.length; i++) {
                     // i = current
                     // convers i
@@ -517,65 +565,59 @@ define(['enemy'], function(enemy) {
                     if (i == 0) {
                         _target = 1;
                     } else {
-                        _target = 0;
+                        _target = 0
                     }
 
-                    var tween = new TweenMax(itemSelected[i], 0.5, {
-                        x: itemSelected[_target].originX,
-                        y: itemSelected[_target].originY,
-                        alpha: 1,
-                        onComplete: function(_obj,_target) {
-                            _obj.originX = _obj.x;
-                            _obj.originY = _obj.y;
-                            _obj.interactive = true;
-                            _obj.myId = _target.myId;
-                            _obj.myRow = _target.myRow;                          
-
-                        },
-                        onCompleteParams: [itemSelected[i],itemSelected[_target]]
-
+                    var tween = new TweenMax(itemSelected[i].targetObj, 0.5, {
+                        x: itemSelected[_target].x,
+                        y: itemSelected[_target].y,
+                        alpha: 1
                     });
 
+                    itemSelected[i].targetObj = itemSelectedTarget[_target].targetObj;
                     currentRole.equip[itemSelected[_target].myRow][itemSelected[_target].myId] = itemSelected[i].myItemId;
+                    itemSelected[i].myItemId = itemSelectedTarget[_target].itemId;                  
 
-                }
+                }              
 
-                
-                 console.log(currentRole.equip);
                 itemSelected = [];
-
-
+                itemSelectedTarget = [];
             }
-        }
-
-        /*drag process*/
-        function _onDragStart(event) {
-            _zIndexUpFirst(this);
-            this.data = event.data;
-            this.dragging = true;
-            this.sx = this.data.getLocalPosition(this).x * this.scale.x;
-            this.sy = this.data.getLocalPosition(this).y * this.scale.y;
 
         }
 
         function _onDragEnd() {
 
-            this.dragging = false;
-            // set the interaction data to null
+            clearTimeout(this.timer);
+
             this.data = null;
-            _checkHit(this)
-            var tween = new TweenMax(this, 0.5, {
-                x: this.originX,
-                y: this.originY,
-                alpha: 1
-            });
+            this.dragging = false;
+
+            if (itemMode == "drag") {
+                itemSelected = [];
+
+                new TimelineLite().to(this, 0.2, {
+                    x: this.originX,
+                    y: this.originY,
+                    alpha: 1
+                }).to(this.scale, 0.2, {
+                    x: 1,
+                    y: 1
+                });
+            }
+
+            itemMode = '';
+
+            // _checkHit(this);
+
         }
 
         function _onDragMove() {
+
             if (this.dragging) {
                 var newPosition = this.data.getLocalPosition(this.parent);
-                this.position.x = newPosition.x - this.sx;
-                this.position.y = newPosition.y - this.sy;
+                this.position.x = newPosition.x - this.width / 2;
+                this.position.y = newPosition.y - this.height / 2;
             }
         }
 
@@ -642,17 +684,23 @@ define(['enemy'], function(enemy) {
         }
         var _item = currentRole.equip;
         var _itemLayer = arrCommonObj['itemLayer'].children;
+        var _itemTouchLayer = arrCommonObj['itemTouchLayer'].children;
 
 
 
         for (var i = 0; i < _item.length; i++) {
             for (var j = 0; j < _item[i].length; j++) {
-                for (var k = 0; k < _itemLayer.length; k++) {
+                for (var k = 0; k < _itemTouchLayer.length; k++) {
 
-                    if (_itemLayer[k].myRow == i && _itemLayer[k].myId == j) {
+                    if (_itemTouchLayer[k].myRow == i && _itemTouchLayer[k].myId == j) {
+
+                        _itemTouchLayer[k].myItemId = _item[i][j];
 
                         _itemLayer[k].children[1].text = arrItems[_item[i][j]].name;
-                        _itemLayer[k].myItemId = _item[i][j];
+
+                        if (_item[i][j] > 0) {
+                            _itemLayer[k].visible = true;
+                        }
 
                         break;
                     }
