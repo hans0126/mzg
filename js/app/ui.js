@@ -464,7 +464,7 @@ define(['enemy'], function(enemy) {
                 _itemBtn.myId = i - 3;
 
                 if (i == 5) {
-                    _itemCaseParent.children[0].tint = 0xFF0000;
+                    //   _itemCaseParent.children[0].tint = 0xFF0000;
                     arrCommonObj['trashCard'] = _itemBtn;
                 }
             }
@@ -494,14 +494,14 @@ define(['enemy'], function(enemy) {
 
             _itemBtn.targetObj = _itemCaseParent;
 
+            _itemBtn.myItemId = 0;
 
-
-            _itemBtn.on("mousedown", _onItemClick);
-            /* // events for drag end
-             .on('mouseup', _onDragEnd)
-             .on('mouseupoutside', _onDragEnd)
-             // events for drag move
-             .on('mousemove', _onDragMove);*/
+            _itemBtn.on("mousedown", _onItemClick)
+                // events for drag end
+                .on('mouseup', _onDragEnd)
+                .on('mouseupoutside', _onDragEnd)
+                // events for drag move
+                .on('mousemove', _onDragMove);
 
         }
 
@@ -522,28 +522,34 @@ define(['enemy'], function(enemy) {
             //has rwo mode 1.traslate  2. combine item
 
             var _obj = this.targetObj;
+            var _currentTouch = this;
 
+            if (this.targetObj.visible) {
+                this.timer = setTimeout(function() {
+                    itemMode = "drag";
+                    _zIndexUpFirst(_obj);
+                    _obj.data = event.data;
+                    _obj.dragging = true;
+                    _obj.sx = _obj.data.getLocalPosition(_obj).x * _obj.scale.x;
+                    _obj.sy = _obj.data.getLocalPosition(_obj).y * _obj.scale.y;
+                    _obj.alpha = 0.8;
+                    itemSelected = [];
+                    itemSelectedTarget = [];
 
-            /*
-                        this.timer = setTimeout(function() {
-                            itemMode = "drag";
-                            _zIndexUpFirst(_obj);
-                            _obj.data = event.data;
-                            _obj.dragging = true;
-                            _obj.sx = _obj.data.getLocalPosition(_obj).x * _obj.scale.x;
-                            _obj.sy = _obj.data.getLocalPosition(_obj).y * _obj.scale.y;
-                            _obj.alpha = 0.5;
-                            itemSelected = [];
+                    for (var i = 0; i < _itemTouchLayer.children.length; i++) {
+                        if (_itemTouchLayer.children[i].myRow != _currentTouch.myRow || _itemTouchLayer.children[i].myId != _currentTouch.myId) {
+                            _itemTouchLayer.children[i].interactive = false;
+                        }
+                    }
 
-                            var tween = new TweenMax(_obj.scale, 0.2, {
-                                x: 1.1,
-                                y: 1.1,
-                                ease: Back.easeInOut
-                            });
+                    var tween = new TweenMax(_obj.scale, 0.2, {
+                        x: 1.1,
+                        y: 1.1,
+                        ease: Back.easeInOut
+                    });
 
-                        }, 300);
-
-            */
+                }, 300);
+            }
 
             if (itemSelected.length < 2) {
                 if (itemSelected.indexOf(this) == -1) {
@@ -557,6 +563,8 @@ define(['enemy'], function(enemy) {
             }
 
             if (itemSelected.length == 2) {
+                clearTimeout(this.timer);
+                /**/
 
                 for (var i = 0; i < itemSelected.length; i++) {
                     // i = current
@@ -568,42 +576,89 @@ define(['enemy'], function(enemy) {
                         _target = 0
                     }
 
-                    var tween = new TweenMax(itemSelected[i].targetObj, 0.5, {
+                    var _alpha = 1;
+                    var _scaleX = 1;
+                    var _scaleY = 1;
+                    //進到垃圾桶
+                    if (itemSelected[_target].myRow == 0 && itemSelected[_target].myId == 2) {
+                        _alpha = 0;
+                        _scaleX = 0.5;
+                        _scaleY = 0.5;
+                    }
+
+                    console.log(itemSelected[i].targetObj.scaleX);
+
+
+                    new TimelineLite().to(itemSelected[i].targetObj, 0.5, {
                         x: itemSelected[_target].x,
                         y: itemSelected[_target].y,
-                        alpha: 1
+                        alpha: _alpha,
+                        scaleX: _scaleX,
+                        scaleY: _scaleY,
+
+                        onComplete: function(_currentObj, _row, _id) {
+
+
+                            for (var j = 0; j < _itemTouchLayer.children.length; j++) {
+                                _itemTouchLayer.children[j].interactive = true;
+                            }
+
+                            if (_row == 0 && _id == 2) {
+                                //                         
+                                _currentObj.targetObj.alpha = 1;
+                                _currentObj.targetObj.visible = false;
+                                _currentObj.targetObj.scale.x = 1;
+                                _currentObj.targetObj.scale.y = 1;
+                            }
+                        },
+                        onCompleteParams: [itemSelected[_target], itemSelected[_target].myRow, itemSelected[_target].myId]
                     });
+
 
                     itemSelected[i].targetObj = itemSelectedTarget[_target].targetObj;
                     currentRole.equip[itemSelected[_target].myRow][itemSelected[_target].myId] = itemSelected[i].myItemId;
-                    itemSelected[i].myItemId = itemSelectedTarget[_target].itemId;                  
+                    itemSelected[i].myItemId = itemSelectedTarget[_target].itemId;
 
-                }              
+                    if (itemSelected[_target].myRow == 0 && itemSelected[_target].myId == 2) {
+                        itemSelected[_target].myItemId = 0;
+                    }
+
+
+                }
 
                 itemSelected = [];
                 itemSelectedTarget = [];
+                currentRole.equip[0].splice(2, 1);
+                arrCommonObj['trashCard'].myItemId = 0;
+                console.log(currentRole.equip);
             }
-
         }
 
         function _onDragEnd() {
 
             clearTimeout(this.timer);
 
-            this.data = null;
-            this.dragging = false;
 
             if (itemMode == "drag") {
+
+                this.targetObj.data = null;
+                this.targetObj.dragging = false;
                 itemSelected = [];
 
-                new TimelineLite().to(this, 0.2, {
-                    x: this.originX,
-                    y: this.originY,
+                new TimelineLite().to(this.targetObj, 0.1, {
+                    x: this.x,
+                    y: this.y,
                     alpha: 1
-                }).to(this.scale, 0.2, {
+                }).to(this.targetObj.scale, 0.1, {
                     x: 1,
-                    y: 1
+                    y: 1,
+                    onComplete: function() {
+                        for (var i = 0; i < _itemTouchLayer.children.length; i++) {
+                            _itemTouchLayer.children[i].interactive = true;
+                        }
+                    }
                 });
+
             }
 
             itemMode = '';
@@ -614,10 +669,10 @@ define(['enemy'], function(enemy) {
 
         function _onDragMove() {
 
-            if (this.dragging) {
-                var newPosition = this.data.getLocalPosition(this.parent);
-                this.position.x = newPosition.x - this.width / 2;
-                this.position.y = newPosition.y - this.height / 2;
+            if (this.targetObj.dragging) {
+                var newPosition = this.targetObj.data.getLocalPosition(this.targetObj.parent);
+                this.targetObj.position.x = newPosition.x - this.targetObj.width / 2;
+                this.targetObj.position.y = newPosition.y - this.targetObj.height / 2;
             }
         }
 
@@ -679,10 +734,15 @@ define(['enemy'], function(enemy) {
 
 
     function _updateStatusItem() {
+
+
         if (currentRole == null) {
             return false;
         }
         var _item = currentRole.equip;
+
+
+
         var _itemLayer = arrCommonObj['itemLayer'].children;
         var _itemTouchLayer = arrCommonObj['itemTouchLayer'].children;
 
@@ -696,10 +756,10 @@ define(['enemy'], function(enemy) {
 
                         _itemTouchLayer[k].myItemId = _item[i][j];
 
-                        _itemLayer[k].children[1].text = arrItems[_item[i][j]].name;
-
+                        // _itemLayer[k].children[1].text = arrItems[_item[i][j]].name;
+                        _itemTouchLayer[k].targetObj.children[1].text = arrItems[_item[i][j]].name;
                         if (_item[i][j] > 0) {
-                            _itemLayer[k].visible = true;
+                            _itemTouchLayer[k].targetObj.visible = true;
                         }
 
                         break;
@@ -707,6 +767,9 @@ define(['enemy'], function(enemy) {
                 }
             }
         }
+
+
+
     }
 
     function _updateSkill() {
@@ -748,8 +811,8 @@ define(['enemy'], function(enemy) {
         gameStage.visible = true;
         statusLayer.visible = false;
         mainUiLayer.visible = true;
-        arrCommonObj['trashCard'].myItemId = 0;
-        arrCommonObj['trashCard'].children[1].text = "empty";
+        /*     arrCommonObj['trashCard'].myItemId = 0;
+             arrCommonObj['trashCard'].children[1].text = "empty";*/
     }
 
 

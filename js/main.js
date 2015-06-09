@@ -32,20 +32,39 @@ requirejs(['init', 'jquery', 'pixi', 'TweenMax', 'EasePack'], function(init) {
         });
     }
 
+    Object.defineProperties(PIXI.Container.prototype, {
+        scaleX: {
+            get: function() {
+                return this.scale.x;
+            },
+            set: function(v) {
+                this.scale.x = v;
+            }
+        },
+        scaleY: {
+            get: function() {
+                return this.scale.y;
+            },
+            set: function(v) {
+                this.scale.y = v;
+            }
+        }
+    });
+
     loader = new PIXI.loaders.Loader();
     loader.add("map", "images/map.json");
-    loader.add("police_bg","images/police_bg.jpg");
-    loader.add("skill_bg","images/skill_bg.png");
-    loader.add("crackhouse","images/crackhouse.fnt");
-    loader.add("card_bg","images/card.jpg");
+    loader.add("police_bg", "images/police_bg.jpg");
+    loader.add("skill_bg", "images/skill_bg.png");
+    loader.add("crackhouse", "images/crackhouse.fnt");
+    loader.add("card_bg", "images/card.jpg");
     loader.on("complete", complete);
     loader.load();
 
 
-    function complete(loader,re) {
-        resource = re; 
-      
-        
+    function complete(loader, re) {
+        resource = re;
+
+
         init.init();
     }
 

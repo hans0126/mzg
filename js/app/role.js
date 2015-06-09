@@ -268,7 +268,7 @@ define(['attack', 'ui', 'findpath'], function(attack, ui, findpath) {
         var _getItem = Math.floor(Math.random() * arrItems.length);
         _closeAttackBtn();
         arrCommonObj['msgbox'].visible = true;
-        arrCommonObj['msgbox'].children = [];        
+        arrCommonObj['msgbox'].children = [];
 
         itemLayer.removeChild(this);
 
@@ -297,7 +297,11 @@ define(['attack', 'ui', 'findpath'], function(attack, ui, findpath) {
             ui.statusOpen();
 
             arrCommonObj['trashCard'].myItemId = this.itemId;
-            arrCommonObj['trashCard'].children[1].text = arrItems[this.itemId].name;
+            arrCommonObj['trashCard'].targetObj.children[1].text = arrItems[this.itemId].name;
+            arrCommonObj['trashCard'].targetObj.visible = true;
+
+            /* arrCommonObj['trashCard'].myItemId = this.itemId;
+             arrCommonObj['trashCard'].children[1].text = arrItems[this.itemId].name;*/
 
         }
 
