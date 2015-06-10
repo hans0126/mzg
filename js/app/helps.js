@@ -210,8 +210,8 @@ function createRandomId() {
 function checkActionPoint() {
     if (currentRole.actionPoint == 0) {
         currentRole.interactive = false;
-        currentRole.tint = arrRoleType[1].color;
-
+        currentRole.tint = 0x999999;
+        //16777215
         objectHelp(passageLayer.children, null, {
             interactive: false,
             tint: 0x666666,
@@ -268,28 +268,6 @@ function countdown() {
 
 }
 
-/* 隨機位置不重疊
-    _target : 比對的對象
-    _targetGroup : 比對的群組
-    _roomObject:區域
-    
- */
-
-function locationCheck(_target, _targetGroup, _roomObject) {
-
-    for (var i = 0; i < _targetGroup.length; i++) {
-        if (_target.local == _targetGroup[i].local && _target != _targetGroup[i]) {
-            if (hitTest(_target, _targetGroup[i])) {
-
-                _target.x = randomDeploy(_roomObject.localX, blockHeight);
-                _target.y = randomDeploy(_roomObject.localY, blockHeight);
-
-                locationCheck(_target, _targetGroup, _roomObject);
-                break;
-            }
-        }
-    }
-}
 
 
 /* 
@@ -332,8 +310,32 @@ function getRandomRoom(roomCount) {
 */
 
 function randomDeploy(level, space) {
-    return (Math.random() * (space - 30) + 15) + (space * level);
+    return (Math.random() * (space - 45) + 15) + (space * level);
 }
+
+/* 隨機位置不重疊
+    _target : 比對的對象
+    _targetGroup : 比對的群組
+    _roomObject:區域
+    
+ */
+
+function locationCheck(_target, _targetGroup, _roomObject) {
+
+    for (var i = 0; i < _targetGroup.length; i++) {
+        if (_target.local == _targetGroup[i].local && _target != _targetGroup[i]) {
+            if (hitTest(_target, _targetGroup[i])) {
+
+                _target.x = randomDeploy(_roomObject.localX, blockHeight);
+                _target.y = randomDeploy(_roomObject.localY, blockHeight);
+
+                locationCheck(_target, _targetGroup, _roomObject);
+                break;
+            }
+        }
+    }
+}
+
 
 
 function getRoomPassage(_roomId) {
@@ -404,7 +406,7 @@ function findGameObjfromMouse(_x, _y, _gameObj) {
         _y > _gameObj.y &&
         _y < _gameObj.y + _gameObj.height) {
 
-        _match = true;     
+        _match = true;
 
     }
 

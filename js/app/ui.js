@@ -359,8 +359,6 @@ define(['enemy'], function(enemy) {
                     console.log("Move");
                 }
             }, 1500);
-
-
         }
 
         function _onDragEnd() {
@@ -398,18 +396,12 @@ define(['enemy'], function(enemy) {
         function _getSkillDetail(_position) {
             var _sk = arrCommonObj['skillList'].children
             for (var i = 0; i < _sk.length; i++) {
-
                 if (findGameObjfromMouse(_position.x, _position.y, _sk[i])) {
                     console.log(i);
                     break;
                 }
-
             }
-
         }
-
-
-
     }
 
 
@@ -445,7 +437,7 @@ define(['enemy'], function(enemy) {
             _itemCaseParent.zIndex = i;
             _itemCaseParent.addChild(_itemCase);
             _itemLayer.addChild(_itemCaseParent);
-            _itemCaseParent.myItemId = 0; //初始
+
 
             if (i < 3) {
                 _itemBtn.x = i * _itemCaseParent.width + 20 * i;
@@ -481,19 +473,13 @@ define(['enemy'], function(enemy) {
             _textObj.x = 20;
             _textObj.y = 10;
 
-
             _itemCaseParent.addChild(_textObj);
 
-            _itemCaseParent.originX = _itemCaseParent.x;
-            _itemCaseParent.originY = _itemCaseParent.y;
             _itemCaseParent.visible = false;
-            //_itemCaseParent.visible = false;
-            /*bind drag event*/
             _itemBtn.interactive = true;
             _itemBtn.buttonMode = true;
 
             _itemBtn.targetObj = _itemCaseParent;
-
             _itemBtn.myItemId = 0;
 
             _itemBtn.on("mousedown", _onItemClick)
@@ -517,7 +503,6 @@ define(['enemy'], function(enemy) {
         statusLayer.updateLayersOrder();
 
         /*click process*/
-
         function _onItemClick(event) {
             //has rwo mode 1.traslate  2. combine item
 
@@ -526,6 +511,7 @@ define(['enemy'], function(enemy) {
 
             if (this.targetObj.visible) {
                 this.timer = setTimeout(function() {
+                    //combine mode
                     itemMode = "drag";
                     _zIndexUpFirst(_obj);
                     _obj.data = event.data;
@@ -542,9 +528,9 @@ define(['enemy'], function(enemy) {
                         }
                     }
 
-                    var tween = new TweenMax(_obj.scale, 0.2, {
-                        x: 1.1,
-                        y: 1.1,
+                    var tween = new TweenMax(_obj, 0.2, {
+                        scaleX: 1.1,
+                        scaleY: 1.1,
                         ease: Back.easeInOut
                     });
 
@@ -565,7 +551,6 @@ define(['enemy'], function(enemy) {
             if (itemSelected.length == 2) {
                 clearTimeout(this.timer);
                 /**/
-
                 for (var i = 0; i < itemSelected.length; i++) {
                     // i = current
                     // convers i
@@ -586,9 +571,6 @@ define(['enemy'], function(enemy) {
                         _scaleY = 0.5;
                     }
 
-                    console.log(itemSelected[i].targetObj.scaleX);
-
-
                     new TimelineLite().to(itemSelected[i].targetObj, 0.5, {
                         x: itemSelected[_target].x,
                         y: itemSelected[_target].y,
@@ -597,10 +579,10 @@ define(['enemy'], function(enemy) {
                         scaleY: _scaleY,
 
                         onComplete: function(_currentObj, _row, _id) {
-
-
                             for (var j = 0; j < _itemTouchLayer.children.length; j++) {
-                                _itemTouchLayer.children[j].interactive = true;
+                                if (_itemTouchLayer.children[j].myItemId != 99 || _itemTouchLayer.children[j].myItemId != 0) {
+                                    _itemTouchLayer.children[j].interactive = true;
+                                }
                             }
 
                             if (_row == 0 && _id == 2) {
@@ -622,8 +604,6 @@ define(['enemy'], function(enemy) {
                     if (itemSelected[_target].myRow == 0 && itemSelected[_target].myId == 2) {
                         itemSelected[_target].myItemId = 0;
                     }
-
-
                 }
 
                 itemSelected = [];
@@ -638,32 +618,16 @@ define(['enemy'], function(enemy) {
 
             clearTimeout(this.timer);
 
-
             if (itemMode == "drag") {
 
                 this.targetObj.data = null;
                 this.targetObj.dragging = false;
                 itemSelected = [];
 
-                new TimelineLite().to(this.targetObj, 0.1, {
-                    x: this.x,
-                    y: this.y,
-                    alpha: 1
-                }).to(this.targetObj.scale, 0.1, {
-                    x: 1,
-                    y: 1,
-                    onComplete: function() {
-                        for (var i = 0; i < _itemTouchLayer.children.length; i++) {
-                            _itemTouchLayer.children[i].interactive = true;
-                        }
-                    }
-                });
-
+                _checkCombine(this.targetObj, this);
             }
 
             itemMode = '';
-
-            // _checkHit(this);
 
         }
 
@@ -691,43 +655,68 @@ define(['enemy'], function(enemy) {
         /*
         touch area 60%+ triggle change
         */
-        function _checkHit(_obj) {
-            var _iL = _itemLayer.children;
+        function _checkCombine(_obj, _parent) {
+
+            var _iL = _itemTouchLayer.children;
+            var _getItemId;
+            var _targetObj;
 
             for (var i = 0; i < _iL.length; i++) {
                 if (hitTest(_iL[i], _obj) && _iL[i] != _obj) {
-
-                    var _recWidth = ((_obj.width - Math.abs(_obj.x - _iL[i].x)) / _obj.width) * 100;
-                    var _recHeight = ((_obj.height - Math.abs(_obj.y - _iL[i].y)) / _obj.height) * 100;
+                    _targetObj = _iL[i];
+                    var _recWidth = ((_obj.width - Math.abs(_obj.x - _targetObj.x)) / _obj.width) * 100;
+                    var _recHeight = ((_obj.height - Math.abs(_obj.y - _targetObj.y)) / _obj.height) * 100;
 
                     if (_recWidth > 60 && _recHeight > 60) {
-                        var _targetObj = _iL[i];
-                        var _currentItemId = _obj.myItemId;
-                        var _changeElement = [];
 
-                        _obj.children[1].text = arrItems[_targetObj.myItemId].name;
-                        _obj.myItemId = _targetObj.myItemId;
+                        //match element
+                        var _targetItemId = _targetObj.myItemId;
+                        var _currentItemId = _parent.myItemId;
 
-                        _targetObj.children[1].text = arrItems[_currentItemId].name;
-                        _targetObj.myItemId = _currentItemId;
-
-                        _changeElement.push(_obj, _targetObj);
-
-                        for (j = 0; j < _changeElement.length; j++) {
-                            console.log(_changeElement[j].myRow + "/" + _changeElement[j].myId);
-                            if (_changeElement[j].myRow != 0 || _changeElement[j].myId != 2) {
-
-                                currentRole.equip[_changeElement[j].myRow][_changeElement[j].myId] = _changeElement[j].myItemId;
+                        for (_key in arrItems) {
+                            var _martch1 = arrItems[_key].combineElement.indexOf(_targetItemId);
+                            var _martch2 = arrItems[_key].combineElement.indexOf(_currentItemId);
+                            if (_martch1 > -1 && _martch2 > -1 && _martch1 != _martch2) {
+                                _getItemId = _key;
+                                break;
                             }
                         }
 
-                        console.log(currentRole.equip);
-
-                        return true;
                         break;
-
                     }
                 }
+            }
+
+            if (_getItemId) {
+                _parent.myItemId = 0;
+                _obj.visible = 0;
+                _obj.x = _parent.x;
+                _obj.y = _parent.y;
+
+                console.log(_parent.myRow);
+
+                currentRole.equip[_parent.myRow][_parent.myId] = 0;
+
+                _targetObj.myItemId = _getItemId;
+                _targetObj.targetObj.children[1].text = arrItems[_getItemId].name;
+
+                currentRole.equip[_targetObj.myRow][_targetObj.myId] = _getItemId;
+
+                _itemTouchLayer.children[i].interactive = true;
+
+            } else {
+                new TimelineLite().to(_parent.targetObj, 0.1, {
+                    x: _parent.x,
+                    y: _parent.y,
+                    alpha: 1,
+                    scaleX: 1,
+                    scaleY: 1,
+                    onComplete: function() {
+                        for (var i = 0; i < _itemTouchLayer.children.length; i++) {
+                            _itemTouchLayer.children[i].interactive = true;
+                        }
+                    }
+                });
             }
         }
     }
@@ -735,18 +724,13 @@ define(['enemy'], function(enemy) {
 
     function _updateStatusItem() {
 
-
         if (currentRole == null) {
             return false;
         }
+
         var _item = currentRole.equip;
-
-
-
         var _itemLayer = arrCommonObj['itemLayer'].children;
         var _itemTouchLayer = arrCommonObj['itemTouchLayer'].children;
-
-
 
         for (var i = 0; i < _item.length; i++) {
             for (var j = 0; j < _item[i].length; j++) {
@@ -760,6 +744,10 @@ define(['enemy'], function(enemy) {
                         _itemTouchLayer[k].targetObj.children[1].text = arrItems[_item[i][j]].name;
                         if (_item[i][j] > 0) {
                             _itemTouchLayer[k].targetObj.visible = true;
+
+                            if (_item[i][j] == 99) {
+                                _itemTouchLayer[k].interactive = false;
+                            }
                         }
 
                         break;
@@ -767,9 +755,6 @@ define(['enemy'], function(enemy) {
                 }
             }
         }
-
-
-
     }
 
     function _updateSkill() {
@@ -782,7 +767,6 @@ define(['enemy'], function(enemy) {
 
             _textObj.y = i * _textObj.height + 10 * i;
             _textObj.skill = arrSkills[currentRole.skill[i]];
-
             arrCommonObj['skillList'].addChild(_textObj);
 
         }

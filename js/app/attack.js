@@ -1,9 +1,9 @@
-define(['findpath','ui'],function(findpath,ui) {    /**/
+define(['findpath', 'ui'], function(findpath, ui) { /**/
 
 
 
     function _attack() {
-       
+
         ui.closeAttackBtn();
         currentRole.actionPoint--;
         ui.updateAp(currentRole.actionPoint);
@@ -195,19 +195,19 @@ define(['findpath','ui'],function(findpath,ui) {    /**/
                             // 判斷所有動畫都撥完畢之後再刪除物件
                             var _allComplete = false;
                             for (var i = 0; i < _obj2.length; i++) {
-                              
+
                                 if (_obj2[i].progress() != 1) {
                                     _allComplete = false;
                                     break;
                                 } else {
                                     _allComplete = true;
                                 }
-                            }                          
+                            }
 
                             if (_allComplete) {
 
-                                  ui.updateScore(score);
-                                
+                                ui.updateScore(score);
+
                                 for (var i = 0; i < _arrRemoveTemp.length; i++) {
                                     _arrRemoveTemp[i].clear();
                                     for (var j = 0; j < enemyLayer.children.length; j++) {
@@ -234,7 +234,7 @@ define(['findpath','ui'],function(findpath,ui) {    /**/
 
             //清除陣列
             _attackEnd(_range);
-       
+
 
             for (var i = 0; i < actionUiLayer.children.length; i++) {
                 if (actionUiLayer.children[i].btnClass == "attackArea") {
@@ -262,7 +262,7 @@ define(['findpath','ui'],function(findpath,ui) {    /**/
             }
 
             function _tweenComplete(obj) {
-              
+
                 var _target = obj.target;
 
                 for (var j = 0; j < actionUiLayer.children.length; j++) {
@@ -271,7 +271,7 @@ define(['findpath','ui'],function(findpath,ui) {    /**/
                     }
                 }
 
-              
+
             }
         }
 
@@ -306,13 +306,46 @@ define(['findpath','ui'],function(findpath,ui) {    /**/
                 fill: 0x000000
             });
 
-            _textObj.myId = Math.floor(Math.random() * 1000) + "_" + Math.floor(Math.random() * 1000);
+            //判斷與目標的相對位置
+
+            if (_weaponObj.attackType == "melee") {
+                var _dx = this.x - currentRole.x;
+                var _dy = this.y - currentRole.y;
+
+                if (Math.abs(_dx) > this.width) {
+                    if (_dx > 0) {
+                        _dx = this.x - this.width;
+                    } else {
+                        _dx = this.x + this.width;
+                    }
+                } else {
+                    _dx = currentRole.x;
+                }
+
+                if (Math.abs(_dy) > this.height) {
+                    if (_dy > 0) {
+                        _dy = this.y - this.height;
+                    } else {
+                        _dy = this.y + this.height;
+                    }
+                } else {
+                    _dy = currentRole.y;
+                }
+
+                var tween = new TweenMax(currentRole, 0.3, {
+                    x: _dx,
+                    y: _dy
+                });
+            }
+
+            _textObj.myId = createRandomId();
 
             //計算攻擊
             if (_attackRoll() >= _successRange) {
                 console.log(_weaponObj.name + " 對 " + this.objectName + " 攻擊成功");
-                this.clear();
-                _textObj.text = "KILL";
+                //
+                _textObj.text = "KILLLLLL";
+
                 score++;
                 for (var i = 0; i < enemyLayer.children.length; i++) {
                     if (enemyLayer.children[i].objectName == this.objectName) {
@@ -328,15 +361,20 @@ define(['findpath','ui'],function(findpath,ui) {    /**/
                     }
                 }
 
+                //this.destroy();
+
             } else {
                 _textObj.text = "MISS";
                 console.log(_weaponObj.name + " 對 " + this.objectName + " 攻擊失誤");
             }
 
             actionUiLayer.addChild(_textObj);
-            _textObj.x = this.x - _textObj.width / 2;
-            _textObj.y = this.y - _textObj.height / 2;
 
+            _textObj.anchor.x = 0;
+            _textObj.anchor.y = 0;
+            _textObj.x = this.x  ;
+            _textObj.y = this.y - _textObj.height;
+            
             new TweenMax(_textObj, 0.5, {
                 y: _textObj.y - 30,
                 alpha: 0,
@@ -345,13 +383,16 @@ define(['findpath','ui'],function(findpath,ui) {    /**/
                     for (var i = 0; i < actionUiLayer.children.length; i++) {
                         if (actionUiLayer.children[i].myId == _obj.target.myId) {
                             actionUiLayer.children.splice(i, 1);
-                             ui.updateScore(score);
+
                         }
                     }
+
+                    ui.updateScore(score);
+
+
                 },
                 onCompleteParams: ["{self}"]
             })
-
             if (_attackCounter == 0 || _activeRole.length <= 0) {
                 _attackEnd(_range);
             }
@@ -394,15 +435,11 @@ define(['findpath','ui'],function(findpath,ui) {    /**/
         function _getSkillValue(_skillType) {
 
             var _returnValue = 0;
-
-
             for (var i = arrSkillType[_skillType][0]; i < arrSkillType[_skillType][1] + 1; i++) {
 
                 if (currentRole.skill.indexOf(parseInt(i)) > -1) {
                     _returnValue += arrSkills[i].value;
-                    console.log(arrSkills[i] + "/" + i);
                 }
-
             }
             return _returnValue;
         }
@@ -410,7 +447,7 @@ define(['findpath','ui'],function(findpath,ui) {    /**/
     }
 
     return {
-    	attack:_attack
+        attack: _attack
     }
 
 })

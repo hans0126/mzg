@@ -5,11 +5,10 @@ define(['attack', 'ui', 'findpath'], function(attack, ui, findpath) {
         this._roleTypeObj;
         this._faction;
         this._objectName;
+        this._spriteName
         this.create = function() {
-            var _role = new PIXI.Graphics();
-            _role.beginFill(this._roleTypeObj.color, 1);
-            _role.drawCircle(0, 0, 10);
-            _role.endFill();
+
+            var _role = PIXI.Sprite.fromFrame(this._spriteName);
 
             if (this._roleLocal == "undefined" || this._roleLocal == null) {
                 this._roleLocal = getRandomRoom(totalRoom);
@@ -19,8 +18,10 @@ define(['attack', 'ui', 'findpath'], function(attack, ui, findpath) {
 
             _role.x = randomDeploy(this._roleLocal.localX, blockWidth);
             _role.y = randomDeploy(this._roleLocal.localY, blockHeight);
+            _role.width = 50;
+            _role.height = 50;
 
-
+            console.log(_role.tint);
 
             if (this._objectName == "undefined" || this._objectName == null) {
                 _role.objectName = "z" + Math.floor(Math.random() * 999999) + "_" + new Date().getTime(); //亂數
@@ -42,8 +43,7 @@ define(['attack', 'ui', 'findpath'], function(attack, ui, findpath) {
     /*角色被選取時*/
     function _roleClick(event) {
         //console.log(this.objectName);
-        this.interactive = false;
-        this.tint = 0xFF0000;
+        this.interactive = false;      
 
         _activeCurrentRoomObj(this.local.room_id);
         currentRole = this;

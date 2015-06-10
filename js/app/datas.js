@@ -339,7 +339,8 @@ arrItems[0] = { //空物件
     maxRange: null,
     successRange: null,
     numberOfAttack: null,
-    dual: null
+    dual: null,
+    combineElement: []
 };
 
 arrItems[1] = {
@@ -351,7 +352,8 @@ arrItems[1] = {
     maxRange: 1,
     successRange: 4,
     numberOfAttack: 5,
-    dual: true
+    dual: true,
+    combineElement: []
 };
 arrItems[2] = {
     category: "weapon",
@@ -362,18 +364,79 @@ arrItems[2] = {
     maxRange: 0,
     successRange: 4,
     numberOfAttack: 2,
-    dual: true
+    dual: true,
+    combineElement: []
 };
 arrItems[3] = {
     category: "item",
     name: "Food",
-    attackType: "null",
+    attackType: null,
     power: null,
     minRange: null,
     maxRange: null,
     successRange: null,
-    numberOfAttack: null
+    numberOfAttack: null,
+    dual: null,
+    combineElement: []
 };
+
+arrItems[4] = {
+    category: "item",
+    name: "Nail",
+    attackType: null,
+    power: null,
+    minRange: null,
+    maxRange: null,
+    successRange: null,
+    numberOfAttack: null,
+    dual: null,
+    combineElement: []
+};
+
+arrItems[5] = {
+    category: "weapon",
+    name: "Bat",
+    attackType: "melee",
+    power: 1,
+    minRange: 0,
+    maxRange: 0,
+    successRange: 5,
+    numberOfAttack: 1,
+    dual: null,
+    combineElement: []
+};
+
+arrItems[6] = {
+    category: "weapon",
+    name: "Mace",
+    attackType: "melee",
+    power: 2,
+    minRange: 0,
+    maxRange: 0,
+    successRange: 3,
+    numberOfAttack: 1,
+    dual: null,
+    combineElement: [4, 5]
+};
+
+arrItems[99] = {
+    category: "item",
+    name: "Wound",
+    attackType:null,
+    power: 0,
+    minRange: 0,
+    maxRange: 0,
+    successRange: 0,
+    numberOfAttack: 0,
+    dual: null,
+    combineElement: []
+};
+
+
+
+
+
+
 
 /*
 skill 狀態區分 0-10 一種狀態(range 加成) ......

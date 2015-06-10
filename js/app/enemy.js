@@ -88,7 +88,8 @@ define(['findpath'], function(findpath) {
 
         objectHelp(playerLayer.children, {}, {
             interactive: true,
-            actionPoint: 3
+            actionPoint: 3,
+            tint:0xFFFFFF
         });
     }
 

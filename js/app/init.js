@@ -110,18 +110,18 @@ define(['ui', 'map', 'role', 'findpath', 'help', 'datas', 'meter'], function(ui,
         var cR = new role.createRole();
         cR._roleTypeObj = arrRoleType[0];
         cR._faction = "enemy";
-        for (var i = 0; i < 40; i++) {
+        for (var i = 0; i < 20; i++) {
             cR._roleLocal = null;
+            cR._spriteName = "role_zombie_"+Math.floor(Math.random()*2);
             var _enemy = cR.create();
             _enemy.visible = false;
-
             enemyLayer.addChild(_enemy);
-
         }
 
         var cR = new role.createRole();
         cR._roleTypeObj = arrRoleType[1];
         cR._faction = "player";
+        cR._spriteName ="role_phil";
         cR._roleLocal = getMapInfo(arrMap, {
             room_id: "f"
         })[0];
@@ -132,7 +132,7 @@ define(['ui', 'map', 'role', 'findpath', 'help', 'datas', 'meter'], function(ui,
         newR.interactive = true;
         newR.buttonMode = true;
 
-        newR.skill = [0,10,20,30,40,50,60,70];     
+        newR.skill = [];     
         newR.level = 1;
         newR.skill.push(newR.skillTree[0][0]);
 
@@ -140,7 +140,7 @@ define(['ui', 'map', 'role', 'findpath', 'help', 'datas', 'meter'], function(ui,
 
         newR.equip = [
             [1, 2],
-            [1, 3, 0]
+            [4, 5, 99]
         ];
         //[0] = hand 
         //[1] = backpack
@@ -195,11 +195,11 @@ define(['ui', 'map', 'role', 'findpath', 'help', 'datas', 'meter'], function(ui,
 
         /*拖拉地圖*/
 
-      /* gameStage.on('mousewheel',onWheel);
+        /*gameStage.on('mousewheel',onWheel);
 
         document.getElementById('gameView').addEventListener("mousewheel", onWheel, false);*/
 
-        // gridLayer.anchor.set(0.5);// graphics.pivot , sprite.anchor    
+        // gridLayer.anchor.set(0.5);// graphics.pivot , sprite.anchor  
 
 
         function onDragStart(event) {
@@ -217,7 +217,6 @@ define(['ui', 'map', 'role', 'findpath', 'help', 'datas', 'meter'], function(ui,
             this.alpha = 1;
 
             this.dragging = false;
-
             // set the interaction data to null
             this.data = null;
         }
