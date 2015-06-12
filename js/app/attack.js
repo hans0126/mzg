@@ -299,14 +299,14 @@ define(['findpath', 'ui'], function(findpath, ui) { /**/
         function _attackClick() {
 
             _attackCounter--;;
-            $('#attack_count').html(_attackCounter);
+           // $('#attack_count').html(_attackCounter);
             //
             var _textObj = new PIXI.Text('', {
                 font: '20px Arial',
                 fill: 0x000000
             });
 
-            //判斷與目標的相對位置
+            //判斷與目標的相對位置,並移動到目標旁
 
             if (_weaponObj.attackType == "melee") {
                 var _dx = this.x - currentRole.x;
@@ -342,12 +342,13 @@ define(['findpath', 'ui'], function(findpath, ui) { /**/
 
             //計算攻擊
             if (_attackRoll() >= _successRange) {
+
                 console.log(_weaponObj.name + " 對 " + this.objectName + " 攻擊成功");
                 //
-                _textObj.text = "KILLLLLL";
+                _textObj.text = "KILL";
 
                 score++;
-                for (var i = 0; i < enemyLayer.children.length; i++) {
+               for (var i = 0; i < enemyLayer.children.length; i++) {
                     if (enemyLayer.children[i].objectName == this.objectName) {
                         enemyLayer.children.splice(i, 1);
                         break;
@@ -361,7 +362,25 @@ define(['findpath', 'ui'], function(findpath, ui) { /**/
                     }
                 }
 
-                //this.destroy();
+                //震動
+                /*
+                new TweenMax.fromTo(this, 0.3, {
+                    x: this.x - 1
+                }, {
+                    x: this.x,
+
+                    ease: RoughEase.ease.config({
+                        strength: 18,
+                        points: 20,
+                        template: Linear.easeNone,
+                        randomize: false
+                    }),
+                    clearProps: "x"
+                })
+                */
+
+
+
 
             } else {
                 _textObj.text = "MISS";
@@ -372,9 +391,9 @@ define(['findpath', 'ui'], function(findpath, ui) { /**/
 
             _textObj.anchor.x = 0;
             _textObj.anchor.y = 0;
-            _textObj.x = this.x  ;
+            _textObj.x = this.x;
             _textObj.y = this.y - _textObj.height;
-            
+
             new TweenMax(_textObj, 0.5, {
                 y: _textObj.y - 30,
                 alpha: 0,
@@ -383,7 +402,6 @@ define(['findpath', 'ui'], function(findpath, ui) { /**/
                     for (var i = 0; i < actionUiLayer.children.length; i++) {
                         if (actionUiLayer.children[i].myId == _obj.target.myId) {
                             actionUiLayer.children.splice(i, 1);
-
                         }
                     }
 
@@ -393,6 +411,7 @@ define(['findpath', 'ui'], function(findpath, ui) { /**/
                 },
                 onCompleteParams: ["{self}"]
             })
+
             if (_attackCounter == 0 || _activeRole.length <= 0) {
                 _attackEnd(_range);
             }

@@ -2,7 +2,7 @@ define(['ui', 'map', 'role', 'findpath', 'help', 'datas', 'meter'], function(ui,
 
     function init() {
 
-      
+
 
         stats = new Stats();
         stats.setMode(0); // 0: fps, 1: ms
@@ -102,8 +102,6 @@ define(['ui', 'map', 'role', 'findpath', 'help', 'datas', 'meter'], function(ui,
         /*create map*/
         map.createMap();
 
-
-
         //增加容器 
 
 
@@ -112,7 +110,7 @@ define(['ui', 'map', 'role', 'findpath', 'help', 'datas', 'meter'], function(ui,
         cR._faction = "enemy";
         for (var i = 0; i < 20; i++) {
             cR._roleLocal = null;
-            cR._spriteName = "role_zombie_"+Math.floor(Math.random()*2);
+            cR._spriteName = "role_zombie_" + Math.floor(Math.random() * 2);
             var _enemy = cR.create();
             _enemy.visible = false;
             enemyLayer.addChild(_enemy);
@@ -121,7 +119,7 @@ define(['ui', 'map', 'role', 'findpath', 'help', 'datas', 'meter'], function(ui,
         var cR = new role.createRole();
         cR._roleTypeObj = arrRoleType[1];
         cR._faction = "player";
-        cR._spriteName ="role_phil";
+        cR._spriteName = "role_phil";
         cR._roleLocal = getMapInfo(arrMap, {
             room_id: "f"
         })[0];
@@ -132,11 +130,11 @@ define(['ui', 'map', 'role', 'findpath', 'help', 'datas', 'meter'], function(ui,
         newR.interactive = true;
         newR.buttonMode = true;
 
-        newR.skill = [];     
+        newR.skill = [];
         newR.level = 1;
         newR.skill.push(newR.skillTree[0][0]);
 
-        
+
 
         newR.equip = [
             [1, 2],
@@ -170,7 +168,7 @@ define(['ui', 'map', 'role', 'findpath', 'help', 'datas', 'meter'], function(ui,
             faction: "player"
         })[0];
 
-       moveToTarget(getInitCurrentPlayer.x, getInitCurrentPlayer.y);
+        moveToTarget(getInitCurrentPlayer.x, getInitCurrentPlayer.y);
 
         $('#e_move').click(function() {
             enemyMove();

@@ -21,8 +21,6 @@ define(['attack', 'ui', 'findpath'], function(attack, ui, findpath) {
             _role.width = 50;
             _role.height = 50;
 
-            console.log(_role.tint);
-
             if (this._objectName == "undefined" || this._objectName == null) {
                 _role.objectName = "z" + Math.floor(Math.random() * 999999) + "_" + new Date().getTime(); //亂數
             } else {

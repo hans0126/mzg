@@ -58,12 +58,16 @@ requirejs(['init', 'jquery', 'pixi', 'TweenMax', 'EasePack'], function(init) {
     loader.add("crackhouse", "images/crackhouse.fnt");
     loader.add("card_bg", "images/card.jpg");
     loader.add("role", "images/role.json");
+    loader.add("wound", "images/wound_card.jpg");
     loader.on("complete", complete);
     loader.load();
 
 
     function complete(loader, re) {
-        resource = re;      
+        resource = re;
+
+       
+
         init.init();
     }
 

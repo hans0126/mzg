@@ -580,7 +580,8 @@ define(['enemy'], function(enemy) {
 
                         onComplete: function(_currentObj, _row, _id) {
                             for (var j = 0; j < _itemTouchLayer.children.length; j++) {
-                                if (_itemTouchLayer.children[j].myItemId != 99 || _itemTouchLayer.children[j].myItemId != 0) {
+                                if (_itemTouchLayer.children[j].myItemId != 99) {
+
                                     _itemTouchLayer.children[j].interactive = true;
                                 }
                             }
@@ -610,7 +611,7 @@ define(['enemy'], function(enemy) {
                 itemSelectedTarget = [];
                 currentRole.equip[0].splice(2, 1);
                 arrCommonObj['trashCard'].myItemId = 0;
-                console.log(currentRole.equip);
+
             }
         }
 
@@ -693,8 +694,6 @@ define(['enemy'], function(enemy) {
                 _obj.x = _parent.x;
                 _obj.y = _parent.y;
 
-                console.log(_parent.myRow);
-
                 currentRole.equip[_parent.myRow][_parent.myId] = 0;
 
                 _targetObj.myItemId = _getItemId;
@@ -702,7 +701,7 @@ define(['enemy'], function(enemy) {
 
                 currentRole.equip[_targetObj.myRow][_targetObj.myId] = _getItemId;
 
-                _itemTouchLayer.children[i].interactive = true;
+                //  _itemTouchLayer.children[i].interactive = true;
 
             } else {
                 new TimelineLite().to(_parent.targetObj, 0.1, {
@@ -712,11 +711,17 @@ define(['enemy'], function(enemy) {
                     scaleX: 1,
                     scaleY: 1,
                     onComplete: function() {
-                        for (var i = 0; i < _itemTouchLayer.children.length; i++) {
-                            _itemTouchLayer.children[i].interactive = true;
-                        }
+                        /* for (var i = 0; i < _itemTouchLayer.children.length; i++) {
+                             _itemTouchLayer.children[i].interactive = true;
+                         }*/
                     }
                 });
+            }
+
+            for (var i = 0; i < _itemTouchLayer.children.length; i++) {
+                if (_itemTouchLayer.children[i].myItemId != 99) {
+                    _itemTouchLayer.children[i].interactive = true;
+                }
             }
         }
     }
@@ -747,6 +752,13 @@ define(['enemy'], function(enemy) {
 
                             if (_item[i][j] == 99) {
                                 _itemTouchLayer[k].interactive = false;
+
+                                //_itemTouchLayer[k].targetObj.children[0].texture(resource.card_bg.texture);
+
+                                _itemTouchLayer[k].targetObj.children[0].texture = resource.wound.texture;
+                                _itemTouchLayer[k].targetObj.children[1].text = '';
+
+
                             }
                         }
 
