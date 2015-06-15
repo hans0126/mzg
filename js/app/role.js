@@ -41,7 +41,7 @@ define(['attack', 'ui', 'findpath'], function(attack, ui, findpath) {
     /*角色被選取時*/
     function _roleClick(event) {
         //console.log(this.objectName);
-        this.interactive = false;      
+        this.interactive = false;
 
         _activeCurrentRoomObj(this.local.room_id);
         currentRole = this;
@@ -237,11 +237,11 @@ define(['attack', 'ui', 'findpath'], function(attack, ui, findpath) {
 
         }
 
-        console.log(itemLayer.children.length);
+
 
         for (var i = 0; i < itemLayer.children.length; i++) {
             if (itemLayer.children[i].local.room_id == room_id) {
-                console.log(i);
+
                 itemLayer.children[i].interactive = true;
             }
         }

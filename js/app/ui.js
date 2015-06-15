@@ -816,22 +816,16 @@ define(['enemy'], function(enemy) {
     function _closeAttackBtn() {
         for (var i = 0; i < actionUiLayer.children.length; i++) {
             if (actionUiLayer.children[i].btnClass == "attackBtn") {
-
                 actionUiLayer.children[i].interactive = false;
-                var tween = new TweenMax(actionUiLayer.children[i], 0.3, {
+                new TweenMax(actionUiLayer.children[i], 0.3, {
                     x: currentRole.x,
                     y: currentRole.y,
                     alpha: 0,
-                    onComplete: function() {
-                        var _target = this.target;
-
-                        for (var j = 0; j < actionUiLayer.children.length; j++) {
-                            if (actionUiLayer.children[j].myId == _target.myId) {
-                                actionUiLayer.children.splice(j, 1);
-                            }
-                        }
-
-                    }
+                    onComplete: function(_self) {
+                        var _target = _self.target;
+                        actionUiLayer.removeChild(_target);
+                    },
+                    onCompleteParams:["{self}"]
                 });
             }
         }

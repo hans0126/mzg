@@ -359,6 +359,37 @@ function getRoomPassage(_roomId) {
     return _returnPassage;
 }
 
+/*取得目標相近座標*/
+
+function moveToNearTarget(_current, _target) {
+    var _dx = _target.x - _current.x;
+    var _dy = _target.y - _current.y;
+
+    if (Math.abs(_dx) > _target.width) {
+        if (_dx > 0) {
+            _dx = _target.x - _target.width;
+        } else {
+            _dx = _target.x + _target.width;
+        }
+    } else {
+        _dx = _current.x;
+    }
+
+    if (Math.abs(_dy) > _target.height) {
+        if (_dy > 0) {
+            _dy = _target.y - _target.height;
+        } else {
+            _dy = _target.y + _target.height;
+        }
+    } else {
+        _dy = _current.y;
+    }
+
+    return {
+        x: _dx,
+        y: _dy
+    }
+}
 
 
 /**/
@@ -454,6 +485,23 @@ function findEnemyByNoise() {
     });
 
 }
+
+/*震動效果*/
+function shakeAnimation(_obj) {
+    new TweenMax.fromTo(_obj, 0.2, {
+        x: _obj.x - 1
+    }, {
+        x: _obj.x,
+        ease: RoughEase.ease.config({
+            strength: 18,
+            points: 20,
+            template: Linear.easeNone,
+            randomize: false
+        }),
+        clearProps: "x"
+    })
+}
+
 
 
 

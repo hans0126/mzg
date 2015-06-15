@@ -57,17 +57,14 @@ define(['findpath'], function(findpath) {
         for (var i = 0; i < _canMovePlay.length; i++) {
             _canMovePlay[i].local = _canMoveTargetRoom[i];
             //_canMovePlay[i].actionMovement = true;
-
-            var tween = new TweenMax(_canMovePlay[i], ((Math.random() * 5) + 4) / 10, {
+            new TweenMax(_canMovePlay[i], ((Math.random() * 5) + 4) / 10, {
                 x: _canMovePlay[i].goalX,
                 y: _canMovePlay[i].goalY
             });
         }
+
         //取得所有玩家
-
-        objectHelp(enemyLayer.children, {
-
-        }, {
+        objectHelp(enemyLayer.children, {}, {
             visible: false
         });
 
@@ -89,11 +86,68 @@ define(['findpath'], function(findpath) {
         objectHelp(playerLayer.children, {}, {
             interactive: true,
             actionPoint: 3,
-            tint:0xFFFFFF
+            tint: 0xFFFFFF
         });
+
+        _enemyAttack();
     }
 
+    function _enemyAttack() {
+
+        var _players = playerLayer.children;
+        var _enemys = enemyLayer.children;
+
+        for (var i = 0; i < _players.length; i++) {
+            var _local = _players[i].local;
+            var _count = 0;
+
+            for (var j = 0; j < _enemys.length; j++) {
+
+                if (_enemys[j].local == _local) {
+                    _count++;
+
+                    if (_players[i].wound < 5) {
+                      
+
+                        //random equip block 0:hand 1:backpack
+                        _getWound(_players[i]);                       
+                         _players[i].wound++;
+
+
+
+
+                    } else {
+                        console.log("playre die!!");
+                    }
+                }
+
+            }
+        }
+    }
+
+    function _getWound(_playerObj, _type, _block, _history) {
+       
+        if (typeof(_history) == "undefined") {
+            //            _history = [];
+            //初始掃描裝備欄是否有傷並做history標記 true:有傷 必須在找下一個
+            _history = []
+
+            for (var i = 0; i < _playerObj.equip.length; i++) {             
+                for (var j = 0; j < _playerObj.equip[i].length; j++) {
+                    if (_playerObj.equip[i][j] != 99) {
+                        _history.push([i,j]);
+                    } 
+                }
+
+            }
+        }
+
+        var getRandom = Math.floor(Math.random()*_history.length);
+        _playerObj.equip[_history[getRandom][0]][_history[getRandom][1]] = 99;
+    }
+
+
     return {
-        enemyMove:_enemyMove
+        enemyMove: _enemyMove
     }
 })

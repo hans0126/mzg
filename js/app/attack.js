@@ -1,7 +1,5 @@
 define(['findpath', 'ui'], function(findpath, ui) { /**/
 
-
-
     function _attack() {
 
         ui.closeAttackBtn();
@@ -43,15 +41,14 @@ define(['findpath', 'ui'], function(findpath, ui) { /**/
             }
         }
 
+
         if (_range) {
             if (currentRole.skill.indexOf(parseInt(70)) > -1) {
                 _range = false;
-
             }
         }
 
-
-
+        //雙持武器
         if (_weaponObj.dual) {
             if (currentRole.equip[0][0] == currentRole.equip[0][1]) {
                 _numberOfAttack = _numberOfAttack * 2;
@@ -79,13 +76,11 @@ define(['findpath', 'ui'], function(findpath, ui) { /**/
             var _tg = new PIXI.Graphics();
             _tg.beginFill(0x3333FF);
             _tg.alpha = 0.7;
-            _tg.interactive = true;
             _tg.buttonMode = true;
             _tg.on('mousedown', _randomAttack);
             _tg.local = _roomObj;
             _tg.btnClass = "attackArea";
             _tg.alpha = 0.5;
-            _tg.myId = Math.floor(Math.random() * 1000) + "_" + Math.floor(Math.random() * 1000);
 
             var _x = (_roomObj.localX * blockWidth) + 10;
             var _y = (_roomObj.localY * blockHeight) + 10;
@@ -95,20 +90,17 @@ define(['findpath', 'ui'], function(findpath, ui) { /**/
             _tg.x = (_currentLocal.localX * blockWidth);
             _tg.y = (_currentLocal.localY * blockHeight);
 
-            var tween = new TweenMax(_tg, 0.3, {
+            new TweenMax(_tg, 0.3, {
                 x: _x,
                 y: _y,
                 alpha: 0.5,
-                onComplete: function() {
-                    var _target = this.target;
-                    for (var j = 0; j < actionUiLayer.children.length; j++) {
-                        if (actionUiLayer.children[j].myId == _target.myId) {
-                            actionUiLayer.children[j].interactive = true;
-                        }
-                    }
-
-                }
+                onComplete: function(_self) {
+                    var _target = _self.target;
+                    _target.interactive = true;
+                },
+                onCompleteParams: ["{self}"]
             });
+
             actionUiLayer.addChild(_tg);
 
             return _tg;
@@ -124,7 +116,6 @@ define(['findpath', 'ui'], function(findpath, ui) { /**/
 
             //判斷攻擊次數以及成功
             for (var i = 0; i < _numberOfAttack; i++) {
-
                 if (_attackRoll() >= _successRange) {
                     _arrAttackResult.push(true);
                     score++;
@@ -144,56 +135,48 @@ define(['findpath', 'ui'], function(findpath, ui) { /**/
                 while (_attackCount < _arrAttackResult.length) {
 
                     var _success = false;
-
-                    var _textObj = new PIXI.Text('', {
-                        font: '20px Arial',
-                        fill: 0x000000
-                    });
-
-                    _textObj.myId = Math.floor(Math.random() * 1000) + "_" + Math.floor(Math.random() * 1000);
-
-
-
+                    //display attack result
+                    var _textObj = new _desplayAttackText();
 
                     if (_arrAttackResult[_attackCount]) {
                         console.log(_weaponObj.name + " 對 " + _arrTemp[i].objectName + " 攻擊成功");
                         _success = true;
-                        _textObj.text = "KILL";
+                        _textObj.setText = "KILL";
                         _arrRemoveTemp.push(_arrTemp[i]);
 
                     } else {
                         console.log(_weaponObj.name + " 對 " + _arrTemp[i].objectName + " 攻擊失誤");
-                        _textObj.text = "MISS";
-
+                        _textObj.setText = "MISS";
                     }
 
+                    var _textObj = _textObj.create();
+                    _textObj.alpha = 0;
                     actionUiLayer.addChild(_textObj);
+
                     _textObj.x = _arrTemp[i].x - _textObj.width / 2;
                     _textObj.y = _arrTemp[i].y - _textObj.height / 2;
-                    _textObj.alpha = 0;
-                    /*  new TweenMax(_textObj, 0.3, {
-                          y: _textObj.y - 30,
-                          alpha: 0,
-                          delay: (_attackCount * 0.3)
 
-                      })*/
-
-                    var _ani = new TimelineLite().to(_textObj, 0.2, {
+                    var _ani = new TimelineMax().to(_textObj, 0.2, {
                         y: _textObj.y - 30,
                         alpha: 1,
-                        delay: (_attackCount * 0.3)
+                        delay: (_attackCount * 0.3),
+                        onStart: function(_self) {
+                            for (var i = 0; i < _arrRemoveTemp.length; i++) {
+                                if (_arrRemoveTemp[i].myId == _self.myId) {
+                                    shakeAnimation(_self);
+                                    break;
+                                }
+                            }
+                        },
+                        onStartParams: [_arrTemp[i]]
                     }).to(_textObj, 0.1, {
                         alpha: 0,
                         onComplete: function(_obj, _obj2) {
 
-                            for (var i = 0; i < actionUiLayer.children.length; i++) {
-                                if (actionUiLayer.children[i].myId == _obj.target.myId) {
-                                    actionUiLayer.children.splice(i, 1);
-                                }
-                            }
-
+                            actionUiLayer.removeChild(_obj.target);
                             // 判斷所有動畫都撥完畢之後再刪除物件
                             var _allComplete = false;
+
                             for (var i = 0; i < _obj2.length; i++) {
 
                                 if (_obj2[i].progress() != 1) {
@@ -205,14 +188,12 @@ define(['findpath', 'ui'], function(findpath, ui) { /**/
                             }
 
                             if (_allComplete) {
-
                                 ui.updateScore(score);
-
                                 for (var i = 0; i < _arrRemoveTemp.length; i++) {
-                                    _arrRemoveTemp[i].clear();
                                     for (var j = 0; j < enemyLayer.children.length; j++) {
                                         if (_arrRemoveTemp[i] == enemyLayer.children[j]) {
-                                            enemyLayer.children.splice(j, 1);
+                                            // 淡出特效後移除
+                                           _fadeOutRemoveObj(_arrRemoveTemp[i]);
                                             break;
                                         }
                                     }
@@ -231,15 +212,14 @@ define(['findpath', 'ui'], function(findpath, ui) { /**/
                 }
             }
 
-
             //清除陣列
             _attackEnd(_range);
-
+            // debugger;
 
             for (var i = 0; i < actionUiLayer.children.length; i++) {
                 if (actionUiLayer.children[i].btnClass == "attackArea") {
-                    if (actionUiLayer.children[i].myId == this.myId) {
-                        var tween = new TweenMax(actionUiLayer.children[i], 0.6, {
+                    if (actionUiLayer.children[i] == this) {
+                        new TweenMax(actionUiLayer.children[i], 0.6, {
                             alpha: 0,
                             ease: RoughEase.ease.config({
                                 points: 10,
@@ -249,8 +229,7 @@ define(['findpath', 'ui'], function(findpath, ui) { /**/
                             onCompleteParams: ["{self}"]
                         });
                     } else {
-
-                        var tween = new TweenMax(actionUiLayer.children[i], 0.2, {
+                        new TweenMax(actionUiLayer.children[i], 0.2, {
                             alpha: 0,
                             x: (_currentLocal.localX * blockWidth) + 10,
                             y: (_currentLocal.localY * blockWidth) + 10,
@@ -262,16 +241,8 @@ define(['findpath', 'ui'], function(findpath, ui) { /**/
             }
 
             function _tweenComplete(obj) {
-
                 var _target = obj.target;
-
-                for (var j = 0; j < actionUiLayer.children.length; j++) {
-                    if (actionUiLayer.children[j].myId == _target.myId) {
-                        actionUiLayer.children.splice(j, 1);
-                    }
-                }
-
-
+                actionUiLayer.removeChild(_target);
             }
         }
 
@@ -288,7 +259,6 @@ define(['findpath', 'ui'], function(findpath, ui) { /**/
                     enemyLayer.children[i].tint = 0xFFF000;
                     _activeRole.push(enemyLayer.children[i]);
                 }
-
             }
 
             _attackCounter = _numberOfAttack;
@@ -299,42 +269,17 @@ define(['findpath', 'ui'], function(findpath, ui) { /**/
         function _attackClick() {
 
             _attackCounter--;;
-           // $('#attack_count').html(_attackCounter);
+            // $('#attack_count').html(_attackCounter);
             //
-            var _textObj = new PIXI.Text('', {
-                font: '20px Arial',
-                fill: 0x000000
-            });
+            var _textObj = new _desplayAttackText().create();
+            var _killedObj = null;
 
             //判斷與目標的相對位置,並移動到目標旁
-
             if (_weaponObj.attackType == "melee") {
-                var _dx = this.x - currentRole.x;
-                var _dy = this.y - currentRole.y;
-
-                if (Math.abs(_dx) > this.width) {
-                    if (_dx > 0) {
-                        _dx = this.x - this.width;
-                    } else {
-                        _dx = this.x + this.width;
-                    }
-                } else {
-                    _dx = currentRole.x;
-                }
-
-                if (Math.abs(_dy) > this.height) {
-                    if (_dy > 0) {
-                        _dy = this.y - this.height;
-                    } else {
-                        _dy = this.y + this.height;
-                    }
-                } else {
-                    _dy = currentRole.y;
-                }
-
+                var _np = moveToNearTarget(currentRole, this);
                 var tween = new TweenMax(currentRole, 0.3, {
-                    x: _dx,
-                    y: _dy
+                    x: _np.x,
+                    y: _np.y
                 });
             }
 
@@ -348,39 +293,8 @@ define(['findpath', 'ui'], function(findpath, ui) { /**/
                 _textObj.text = "KILL";
 
                 score++;
-               for (var i = 0; i < enemyLayer.children.length; i++) {
-                    if (enemyLayer.children[i].objectName == this.objectName) {
-                        enemyLayer.children.splice(i, 1);
-                        break;
-                    }
-                }
 
-                for (var i = 0; i < _activeRole.length; i++) {
-                    if (_activeRole[i].objectName == this.objectName) {
-                        _activeRole.splice(i, 1);
-                        break;
-                    }
-                }
-
-                //震動
-                /*
-                new TweenMax.fromTo(this, 0.3, {
-                    x: this.x - 1
-                }, {
-                    x: this.x,
-
-                    ease: RoughEase.ease.config({
-                        strength: 18,
-                        points: 20,
-                        template: Linear.easeNone,
-                        randomize: false
-                    }),
-                    clearProps: "x"
-                })
-                */
-
-
-
+                _killedObj = this;
 
             } else {
                 _textObj.text = "MISS";
@@ -389,44 +303,36 @@ define(['findpath', 'ui'], function(findpath, ui) { /**/
 
             actionUiLayer.addChild(_textObj);
 
-            _textObj.anchor.x = 0;
-            _textObj.anchor.y = 0;
             _textObj.x = this.x;
             _textObj.y = this.y - _textObj.height;
 
             new TweenMax(_textObj, 0.5, {
                 y: _textObj.y - 30,
                 alpha: 0,
-                onComplete: function(_obj) {
-
-                    for (var i = 0; i < actionUiLayer.children.length; i++) {
-                        if (actionUiLayer.children[i].myId == _obj.target.myId) {
-                            actionUiLayer.children.splice(i, 1);
-                        }
+                onStart: function(_self) {
+                    shakeAnimation(_self);
+                },
+                onStartParams: [this],
+                onComplete: function(_obj, _removeObj) {
+                    actionUiLayer.removeChild(_obj.target);
+                    if (_removeObj) {
+                       _fadeOutRemoveObj(_removeObj);
                     }
 
                     ui.updateScore(score);
-
-
                 },
-                onCompleteParams: ["{self}"]
+                onCompleteParams: ["{self}", _killedObj]
             })
 
             if (_attackCounter == 0 || _activeRole.length <= 0) {
                 _attackEnd(_range);
             }
-            //this.off("mousedown", testaaa);
 
         }
 
         function _attackEnd(attackType) {
 
-            if (attackType) { //is range true
-                /*  for (var i = 0; i < attackButtom.length; i++) {
-                      attackButtom[i].clear();
-                  }
-
-                  attackButtom = [];*/
+            if (attackType) {
 
             } else {
                 console.log("end");
@@ -450,7 +356,6 @@ define(['findpath', 'ui'], function(findpath, ui) { /**/
         }
 
         //讀取技能參數
-
         function _getSkillValue(_skillType) {
 
             var _returnValue = 0;
@@ -461,6 +366,33 @@ define(['findpath', 'ui'], function(findpath, ui) { /**/
                 }
             }
             return _returnValue;
+        }
+
+        function _desplayAttackText() {
+            this.setText = '';
+            this.create = function() {
+
+                var _textObj = new PIXI.extras.BitmapText("", {
+                    font: "50px Crackhouse",
+                    tint: 0x000000
+                });
+
+                _textObj.myId = createRandomId();
+                _textObj.text = this.setText;
+
+                return _textObj;
+            }
+
+        }
+
+        function _fadeOutRemoveObj(_obj) {
+            new TweenMax(_obj, 0.3, {
+                alpha: 0,
+                onComplete: function() {
+                    enemyLayer.removeChild(_obj);
+                },
+                onCompleteParams: [_obj]
+            })
         }
 
     }

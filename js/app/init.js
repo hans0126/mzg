@@ -138,8 +138,10 @@ define(['ui', 'map', 'role', 'findpath', 'help', 'datas', 'meter'], function(ui,
 
         newR.equip = [
             [1, 2],
-            [4, 5, 99]
+            [0, 99, 0]
         ];
+
+        newR.wound = 1;
         //[0] = hand 
         //[1] = backpack
         newR.actionPoint = 3;
