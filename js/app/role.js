@@ -1,7 +1,7 @@
 define(['attack', 'ui', 'findpath'], function(attack, ui, findpath) {
 
     function _createRole() {
-        this._roleLocal; //Object
+        this._roleLocal = null; //Object
         this._roleTypeObj;
         this._faction;
         this._objectName;
@@ -14,17 +14,15 @@ define(['attack', 'ui', 'findpath'], function(attack, ui, findpath) {
                 this._roleLocal = getRandomRoom(totalRoom);
             }
 
-            //  var _roomLocal = getRoomObject(this._roleLocal);
-
             _role.x = randomDeploy(this._roleLocal.localX, blockWidth);
             _role.y = randomDeploy(this._roleLocal.localY, blockHeight);
             _role.width = 50;
             _role.height = 50;
 
             if (this._objectName == "undefined" || this._objectName == null) {
-                _role.objectName = "z" + Math.floor(Math.random() * 999999) + "_" + new Date().getTime(); //亂數
+                _role.myId = "z" + Math.floor(Math.random() * 999999) + "_" + new Date().getTime(); //亂數
             } else {
-                _role.objectName = this._objectName;
+                _role.myId = this._objectName;
             }
 
             _role.local = this._roleLocal;
@@ -37,10 +35,67 @@ define(['attack', 'ui', 'findpath'], function(attack, ui, findpath) {
         }
     }
 
+    function _createEnemy() {
+        for (var i = 0; i < appearEnemy.length; i++) {
+            for (j = 0; j < appearEnemy[i].count; j++) {
+                var cR = new _createRole();
+                cR._roleTypeObj = arrRoleType[appearEnemy[i].id];
+                cR._spriteName = "role_zombie_" + Math.floor(Math.random() * 2);
+                var _enemy = cR.create();
+                _enemy.visible = true;
+                enemyLayer.addChild(_enemy);
+            }
+        }
+    }
+
+    function _createPlayer() {
+        for (var i = 0; i < appearPlayer.length; i++) {
+            var cR = new _createRole();
+            cR._roleTypeObj = arrRoleType[appearPlayer[i]];
+            cR._spriteName = "role_phil";
+            cR._roleLocal = null;
+            var newR = cR.create();
+            newR.skillTree = arrRoleType[appearPlayer[i]].skillTree;
+
+            playerLayer.addChild(newR);
+
+            newR.interactive = true;
+            newR.buttonMode = true;
+
+            newR.skill = [];
+            newR.level = 1;
+            newR.skill.push(newR.skillTree[0][0]);
+            //[0] = hand 
+            //[1] = backpack
+            newR.equip = [
+                [1, 2],
+                [0, 0, 0]
+            ];
+
+            newR.wound = 0;
+            newR.actionPoint = 3;
+            newR.on('mousedown', _roleClick);
+
+            //取得視野
+            newR.panorama = findpath.getPanorama(newR.local.room_id, 0, 5);
+/*
+            for (var j = 0; j < newR.panorama.length; j++) {
+
+                objectHelp(enemyLayer.children, {
+                    local: newR.panorama[j]
+                }, {
+                    visible: true
+                });
+
+            }*/
+        }
+    }
+
 
     /*角色被選取時*/
     function _roleClick(event) {
         //console.log(this.objectName);
+        _closeAttackBtn();
         this.interactive = false;
 
         _activeCurrentRoomObj(this.local.room_id);
@@ -129,17 +184,15 @@ define(['attack', 'ui', 'findpath'], function(attack, ui, findpath) {
             },
             onCompleteParams: ["{self}"]
         });
-
-
-
     }
 
 
     function _closeAttackBtn() {
         ui.closeAttackBtn();
-        currentRole.interactive = true;
+        objectHelp(playerLayer.children, {}, {
+            interactive: true
+        });
     }
-
 
 
     /*通過房間*/
@@ -168,7 +221,6 @@ define(['attack', 'ui', 'findpath'], function(attack, ui, findpath) {
                 x: _x,
                 y: _y,
                 onUpdate: function() {
-
                     TweenLite.to(gameStage, 0.5, {
                         x: (displayWidth / 2) - currentRole.x,
                         y: (displayHeight / 2) - currentRole.y,
@@ -186,25 +238,9 @@ define(['attack', 'ui', 'findpath'], function(attack, ui, findpath) {
             */
 
             /**/
-            var _currentPanorama = findpath.getPanorama(currentRole.local.room_id, 0, 5);
+            currentRole.panorama = findpath.getPanorama(currentRole.local.room_id, 0, 5);             
 
-            currentRole.panorama = _currentPanorama;
-
-            objectHelp(enemyLayer.children, {
-
-            }, {
-                visible: false
-            });
-
-            for (var i = 0; i < _currentPanorama.length; i++) {
-
-                objectHelp(enemyLayer.children, {
-                    local: _currentPanorama[i]
-                }, {
-                    visible: true
-                });
-
-            }
+           // _displayPanorama();
 
             currentRole.actionPoint--;
             ui.updateAp(currentRole.actionPoint);
@@ -296,22 +332,35 @@ define(['attack', 'ui', 'findpath'], function(attack, ui, findpath) {
 
             arrCommonObj['trashCard'].myItemId = this.itemId;
             arrCommonObj['trashCard'].targetObj.children[1].text = arrItems[this.itemId].name;
-            arrCommonObj['trashCard'].targetObj.visible = true;
-
-            /* arrCommonObj['trashCard'].myItemId = this.itemId;
-             arrCommonObj['trashCard'].children[1].text = arrItems[this.itemId].name;*/
+            arrCommonObj['trashCard'].targetObj.visible = true;        
 
         }
 
     }
 
-
+    function _displayPanorama() {
+        objectHelp(enemyLayer.children, {}, {
+            visible: false
+        });
+        var _players = playerLayer.children;
+        for (var i = 0; i < _players.length; i++) {
+            for (var j = 0; j < _players[i].panorama.length; j++) {
+                objectHelp(enemyLayer.children, {
+                    local: _players[i].panorama[j]
+                }, {
+                    visible: true
+                });
+            }
+        }
+    }
 
     return {
         createRole: _createRole,
         roleClick: _roleClick,
         passageDoor: _passageDoor,
-        searchItem: _searchItem
+        searchItem: _searchItem,
+        createEnemy: _createEnemy,
+        createPlayer: _createPlayer
     }
 
 })

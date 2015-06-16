@@ -102,20 +102,11 @@ define(['ui', 'map', 'role', 'findpath', 'help', 'datas', 'meter'], function(ui,
         /*create map*/
         map.createMap();
 
-        //增加容器 
-
-
-        var cR = new role.createRole();
-        cR._roleTypeObj = arrRoleType[0];
-        cR._faction = "enemy";
-        for (var i = 0; i < 20; i++) {
-            cR._roleLocal = null;
-            cR._spriteName = "role_zombie_" + Math.floor(Math.random() * 2);
-            var _enemy = cR.create();
-            _enemy.visible = false;
-            enemyLayer.addChild(_enemy);
-        }
-
+       //增加增加敵人
+       role.createEnemy();
+       role.createPlayer();
+      
+/*
         var cR = new role.createRole();
         cR._roleTypeObj = arrRoleType[1];
         cR._faction = "player";
@@ -133,48 +124,36 @@ define(['ui', 'map', 'role', 'findpath', 'help', 'datas', 'meter'], function(ui,
         newR.skill = [];
         newR.level = 1;
         newR.skill.push(newR.skillTree[0][0]);
-
-
-
-        newR.equip = [
-            [1, 2],
-            [0, 99, 0]
-        ];
-
-        newR.wound = 1;
         //[0] = hand 
         //[1] = backpack
-        newR.actionPoint = 3;
+        newR.equip = [
+            [1, 2],
+            [0, 0, 0]
+        ];
+
+        newR.wound = 0;
+        newR.actionPoint = 3;*/
+
+
         //取得視野
-        newR.panorama = findpath.getPanorama(newR.local.room_id, 0, 5);
+      /*  
+*/
+        /*currentRole = newR;
+        newR.on('mousedown', role.roleClick);*/
 
-        for (var i = 0; i < newR.panorama.length; i++) {
-
-            objectHelp(enemyLayer.children, {
-
-                local: newR.panorama[i]
-            }, {
-                visible: true
-            });
-
-        }
-
-        currentRole = newR;
-        newR.on('mousedown', role.roleClick);
-
-        objectHelp(gameStage.children)
+      //  objectHelp(gameStage.children);
 
 
         /**/
+
+        /*
         var getInitCurrentPlayer = objectHelp(playerLayer.children, {
             faction: "player"
         })[0];
 
         moveToTarget(getInitCurrentPlayer.x, getInitCurrentPlayer.y);
 
-        $('#e_move').click(function() {
-            enemyMove();
-        })
+      */
 
 
 

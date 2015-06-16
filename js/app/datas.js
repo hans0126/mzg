@@ -1,12 +1,14 @@
-var arrMap = new Array(); //地圖
-var arrDoors = new Array(); //門資訊
-var arrRoleType = new Array(); //角色類別
-var arrItems = new Array(); //武器資訊
-var arrSkills = new Array(); //人物技能
-var arrSkillType = new Array(); //技能範圍區間
-var arrLanguage = new Array(); //說話
-var levelRange = new Array(); //等級區間
-var arrMapType = new Array();
+var arrMap = []; //地圖
+var arrDoors = []; //門資訊
+var arrRoleType = []; //角色類別
+var arrItems = []; //武器資訊
+var arrSkills = []; //人物技能
+var arrSkillType = []; //技能範圍區間
+var arrLanguage = []; //說話
+var levelRange = []; //等級區間
+var arrMapType = []; //地圖類別
+var appearPlayer = [];
+var appearEnemy = [];
 
 
 
@@ -178,15 +180,6 @@ arrMapType[9] = [
 ];
 
 
-
-
-
-
-
-
-
-
-
 arrDoors = [{
         root_room: "a",
         passage: ["a", "e"],
@@ -314,21 +307,44 @@ arrDoors = [{
 
 ]
 
+/*
+0:空
+1-49 : 玩家
+50-:敵人腳色
+*/
+arrRoleType[0] = {};
 
-arrRoleType = [{
-    typeName: "Zombie",
-    color: 0x33FFCC,
-    skillTree: []
-}, {
-    typeName: "survivor",
-    color: 0xFFFF00,
+arrRoleType[1] = {
+    name: "Phil",
     skillTree: [
         [0],
         [10],
         [20, 30],
         [40, 50, 70]
     ]
-}];
+}
+
+arrRoleType[2] = {
+    name: "Phil2",
+    skillTree: [
+        [0],
+        [10],
+        [20, 30],
+        [40, 50, 70]
+    ]
+}
+
+arrRoleType[50] = {
+    name: "Zombie",
+    skillTree: []
+}
+/*
+登場腳色
+*/
+appearPlayer = [1,2];
+appearEnemy = [{id:50,count:30}];
+
+
 
 arrItems[0] = { //空物件
     category: "item",
@@ -422,7 +438,7 @@ arrItems[6] = {
 arrItems[99] = {
     category: "item",
     name: "Wound",
-    attackType:null,
+    attackType: null,
     power: 0,
     minRange: 0,
     maxRange: 0,

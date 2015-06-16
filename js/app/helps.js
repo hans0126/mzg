@@ -131,71 +131,6 @@ function moveToTarget(_tx, _ty) {
 
 
 
-/*
-尋找目標:眼睛
-_currentRoomId: 當下room
-_roomGroup: 同一個空間
-_history:紀錄歷程以免無限迴圈
----
-result: array[room id]
-*/
-
-function findEnemyByEyes(_currentRoomId, _roomGroup, _history) {
-
-    var _currentRoom;
-
-    if (typeof(_history) == "undefined") {
-        _history = new Array();
-    }
-
-    _history.push(_currentRoomId);
-
-    //get current room
-    _currentRoom = getMapInfo(arrMap, {
-        room_id: _currentRoomId
-    })[0];
-
-
-    if (typeof(_roomGroup) == "undefined") {
-        _roomGroup = _currentRoom.group;
-    }
-
-    _currentPassage = getRoomPassage(_currentRoomId);
-    //判斷這個房間是否有玩家 
-    var _tempHasPlayer = new Array();
-    for (var i = 0; i < _currentPassage.length; i++) {
-
-        var _temp = objectHelp(arrRoleObj, {
-            faction: "player",
-            local: _currentPassage[i]
-        });
-
-        if (_temp.length > 0) {
-            _tempHasPlayer.push(_currentPassage[i]);
-        }
-    }
-
-    if (_tempHasPlayer.length == 0) {
-
-        for (var i = 0; i < _currentPassage.length; i++) {
-            //查詢是不是同一個群組的
-            if (_history.indexOf(_currentPassage[i]) == -1) {
-
-                var _nextRoomGroup = getMapInfo(arrMap, {
-                    room_id: _currentPassage[i]
-                })[0].group;
-
-                if (_currentRoom.group == _nextRoomGroup) {
-                    _tempHasPlayer = findEnemyByEyes(_currentPassage[i], _roomGroup, _history);
-                }
-            }
-
-        }
-    }
-
-    return _tempHasPlayer;
-}
-
 function createRandomId() {
     return Math.floor(Math.random() * 1000) + "_" + Math.floor(Math.random() * 1000);
 }
@@ -339,7 +274,8 @@ function locationCheck(_target, _targetGroup, _roomObject) {
 
 
 function getRoomPassage(_roomId) {
-    var _returnPassage = new Array();
+    var _returnPassage = [];
+    var _returnRoom = [];
     for (var i = 0; i < passageLayer.children.length; i++) {
         var _thisPassageIndex = passageLayer.children[i].passage.indexOf(_roomId)
         if (_thisPassageIndex > -1) {
@@ -356,7 +292,24 @@ function getRoomPassage(_roomId) {
         }
     }
 
-    return _returnPassage;
+    for (var i = 0; i < _returnPassage.length; i++) {
+        for (var y = 0; y < arrMap.length; y++) {
+            var _match = false;
+            for (var x = 0; x < arrMap[y].length; x++) {
+                if(arrMap[y][x].room_id == _returnPassage[i]){
+                    _match =true;
+                    _returnRoom.push(arrMap[y][x]);
+                    break;
+                }
+            }
+
+            if(_match){
+                break;
+            }
+        }
+    }
+
+    return _returnRoom;
 }
 
 /*取得目標相近座標*/

@@ -220,9 +220,70 @@ define(function() {
 
 
 
+    /*
+    尋找目標:眼睛
+    _currentRoomId: 當下room
+    _roomGroup: 同一個空間
+    _history:紀錄歷程以免無限迴圈
+    ---
+    result: array[room id]
+    */
+
+    function _findEnemyByEyes(_currentRoomId, _roomGroup, _history) {
+
+        var _currentRoom;
+
+        if (typeof(_history) == "undefined") {
+            _history = new Array();
+        }
+
+        _history.push(_currentRoomId);      
+
+         _currentRoom = _currentRoomId;
+
+        if (typeof(_roomGroup) == "undefined") {
+            _roomGroup = _currentRoom.group;
+        }      
+
+        _currentPassage = getRoomPassage(_currentRoom.room_id);       
+
+        //判斷這個房間是否有玩家 
+        var _tempHasPlayer = new Array();
+        for (var i = 0; i < _currentPassage.length; i++) {
+
+            var _temp = objectHelp(playerLayer.children, {               
+                local: _currentPassage[i]
+            });
+
+            if (_temp.length > 0) {
+                _tempHasPlayer.push(_currentPassage[i]);
+            }            
+        }    
+
+        if (_tempHasPlayer.length == 0) {
+
+            for (var i = 0; i < _currentPassage.length; i++) {
+                //查詢是不是同一個群組的
+                if (_history.indexOf(_currentPassage[i]) == -1) {                  
+
+                    var _nextRoomGroup = _currentPassage[i].group;
+
+                    if (_currentRoom.group == _nextRoomGroup) {
+                        _tempHasPlayer = _findEnemyByEyes(_currentPassage[i], _roomGroup, _history);
+                    }
+                }
+
+            }
+        }
+        return _tempHasPlayer;
+    }
+
+
+
     return {
         getPath: _getPath,
-        getPanorama: _getPanorama
+        getPanorama: _getPanorama,
+        findEnemyByEyes:_findEnemyByEyes
     }
 
 })
