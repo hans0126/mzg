@@ -136,7 +136,7 @@ define(['findpath', 'ui'], function(findpath, ui) { /**/
 
                     var _success = false;
                     //display attack result
-                    var _textObj = new _desplayAttackText();
+                    var _textObj = new desplayAttackText();
 
                     if (_arrAttackResult[_attackCount]) {
                         console.log(_weaponObj.name + " 對 " + _arrTemp[i].objectName + " 攻擊成功");
@@ -175,19 +175,8 @@ define(['findpath', 'ui'], function(findpath, ui) { /**/
 
                             actionUiLayer.removeChild(_obj.target);
                             // 判斷所有動畫都撥完畢之後再刪除物件
-                            var _allComplete = false;
 
-                            for (var i = 0; i < _obj2.length; i++) {
-
-                                if (_obj2[i].progress() != 1) {
-                                    _allComplete = false;
-                                    break;
-                                } else {
-                                    _allComplete = true;
-                                }
-                            }
-
-                            if (_allComplete) {
+                            if (checkAllTweenComplete(_obj2)) {
                                 ui.updateScore(score);
                                 for (var i = 0; i < _arrRemoveTemp.length; i++) {
                                     for (var j = 0; j < enemyLayer.children.length; j++) {
@@ -271,7 +260,7 @@ define(['findpath', 'ui'], function(findpath, ui) { /**/
             _attackCounter--;;
             // $('#attack_count').html(_attackCounter);
             //
-            var _textObj = new _desplayAttackText().create();
+            var _textObj = new desplayAttackText().create();
             var _killedObj = null;
 
             //判斷與目標的相對位置,並移動到目標旁
@@ -367,23 +356,7 @@ define(['findpath', 'ui'], function(findpath, ui) { /**/
             }
             return _returnValue;
         }
-
-        function _desplayAttackText() {
-            this.setText = '';
-            this.create = function() {
-
-                var _textObj = new PIXI.extras.BitmapText("", {
-                    font: "50px Crackhouse",
-                    tint: 0x000000
-                });
-
-                _textObj.myId = createRandomId();
-                _textObj.text = this.setText;
-
-                return _textObj;
-            }
-
-        }
+      
 
         function _fadeOutRemoveObj(_obj) {
             new TweenMax(_obj, 0.3, {

@@ -18,12 +18,18 @@ define(['attack', 'ui', 'findpath'], function(attack, ui, findpath) {
             _role.y = randomDeploy(this._roleLocal.localY, blockHeight);
             _role.width = 50;
             _role.height = 50;
+            _role.pivot.x = 0.5;
+            _role.pivot.y = 0.5;
+            _role.anchor.x = 0.5;
+            _role.anchor.y = 0.5;
+            console.log(_role);
 
             if (this._objectName == "undefined" || this._objectName == null) {
                 _role.myId = "z" + Math.floor(Math.random() * 999999) + "_" + new Date().getTime(); //亂數
             } else {
                 _role.myId = this._objectName;
             }
+
 
             _role.local = this._roleLocal;
             _role.faction = this._faction;
@@ -65,6 +71,7 @@ define(['attack', 'ui', 'findpath'], function(attack, ui, findpath) {
             newR.skill = [];
             newR.level = 1;
             newR.skill.push(newR.skillTree[0][0]);
+            newR.live = true;
             //[0] = hand 
             //[1] = backpack
             newR.equip = [
@@ -78,16 +85,16 @@ define(['attack', 'ui', 'findpath'], function(attack, ui, findpath) {
 
             //取得視野
             newR.panorama = findpath.getPanorama(newR.local.room_id, 0, 5);
-/*
-            for (var j = 0; j < newR.panorama.length; j++) {
+            /*
+                        for (var j = 0; j < newR.panorama.length; j++) {
 
-                objectHelp(enemyLayer.children, {
-                    local: newR.panorama[j]
-                }, {
-                    visible: true
-                });
+                            objectHelp(enemyLayer.children, {
+                                local: newR.panorama[j]
+                            }, {
+                                visible: true
+                            });
 
-            }*/
+                        }*/
         }
     }
 
@@ -172,7 +179,6 @@ define(['attack', 'ui', 'findpath'], function(attack, ui, findpath) {
 
         actionUiLayer.addChild(_btn);
 
-
         var tween = new TweenMax(_btn, 0.5, {
             y: _btn.y + 50,
             alpha: 1,
@@ -185,7 +191,6 @@ define(['attack', 'ui', 'findpath'], function(attack, ui, findpath) {
             onCompleteParams: ["{self}"]
         });
     }
-
 
     function _closeAttackBtn() {
         ui.closeAttackBtn();
@@ -238,9 +243,9 @@ define(['attack', 'ui', 'findpath'], function(attack, ui, findpath) {
             */
 
             /**/
-            currentRole.panorama = findpath.getPanorama(currentRole.local.room_id, 0, 5);             
+            currentRole.panorama = findpath.getPanorama(currentRole.local.room_id, 0, 5);
 
-           // _displayPanorama();
+            // _displayPanorama();
 
             currentRole.actionPoint--;
             ui.updateAp(currentRole.actionPoint);
@@ -332,7 +337,7 @@ define(['attack', 'ui', 'findpath'], function(attack, ui, findpath) {
 
             arrCommonObj['trashCard'].myItemId = this.itemId;
             arrCommonObj['trashCard'].targetObj.children[1].text = arrItems[this.itemId].name;
-            arrCommonObj['trashCard'].targetObj.visible = true;        
+            arrCommonObj['trashCard'].targetObj.visible = true;
 
         }
 

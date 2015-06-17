@@ -296,14 +296,14 @@ function getRoomPassage(_roomId) {
         for (var y = 0; y < arrMap.length; y++) {
             var _match = false;
             for (var x = 0; x < arrMap[y].length; x++) {
-                if(arrMap[y][x].room_id == _returnPassage[i]){
-                    _match =true;
+                if (arrMap[y][x].room_id == _returnPassage[i]) {
+                    _match = true;
                     _returnRoom.push(arrMap[y][x]);
                     break;
                 }
             }
 
-            if(_match){
+            if (_match) {
                 break;
             }
         }
@@ -317,30 +317,50 @@ function getRoomPassage(_roomId) {
 function moveToNearTarget(_current, _target) {
     var _dx = _target.x - _current.x;
     var _dy = _target.y - _current.y;
+    var _rDx;
+    var _rDy;
+    var _rDxN;
+    var _rDyN;
 
     if (Math.abs(_dx) > _target.width) {
         if (_dx > 0) {
-            _dx = _target.x - _target.width;
+            _rDx = _target.x - _target.width;
         } else {
-            _dx = _target.x + _target.width;
+            _rDx = _target.x + _target.width;
         }
     } else {
-        _dx = _current.x;
+        _rDx = _current.x;
     }
 
     if (Math.abs(_dy) > _target.height) {
         if (_dy > 0) {
-            _dy = _target.y - _target.height;
+            _rDy = _target.y - _target.height;
         } else {
-            _dy = _target.y + _target.height;
+            _rDy = _target.y + _target.height;
         }
     } else {
-        _dy = _current.y;
+        _rDy = _current.y;
     }
 
+    if (_dx > 0) {
+        _rDxN = _target.x - _target.width / 2;
+    } else {
+        _rDxN = _target.x + _target.width / 2;
+    }
+
+    if (_dy > 0) {
+        _rDyN = _target.y - _target.height / 2;
+    } else {
+        _rDyN = _target.y + _target.height / 2;
+    }
+
+
+
     return {
-        x: _dx,
-        y: _dy
+        x: _rDx,
+        y: _rDy,
+        nearX: _rDxN,
+        nearY: _rDyN
     }
 }
 
@@ -374,11 +394,43 @@ function languageCombination(event) {
 
 }
 
+/*受到攻擊時顯示的文字*/
 
-/*產生角色
+function desplayAttackText() {
+    this.setText = '';
+    this.create = function() {
 
- function create return: object
-*/
+        var _textObj = new PIXI.extras.BitmapText("", {
+            font: "50px Crackhouse",
+            tint: 0x000000
+        });
+
+        _textObj.myId = createRandomId();
+        _textObj.text = this.setText;
+
+        return _textObj;
+    }
+
+}
+
+
+/* check tween complete*/
+function checkAllTweenComplete(_process) {
+
+    var _allComplete = false;
+    for (var i = 0; i < _process.length; i++) {
+
+        if (_process[i].progress() != 1) {
+            _allComplete = false;
+            break;
+        } else {
+            _allComplete = true;
+        }
+    }
+
+    return _allComplete;
+}
+
 
 
 function findGameObjfromMouse(_x, _y, _gameObj) {
