@@ -51,7 +51,7 @@ define(['ui', 'map', 'role', 'findpath', 'help', 'datas', 'meter'], function(ui,
 
         //增加容器
 
-        mapTexture = PIXI.Texture.fromImage('images/tilemap.png');
+       
         cameraFollow = false;
 
         dragMap = true;

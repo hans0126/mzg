@@ -88,7 +88,8 @@ define(['findpath'], function(findpath) {
                 //_canMovePlay[i].actionMovement = true;
                 new TweenMax(_canMovePlay[i], ((Math.random() * 5) + 4) / 10, {
                     x: _canMovePlay[i].goalX,
-                    y: _canMovePlay[i].goalY
+                    y: _canMovePlay[i].goalY,
+                    roundProps:"x,y"
                 });
             }
 
@@ -191,13 +192,14 @@ define(['findpath'], function(findpath) {
                     x: _np.x,
                     y: _np.y,
                     rotation: 0,
+                    roundProps:"x,y",
                     onComplete: function(_tObj, _tp) {
 
                         if (checkAllTweenComplete(_tp)) {
                             if (_arrDiePlayer.length == 0) {
                                 _endTurn();
                             } else {
-                                _killedPlayer();
+                               _killedPlayer();
                             }
                         }
 

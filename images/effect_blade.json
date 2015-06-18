@@ -1,62 +1,62 @@
 {"frames": {
 
-"Comp 1_00000.png":
+"effect_blade_0.png":
 {
-	"frame": {"x":2,"y":2,"w":19,"h":24},
-	"rotated": false,
+	"frame": {"x":22,"y":40,"w":19,"h":24},
+	"rotated": true,
 	"trimmed": true,
 	"spriteSourceSize": {"x":124,"y":128,"w":19,"h":24},
 	"sourceSize": {"w":256,"h":292},
 	"pivot": {"x":0.5,"y":0.5}
 },
-"Comp 1_00001.png":
+"effect_blade_1.png":
 {
-	"frame": {"x":23,"y":2,"w":18,"h":24},
+	"frame": {"x":48,"y":35,"w":18,"h":24},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":124,"y":128,"w":18,"h":24},
 	"sourceSize": {"w":256,"h":292},
 	"pivot": {"x":0.5,"y":0.5}
 },
-"Comp 1_00002.png":
+"effect_blade_2.png":
 {
-	"frame": {"x":2,"y":28,"w":25,"h":30},
+	"frame": {"x":63,"y":2,"w":25,"h":30},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":118,"y":128,"w":25,"h":30},
 	"sourceSize": {"w":256,"h":292},
 	"pivot": {"x":0.5,"y":0.5}
 },
-"Comp 1_00003.png":
+"effect_blade_3.png":
 {
-	"frame": {"x":29,"y":28,"w":30,"h":36},
+	"frame": {"x":2,"y":2,"w":30,"h":36},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":113,"y":128,"w":30,"h":36},
 	"sourceSize": {"w":256,"h":292},
 	"pivot": {"x":0.5,"y":0.5}
 },
-"Comp 1_00004.png":
+"effect_blade_4.png":
 {
-	"frame": {"x":2,"y":66,"w":27,"h":31},
+	"frame": {"x":34,"y":2,"w":27,"h":31},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":104,"y":143,"w":27,"h":31},
 	"sourceSize": {"w":256,"h":292},
 	"pivot": {"x":0.5,"y":0.5}
 },
-"Comp 1_00005.png":
+"effect_blade_5.png":
 {
-	"frame": {"x":31,"y":66,"w":18,"h":22},
+	"frame": {"x":2,"y":40,"w":18,"h":22},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":105,"y":152,"w":18,"h":22},
 	"sourceSize": {"w":256,"h":292},
 	"pivot": {"x":0.5,"y":0.5}
 },
-"Comp 1_00006.png":
+"effect_blade_6.png":
 {
-	"frame": {"x":2,"y":99,"w":14,"h":17},
+	"frame": {"x":68,"y":34,"w":14,"h":17},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":105,"y":156,"w":14,"h":17},
@@ -66,10 +66,10 @@
 "meta": {
 	"app": "http://www.codeandweb.com/texturepacker",
 	"version": "1.0",
-	"image": "ttt.png",
+	"image": "effect_blade.png",
 	"format": "RGBA8888",
-	"size": {"w":61,"h":118},
+	"size": {"w":90,"h":64},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:46bf803f611886bbeeaf9246208e23c5:ac6f9318d2cb833a4607e20f36ad6afe:e79bf0f9110abe6e5d45fc060dbcf287$"
+	"smartupdate": "$TexturePacker:SmartUpdate:a59ff65d31a45873bdd88e29c5ad4968:ac6f9318d2cb833a4607e20f36ad6afe:04d7f298f036483484660afee9532dd2$"
 }
 }

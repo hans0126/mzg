@@ -38,6 +38,7 @@ define(['enemy'], function(enemy) {
     }
 
 
+
     function _createDisplayAp() {
 
         var _textObj = new PIXI.Text('AP:', {
@@ -285,7 +286,7 @@ define(['enemy'], function(enemy) {
 
         arrCommonObj['skillLayer'] = _skillLayer;
 
-        var _bg = new PIXI.Sprite(resource.skill_bg.texture);
+        var _bg = new PIXI.Sprite.fromFrame("skill_bg.png");
         _bg.zIndex = 0;
         _skillLayer.addChild(_bg);
 
@@ -423,8 +424,7 @@ define(['enemy'], function(enemy) {
         for (i = 0; i < 6; i++) {
             var _itemCaseParent = new PIXI.Container();
             var _itemBtn = new PIXI.Graphics();
-            var _itemCase = new PIXI.Sprite(resource.card_bg.texture);
-
+            var _itemCase = new PIXI.Sprite.fromFrame("item_card.jpg");
 
             _itemBtn.beginFill(0x666666, 0.5);
             _itemBtn.drawRect(0, 0, 150, 225);
@@ -437,7 +437,6 @@ define(['enemy'], function(enemy) {
             _itemCaseParent.zIndex = i;
             _itemCaseParent.addChild(_itemCase);
             _itemLayer.addChild(_itemCaseParent);
-
 
             if (i < 3) {
                 _itemBtn.x = i * _itemCaseParent.width + 20 * i;
@@ -749,16 +748,11 @@ define(['enemy'], function(enemy) {
                         _itemTouchLayer[k].targetObj.children[1].text = arrItems[_item[i][j]].name;
                         if (_item[i][j] > 0) {
                             _itemTouchLayer[k].targetObj.visible = true;
-
+                            
                             if (_item[i][j] == 99) {
-                                _itemTouchLayer[k].interactive = false;
-
-                                //_itemTouchLayer[k].targetObj.children[0].texture(resource.card_bg.texture);
-
-                                _itemTouchLayer[k].targetObj.children[0].texture = resource.wound.texture;
+                                _itemTouchLayer[k].interactive = false;                                
+                                _itemTouchLayer[k].targetObj.children[0].texture = PIXI.Texture.fromFrame('wound_card.jpg');
                                 _itemTouchLayer[k].targetObj.children[1].text = '';
-
-
                             }
                         }
 

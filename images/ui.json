@@ -1,0 +1,39 @@
+{"frames": {
+
+"item_card.jpg":
+{
+	"frame": {"x":2,"y":2,"w":150,"h":225},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":150,"h":225},
+	"sourceSize": {"w":150,"h":225},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"skill_bg.png":
+{
+	"frame": {"x":306,"y":2,"w":215,"h":196},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":10,"w":215,"h":196},
+	"sourceSize": {"w":215,"h":206},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"wound_card.jpg":
+{
+	"frame": {"x":154,"y":2,"w":150,"h":225},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":150,"h":225},
+	"sourceSize": {"w":150,"h":225},
+	"pivot": {"x":0.5,"y":0.5}
+}},
+"meta": {
+	"app": "http://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "ui.png",
+	"format": "RGBA8888",
+	"size": {"w":504,"h":229},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:df233fbf11bbed39155513384959ad7a:38f7a97bdbff6bf86c12803a680da500:5b04aa198265472a3c5f56958d78e97b$"
+}
+}

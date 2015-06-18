@@ -321,28 +321,53 @@ arrRoleType[1] = {
         [10],
         [20, 30],
         [40, 50, 70]
-    ]
+    ],
+    spriteName: "mini_phil.png"
 }
 
 arrRoleType[2] = {
-    name: "Phil2",
+    name: "amy",
     skillTree: [
         [0],
         [10],
         [20, 30],
         [40, 50, 70]
-    ]
+    ],
+    spriteName: "mini_amy.png"
 }
 
 arrRoleType[50] = {
-    name: "Zombie",
-    skillTree: []
+    name: "Zombie male",
+    skillTree: [],
+    spriteName: "zombie_male.png"
 }
+
+arrRoleType[51] = {
+    name: "Zombie female",
+    skillTree: [],
+    spriteName: "zombie_female.png"
+}
+
+arrRoleType[52] = {
+    name: "Zombie runner",
+    skillTree: [],
+    spriteName: "zombie_runner.png"
+}
+
 /*
 登場腳色
 */
-appearPlayer = [1,2];
-appearEnemy = [{id:50,count:30}];
+appearPlayer = [1, 2];
+appearEnemy = [{
+    id: 50,
+    count: 7,
+}, {
+    id: 51,
+    count: 8,
+}, {
+    id: 52,
+    count: 10,
+}];
 
 
 

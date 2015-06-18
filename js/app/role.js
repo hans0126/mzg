@@ -16,13 +16,12 @@ define(['attack', 'ui', 'findpath'], function(attack, ui, findpath) {
 
             _role.x = randomDeploy(this._roleLocal.localX, blockWidth);
             _role.y = randomDeploy(this._roleLocal.localY, blockHeight);
-            _role.width = 50;
-            _role.height = 50;
+     
             _role.pivot.x = 0.5;
             _role.pivot.y = 0.5;
             _role.anchor.x = 0.5;
             _role.anchor.y = 0.5;
-            console.log(_role);
+
 
             if (this._objectName == "undefined" || this._objectName == null) {
                 _role.myId = "z" + Math.floor(Math.random() * 999999) + "_" + new Date().getTime(); //亂數
@@ -46,7 +45,8 @@ define(['attack', 'ui', 'findpath'], function(attack, ui, findpath) {
             for (j = 0; j < appearEnemy[i].count; j++) {
                 var cR = new _createRole();
                 cR._roleTypeObj = arrRoleType[appearEnemy[i].id];
-                cR._spriteName = "role_zombie_" + Math.floor(Math.random() * 2);
+                // cR._spriteName = "role_zombie_" + Math.floor(Math.random() * 2);
+                cR._spriteName = arrRoleType[appearEnemy[i].id].spriteName;
                 var _enemy = cR.create();
                 _enemy.visible = true;
                 enemyLayer.addChild(_enemy);
@@ -58,7 +58,7 @@ define(['attack', 'ui', 'findpath'], function(attack, ui, findpath) {
         for (var i = 0; i < appearPlayer.length; i++) {
             var cR = new _createRole();
             cR._roleTypeObj = arrRoleType[appearPlayer[i]];
-            cR._spriteName = "role_phil";
+            cR._spriteName = arrRoleType[appearPlayer[i]].spriteName;
             cR._roleLocal = null;
             var newR = cR.create();
             newR.skillTree = arrRoleType[appearPlayer[i]].skillTree;
