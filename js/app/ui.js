@@ -87,6 +87,50 @@ define(['enemy'], function(enemy) {
 
     }
 
+    function _createRoleStatus() {
+
+        for (var i = 0; i < appearPlayer.length; i++) {
+
+            var _c = new PIXI.Container();
+            var _spriteIcon = new PIXI.Sprite.fromFrame("icon_" + arrRoleType[appearPlayer[i]].name + ".png");
+            var _textObj = new PIXI.extras.BitmapText("00", {
+                font: "50px Crackhouse",
+                tint: 0xFF0000
+            });
+
+            _c.addChild(_spriteIcon);
+            mainUiLayer.addChild(_c);
+
+            _c.x = 10;
+            _c.y = (i * _spriteIcon.height + i * 15) + 10;
+
+            _c.addChild(_textObj);
+            _textObj.x = 140;
+            _textObj.y = 30;
+
+            _c.interactive = true;
+            _c.buttonMode = true;
+
+            arrLayerManager[arrRoleType[appearPlayer[i]].name + "_icon_btn"] = _c;
+
+            _c.roleName = arrRoleType[appearPlayer[i]].name;
+
+            _c.mouseover = function() {
+                //this.children[0].tint = 0x999999;                
+            }
+
+            _c.on("mousedown", _moveToTargetRole);
+
+
+        }
+
+
+        function _moveToTargetRole() {
+            moveToTarget(arrLayerManager[this.roleName + "_token"].x, arrLayerManager[this.roleName + "_token"].y);
+        }
+
+    }
+
 
     function _createScore() {
         var _graphic = new PIXI.Graphics();
@@ -129,12 +173,23 @@ define(['enemy'], function(enemy) {
 
 
     function _updateScore(num) {
-        var _scoreWidth = (displayWidth - 20) / 40;
+        /* var _scoreWidth = (displayWidth - 20) / 40;
 
-        var tween = new TweenMax(arrCommonObj['arrow'], 0.5, {
-            x: (_scoreWidth * num) + 10,
-            ease: Elastic.easeOut
-        });
+         var tween = new TweenMax(arrCommonObj['arrow'], 0.5, {
+             x: (_scoreWidth * num) + 10,
+             ease: Elastic.easeOut
+         });*/
+        var _currentValue = currentRole.score + num;
+        currentRole.score = _currentValue;
+        if (_currentValue < 10) {
+            _currentValue = "0" + _currentValue;
+        }
+
+        arrLayerManager[currentRole.roleName + "_icon_btn"].children[1].text = _currentValue;
+                console.log(_currentValue);
+
+
+
 
         /*判斷有沒有升級*/
         var _targetLevel;
@@ -145,11 +200,11 @@ define(['enemy'], function(enemy) {
         for (var i = 0; i < levelRange.length; i++) {
             var _levelUp = false;
             if (i != levelRange.length - 1) {
-                if (score >= levelRange[i] && score < levelRange[i + 1] && currentRole.level != i + 1) {
+                if (currentRole.score >= levelRange[i] && currentRole.score < levelRange[i + 1] && currentRole.level != i + 1) {
                     _levelUp = true;
                 }
             } else {
-                if (score >= levelRange[i] && currentRole.level != i + 1) {
+                if (currentRole.score >= levelRange[i] && currentRole.level != i + 1) {
                     _levelUp = true;
                 }
             }
@@ -748,9 +803,9 @@ define(['enemy'], function(enemy) {
                         _itemTouchLayer[k].targetObj.children[1].text = arrItems[_item[i][j]].name;
                         if (_item[i][j] > 0) {
                             _itemTouchLayer[k].targetObj.visible = true;
-                            
+
                             if (_item[i][j] == 99) {
-                                _itemTouchLayer[k].interactive = false;                                
+                                _itemTouchLayer[k].interactive = false;
                                 _itemTouchLayer[k].targetObj.children[0].texture = PIXI.Texture.fromFrame('wound_card.jpg');
                                 _itemTouchLayer[k].targetObj.children[1].text = '';
                             }
@@ -819,7 +874,7 @@ define(['enemy'], function(enemy) {
                         var _target = _self.target;
                         actionUiLayer.removeChild(_target);
                     },
-                    onCompleteParams:["{self}"]
+                    onCompleteParams: ["{self}"]
                 });
             }
         }
@@ -836,6 +891,7 @@ define(['enemy'], function(enemy) {
         updateScore: _updateScore,
         createMsgBox: _createMsgBox,
         statusOpen: _statusOpen,
-        statusClose: _statusClose
+        statusClose: _statusClose,
+        createRoleStatus: _createRoleStatus
     }
 })

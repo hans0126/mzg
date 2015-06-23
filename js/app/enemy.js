@@ -89,7 +89,7 @@ define(['findpath'], function(findpath) {
                 new TweenMax(_canMovePlay[i], ((Math.random() * 5) + 4) / 10, {
                     x: _canMovePlay[i].goalX,
                     y: _canMovePlay[i].goalY,
-                    roundProps:"x,y"
+                    roundProps: "x,y"
                 });
             }
 
@@ -149,8 +149,11 @@ define(['findpath'], function(findpath) {
                 _textObj.y = _targetPayer.y - _textObj.height;
                 _textObj.alpha = 0;
                 _targetPayer.wound++;
+
+
+
+
                 if (_targetPayer.wound < 5) {
-                    //random equip block 0:hand 1:backpack
                     _getWound(_targetPayer);
 
                 } else {
@@ -172,7 +175,7 @@ define(['findpath'], function(findpath) {
                     x: _targetPayer.x,
                     y: _targetPayer.y,
                     rotation: 0.5,
-                    onStart: function(_tObj, _delay,_target) {
+                    onStart: function(_tObj, _delay, _target) {
 
                         shakeAnimation(_target);
 
@@ -187,19 +190,19 @@ define(['findpath'], function(findpath) {
                             onCompleteParams: ["{self}"]
                         })
                     },
-                    onStartParams: [_textObj, i,_targetPayer]
+                    onStartParams: [_textObj, i, _targetPayer]
                 }).to(_attackUnit[key][i], 0.1, {
                     x: _np.x,
                     y: _np.y,
                     rotation: 0,
-                    roundProps:"x,y",
+                    roundProps: "x,y",
                     onComplete: function(_tObj, _tp) {
 
                         if (checkAllTweenComplete(_tp)) {
                             if (_arrDiePlayer.length == 0) {
                                 _endTurn();
                             } else {
-                               _killedPlayer();
+                                _killedPlayer();
                             }
                         }
 
@@ -264,9 +267,9 @@ define(['findpath'], function(findpath) {
                     },
                     onStartParams: [_textObj],
                     onComplete: function(_self, _arrProcess) {
-                        _self.target.visible = false;                      
+                        _self.target.visible = false;
 
-                        if (checkAllTweenComplete(_arrProcess)) {                          
+                        if (checkAllTweenComplete(_arrProcess)) {
                             _endTurn();
                         }
 
@@ -274,10 +277,13 @@ define(['findpath'], function(findpath) {
                     onCompleteParams: ["{self}", _tp]
                 })
 
+
+                arrLayerManager[_arrDiePlayer[i].roleName + "_icon_btn"].children[0].tint = 0x333333;
+                arrLayerManager[_arrDiePlayer[i].roleName + "_icon_btn"].interactive = false;
+
             }
+
         }
-
-
 
     }
 

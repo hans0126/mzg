@@ -4,18 +4,18 @@
 {
 	"frame": {"x":2,"y":2,"w":176,"h":64},
 	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":16,"y":0,"w":176,"h":64},
-	"sourceSize": {"w":219,"h":87},
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":176,"h":64},
+	"sourceSize": {"w":176,"h":64},
 	"pivot": {"x":0.5,"y":0.5}
 },
 "icon_phil.png":
 {
 	"frame": {"x":180,"y":2,"w":176,"h":64},
 	"rotated": false,
-	"trimmed": true,
-	"spriteSourceSize": {"x":16,"y":8,"w":176,"h":64},
-	"sourceSize": {"w":219,"h":75},
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":176,"h":64},
+	"sourceSize": {"w":176,"h":64},
 	"pivot": {"x":0.5,"y":0.5}
 },
 "mini_amy.png":
@@ -70,6 +70,6 @@
 	"format": "RGBA8888",
 	"size": {"w":358,"h":120},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:de5d2714e409918fda5a2ed3ad394fa8:2370434f10e494a6ea60a27c0bc6a109:91432653025fef7a7e568a3a8b904d0d$"
+	"smartupdate": "$TexturePacker:SmartUpdate:a6978544e54aa31f33c229c17aedc72b:c7c3cde7ca5e842045fb79e9c8a63c53:91432653025fef7a7e568a3a8b904d0d$"
 }
 }

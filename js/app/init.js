@@ -23,9 +23,10 @@ define(['ui', 'map', 'role', 'findpath', 'help', 'datas', 'meter'], function(ui,
         arrCommonObj = [];
         score = 0;
 
-        arrTimer = new Array(); //時間倒數物件  
+      
 
         arrLayerManager = [];
+        arrFrameManager = [];
 
         totalRoom = 0; //總房間數
 
@@ -43,7 +44,7 @@ define(['ui', 'map', 'role', 'findpath', 'help', 'datas', 'meter'], function(ui,
 
 
         renderer = PIXI.autoDetectRenderer(displayWidth, displayHeight, {
-            backgroundColor: 0x000000
+            backgroundColor: 0x333333
         });
 
         document.getElementById("gameView").appendChild(renderer.view);
@@ -51,11 +52,12 @@ define(['ui', 'map', 'role', 'findpath', 'help', 'datas', 'meter'], function(ui,
 
         //增加容器
 
-       
+
         cameraFollow = false;
 
         dragMap = true;
         stage = new PIXI.Container();
+      
         /*game stage*/
         gameStage = new PIXI.Container(); //主場景
         mapLayer = new PIXI.Container(); //地圖
@@ -97,51 +99,53 @@ define(['ui', 'map', 'role', 'findpath', 'help', 'datas', 'meter'], function(ui,
         ui.createUiBtn();
         ui.createAp();
         ui.createStatus();
-        ui.createScore();
+        // ui.createScore();
+        ui.createRoleStatus();
+
         ui.createMsgBox();
         /*create map*/
         map.createMap();
 
-       //增加增加敵人
-       role.createEnemy();
-       role.createPlayer();
-      
-/*
-        var cR = new role.createRole();
-        cR._roleTypeObj = arrRoleType[1];
-        cR._faction = "player";
-        cR._spriteName = "role_phil";
-        cR._roleLocal = getMapInfo(arrMap, {
-            room_id: "f"
-        })[0];
-        var newR = cR.create();
-        newR.skillTree = arrRoleType[1].skillTree;
-        playerLayer.addChild(newR);
+        //增加增加敵人
+        role.createEnemy();
+        role.createPlayer();
 
-        newR.interactive = true;
-        newR.buttonMode = true;
+        /*
+                var cR = new role.createRole();
+                cR._roleTypeObj = arrRoleType[1];
+                cR._faction = "player";
+                cR._spriteName = "role_phil";
+                cR._roleLocal = getMapInfo(arrMap, {
+                    room_id: "f"
+                })[0];
+                var newR = cR.create();
+                newR.skillTree = arrRoleType[1].skillTree;
+                playerLayer.addChild(newR);
 
-        newR.skill = [];
-        newR.level = 1;
-        newR.skill.push(newR.skillTree[0][0]);
-        //[0] = hand 
-        //[1] = backpack
-        newR.equip = [
-            [1, 2],
-            [0, 0, 0]
-        ];
+                newR.interactive = true;
+                newR.buttonMode = true;
 
-        newR.wound = 0;
-        newR.actionPoint = 3;*/
+                newR.skill = [];
+                newR.level = 1;
+                newR.skill.push(newR.skillTree[0][0]);
+                //[0] = hand 
+                //[1] = backpack
+                newR.equip = [
+                    [1, 2],
+                    [0, 0, 0]
+                ];
+
+                newR.wound = 0;
+                newR.actionPoint = 3;*/
 
 
         //取得視野
-      /*  
-*/
+        /*  
+         */
         /*currentRole = newR;
         newR.on('mousedown', role.roleClick);*/
 
-      //  objectHelp(gameStage.children);
+        //  objectHelp(gameStage.children);
 
 
         /**/
@@ -154,6 +158,24 @@ define(['ui', 'map', 'role', 'findpath', 'help', 'datas', 'meter'], function(ui,
         moveToTarget(getInitCurrentPlayer.x, getInitCurrentPlayer.y);
 
       */
+
+        var _frames = [];
+
+        for (var i = 0; i < 7; i++) {
+            _frames.push(PIXI.Texture.fromFrame("effect_blade_" + i+".png"));
+        }
+
+        arrFrameManager['blade'] = _frames;
+
+       /* var mc = new PIXI.extras.MovieClip(frames);
+        mc.animationSpeed = 0.5;
+        mc.loop = false;
+        stage.addChild(mc);
+       mc.onComplete = function(){
+          //  stage.removeChild(this);
+       }
+
+        mc.play();*/
 
 
 
@@ -229,9 +251,7 @@ define(['ui', 'map', 'role', 'findpath', 'help', 'datas', 'meter'], function(ui,
     function animate() {
 
         stats.begin();
-
         renderer.render(stage);
-
         stats.end();
         requestAnimFrame(animate);
 

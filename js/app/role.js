@@ -82,6 +82,10 @@ define(['attack', 'ui', 'findpath'], function(attack, ui, findpath) {
             newR.wound = 0;
             newR.actionPoint = 3;
             newR.on('mousedown', _roleClick);
+            newR.roleName = arrRoleType[appearPlayer[i]].name;
+            newR.score = 0;
+
+            arrLayerManager[arrRoleType[appearPlayer[i]].name+"_token"] = newR;
 
             //取得視野
             newR.panorama = findpath.getPanorama(newR.local.room_id, 0, 5);

@@ -315,14 +315,15 @@ arrDoors = [{
 arrRoleType[0] = {};
 
 arrRoleType[1] = {
-    name: "Phil",
+    name: "phil",
     skillTree: [
         [0],
         [10],
         [20, 30],
         [40, 50, 70]
     ],
-    spriteName: "mini_phil.png"
+    spriteName: "mini_phil.png",
+    spriteStatusName : "icon_phil.png"
 }
 
 arrRoleType[2] = {
@@ -333,7 +334,8 @@ arrRoleType[2] = {
         [20, 30],
         [40, 50, 70]
     ],
-    spriteName: "mini_amy.png"
+    spriteName: "mini_amy.png",
+    spriteStatusName:"icon_amy.png"
 }
 
 arrRoleType[50] = {

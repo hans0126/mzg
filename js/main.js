@@ -55,16 +55,18 @@ requirejs(['init', 'jquery', 'pixi', 'TweenMax', 'EasePack'], function(init) {
     loader.add("map", "images/map.json");
     loader.add("ui", "images/ui.json");
     loader.add("role", "images/role.json");
+    loader.add("blade", "images/effect_blade.json");
     loader.add("police_bg", "images/police_bg.jpg");
     loader.add("crackhouse", "images/crackhouse.fnt");
-    
+
     loader.on("complete", complete);
     loader.load();
 
-
-
     function complete(loader, re) {
         resource = re;
+
+     
+
         init.init();
     }
 

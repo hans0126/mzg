@@ -25,6 +25,8 @@ define(['findpath', 'ui'], function(findpath, ui) { /**/
         if (_weaponObj.attackType == "range") {
             _range = true;
         }
+
+     //   _range = false;
         //處理skill    
         if (currentRole.skill.length > 0) {
             //combat traget
@@ -113,16 +115,18 @@ define(['findpath', 'ui'], function(findpath, ui) { /**/
             var _arrAttackResult = []; //攻擊結果
             var _attackCount = 0; //算攻擊次數
             var _anime = [];
+            var _score = 0;
 
             //判斷攻擊次數以及成功
             for (var i = 0; i < _numberOfAttack; i++) {
                 if (_attackRoll() >= _successRange) {
                     _arrAttackResult.push(true);
-                    score++;
+                   
                 } else {
                     _arrAttackResult.push(false);
                 }
             }
+            
             //該房間的敵人
             for (var i = 0; i < enemyLayer.children.length; i++) {
                 if (enemyLayer.children[i].local == this.local && enemyLayer.children[i] != currentRole) {
@@ -142,6 +146,7 @@ define(['findpath', 'ui'], function(findpath, ui) { /**/
                         console.log(_weaponObj.name + " 對 " + _arrTemp[i].objectName + " 攻擊成功");
                         _success = true;
                         _textObj.setText = "KILL";
+                         _score++;
                         _arrRemoveTemp.push(_arrTemp[i]);
 
                     } else {
@@ -177,12 +182,13 @@ define(['findpath', 'ui'], function(findpath, ui) { /**/
                             // 判斷所有動畫都撥完畢之後再刪除物件
 
                             if (checkAllTweenComplete(_obj2)) {
-                                ui.updateScore(score);
+                             
+                                console.log("A");
                                 for (var i = 0; i < _arrRemoveTemp.length; i++) {
                                     for (var j = 0; j < enemyLayer.children.length; j++) {
                                         if (_arrRemoveTemp[i] == enemyLayer.children[j]) {
                                             // 淡出特效後移除
-                                           _fadeOutRemoveObj(_arrRemoveTemp[i]);
+                                            _fadeOutRemoveObj(_arrRemoveTemp[i]);
                                             break;
                                         }
                                     }
@@ -201,6 +207,7 @@ define(['findpath', 'ui'], function(findpath, ui) { /**/
                 }
             }
 
+               ui.updateScore(_score);
             //清除陣列
             _attackEnd(_range);
             // debugger;
@@ -262,6 +269,7 @@ define(['findpath', 'ui'], function(findpath, ui) { /**/
             //
             var _textObj = new desplayAttackText().create();
             var _killedObj = null;
+            var _score = 0;
 
             //判斷與目標的相對位置,並移動到目標旁
             if (_weaponObj.attackType == "melee") {
@@ -272,7 +280,7 @@ define(['findpath', 'ui'], function(findpath, ui) { /**/
                 });
             }
 
-            _textObj.myId = createRandomId();
+          //  _textObj.myId = createRandomId();
 
             //計算攻擊
             if (_attackRoll() >= _successRange) {
@@ -281,7 +289,9 @@ define(['findpath', 'ui'], function(findpath, ui) { /**/
                 //
                 _textObj.text = "KILL";
 
-                score++;
+                _score++;
+
+                this.interactive = false;
 
                 _killedObj = this;
 
@@ -299,16 +309,17 @@ define(['findpath', 'ui'], function(findpath, ui) { /**/
                 y: _textObj.y - 30,
                 alpha: 0,
                 onStart: function(_self) {
+                    _bladeAnime(_self.x, _self.y);
                     shakeAnimation(_self);
                 },
                 onStartParams: [this],
                 onComplete: function(_obj, _removeObj) {
                     actionUiLayer.removeChild(_obj.target);
                     if (_removeObj) {
-                       _fadeOutRemoveObj(_removeObj);
+                        _fadeOutRemoveObj(_removeObj);
                     }
 
-                    ui.updateScore(score);
+                    ui.updateScore(_score);
                 },
                 onCompleteParams: ["{self}", _killedObj]
             })
@@ -329,7 +340,7 @@ define(['findpath', 'ui'], function(findpath, ui) { /**/
                     _activeRole[i].interactive = false;
                     _activeRole[i].buttonMode = false;
                     _activeRole[i].off("mousedown", _attackClick);
-                    _activeRole[i].tint = arrRoleType[0].color;
+                    _activeRole[i].tint = 0xFFFFFF;
                 }
             }
             $('#attack_count').html(0);
@@ -356,7 +367,7 @@ define(['findpath', 'ui'], function(findpath, ui) { /**/
             }
             return _returnValue;
         }
-      
+
 
         function _fadeOutRemoveObj(_obj) {
             new TweenMax(_obj, 0.3, {
@@ -366,6 +377,21 @@ define(['findpath', 'ui'], function(findpath, ui) { /**/
                 },
                 onCompleteParams: [_obj]
             })
+        }
+
+        function _bladeAnime(_x, _y) {
+            var _mc = new PIXI.extras.MovieClip(arrFrameManager['blade']);
+            _mc.animationSpeed = 0.5;
+            _mc.loop = false;
+            _mc.x = _x;
+            _mc.y = _y
+            actionUiLayer.addChild(_mc);
+            _mc.onComplete = function() {
+                actionUiLayer.removeChild(this);
+            }
+            _mc.anchor.x = 0.5;
+            _mc.anchor.y = 0.5;         
+            _mc.play();
         }
 
     }
