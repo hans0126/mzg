@@ -2,8 +2,8 @@ define(['enemy'], function(enemy) {
 
     function _createUiBtn() {
 
-        var _mouseEvent = [enemy.enemyMove, _statusOpen];
-        var _btnName = ['End Turn', 'Status'];
+        var _mouseEvent = [enemy.enemyMove];
+        var _btnName = ['End Turn'];
         var _tempHeight = 0;
 
         /*turn end*/
@@ -186,7 +186,7 @@ define(['enemy'], function(enemy) {
         }
 
         arrLayerManager[currentRole.roleName + "_icon_btn"].children[1].text = _currentValue;
-                console.log(_currentValue);
+        console.log(_currentValue);
 
 
 
@@ -293,21 +293,86 @@ define(['enemy'], function(enemy) {
     /*create status interface*/
     function _createStatus() {
 
-
-        _createItemStatusLayer();
-        _createSkillStatusLayer();
-        _createStatusCloseBtn();
-
+        /*  _createItemStatusLayer();
+          _createSkillStatusLayer();
+          _createStatusCloseBtn();*/
 
         /*create bg*/
 
-        var _bg = new PIXI.Sprite(resource.police_bg.texture);
+        var _bg = new PIXI.Sprite.fromFrame("item_bg.jpg");
         _bg.zIndex = 0;
         statusLayer.addChild(_bg);
         statusLayer.updateLayersOrder();
+        statusLayer.y = displayHeight - statusLayer.height;
+        //statusLayer.visible = true;
 
-        //updateStatusItem();
+        //create btn
+        var _btnImg = ["cancel_btn", "backpack_btn", "drop_item_btn"];
+        var _btnEvent = [_closeMenu, _openBackpack, _dropMode];
+        var _btnGroup = new PIXI.Container();
+
+        for (var i = 0; i < 3; i++) {
+            var _btn = new PIXI.Sprite.fromFrame(_btnImg[i] + ".png");
+            _btn.y = i * _btn.height + 5 * i;
+            _btnGroup.addChild(_btn);
+            _btn.interactive = true;
+            _btn.buttonMode = true;
+            _btn.myId = i;
+            _btn.on('mousedown', _btnEvent[i]);
+
+            _btn.mouseover = function() {
+                this.texture = new PIXI.Texture.fromFrame(_btnImg[this.myId] + "_hover.png");
+            }
+            _btn.mouseout = function() {
+                this.texture = new PIXI.Texture.fromFrame(_btnImg[this.myId] + ".png");
+            }
+        }
+
+
+        _btnGroup.x = displayWidth - _btnGroup.width - 5;
+        _btnGroup.y = 10;
+
+        statusLayer.addChild(_btnGroup);
+
+        statusLayer.y = displayHeight + 60;
+        statusLayer.visible = false;
+        _createItemStatusLayer();
+
     }
+
+    function _openAttackMenu() {
+        statusLayer.visible = true;
+        currentRole = this;
+
+        _updateStatusItem();
+        new TweenMax(statusLayer, 0.5, {
+            y: displayHeight - 75,
+
+        })
+    }
+
+    function _openBackpack() {
+        statusLayer.visible = true;
+        new TweenMax(statusLayer, 0.5, {
+            y: displayHeight - 350,
+
+        })
+    }
+
+    function _dropMode() {
+
+    }
+
+    function _closeMenu() {
+        new TweenMax(statusLayer, 0.5, {
+            y: displayHeight + 60,
+            onComplete: function(_self) {
+                _self.target.visible = false;
+            },
+            onCompleteParams: ["{self}"]
+        })
+    }
+
 
     function _createStatusCloseBtn() {
         var _closeBtn = new PIXI.Graphics();
@@ -476,27 +541,25 @@ define(['enemy'], function(enemy) {
 
         _itemLayer.zIndex = 60;
 
-        for (i = 0; i < 6; i++) {
+        for (i = 0; i < 5; i++) {
             var _itemCaseParent = new PIXI.Container();
             var _itemBtn = new PIXI.Graphics();
             var _itemCase = new PIXI.Sprite.fromFrame("item_card.jpg");
 
             _itemBtn.beginFill(0x666666, 0.5);
-            _itemBtn.drawRect(0, 0, 150, 225);
-            _itemBtn.lineStyle(0, 0x0000FF, 1);
+            _itemBtn.drawRect(0, 0, 132, 191);
+            _itemBtn.lineStyle(0, 0x0000FF, 0);
             _itemTouchLayer.addChild(_itemBtn);
 
-            _itemCase.width = 150;
-            _itemCase.height = 225;
 
             _itemCaseParent.zIndex = i;
             _itemCaseParent.addChild(_itemCase);
             _itemLayer.addChild(_itemCaseParent);
 
-            if (i < 3) {
-                _itemBtn.x = i * _itemCaseParent.width + 20 * i;
-                _itemBtn.y = 20;
-                _itemBtn.myRow = 1;
+            if (i < 2) {
+                _itemBtn.x = 74 + i * _itemCaseParent.width + 38 * i;
+                _itemBtn.y = -60;
+                _itemBtn.myRow = 0;
                 _itemBtn.myId = i;
 
                 if (i == 0) {
@@ -504,10 +567,10 @@ define(['enemy'], function(enemy) {
                     _row2BaseY = _itemBtn.y + _itemBtn.height + 10;
                 }
             } else {
-                _itemBtn.x = (i - 3) * _itemBtn.width + 20 * (i - 3);
-                _itemBtn.y = _row2BaseY;
+                _itemBtn.x = (i - 2) * _itemBtn.width + 24 * (i - 2);
+                _itemBtn.y = _row2BaseY + 2;
                 _itemBtn.myRow = 0;
-                _itemBtn.myId = i - 3;
+                _itemBtn.myId = i;
 
                 if (i == 5) {
                     //   _itemCaseParent.children[0].tint = 0xFF0000;
@@ -515,9 +578,9 @@ define(['enemy'], function(enemy) {
                 }
             }
 
-            _itemCaseParent.x = _itemBtn.x;
-            _itemCaseParent.y = _itemBtn.y;
-
+            _itemCaseParent.x = _itemBtn.x + 6;
+            _itemCaseParent.y = _itemBtn.y + 6;
+            _itemBtn.alpha = 0;
 
             var _textObj = new PIXI.extras.BitmapText("Empty", {
                 font: "30px Crackhouse",
@@ -529,7 +592,7 @@ define(['enemy'], function(enemy) {
 
             _itemCaseParent.addChild(_textObj);
 
-            _itemCaseParent.visible = false;
+            _itemCaseParent.visible = true;
             _itemBtn.interactive = true;
             _itemBtn.buttonMode = true;
 
@@ -618,16 +681,10 @@ define(['enemy'], function(enemy) {
                     var _alpha = 1;
                     var _scaleX = 1;
                     var _scaleY = 1;
-                    //進到垃圾桶
-                    if (itemSelected[_target].myRow == 0 && itemSelected[_target].myId == 2) {
-                        _alpha = 0;
-                        _scaleX = 0.5;
-                        _scaleY = 0.5;
-                    }
 
                     new TimelineLite().to(itemSelected[i].targetObj, 0.5, {
-                        x: itemSelected[_target].x,
-                        y: itemSelected[_target].y,
+                        x: itemSelected[_target].x+7,
+                        y: itemSelected[_target].y+7,
                         alpha: _alpha,
                         scaleX: _scaleX,
                         scaleY: _scaleY,
@@ -653,20 +710,19 @@ define(['enemy'], function(enemy) {
 
 
                     itemSelected[i].targetObj = itemSelectedTarget[_target].targetObj;
-                    currentRole.equip[itemSelected[_target].myRow][itemSelected[_target].myId] = itemSelected[i].myItemId;
+                    currentRole.equip[itemSelected[_target].myId] = itemSelected[i].myItemId;
                     itemSelected[i].myItemId = itemSelectedTarget[_target].itemId;
 
-                    if (itemSelected[_target].myRow == 0 && itemSelected[_target].myId == 2) {
-                        itemSelected[_target].myItemId = 0;
-                    }
                 }
 
                 itemSelected = [];
                 itemSelectedTarget = [];
-                currentRole.equip[0].splice(2, 1);
-                arrCommonObj['trashCard'].myItemId = 0;
+                // currentRole.equip[0].splice(2, 1);
+                // arrCommonObj['trashCard'].myItemId = 0;
 
             }
+
+            console.log(currentRole.equip);
         }
 
         function _onDragEnd() {
@@ -759,8 +815,8 @@ define(['enemy'], function(enemy) {
 
             } else {
                 new TimelineLite().to(_parent.targetObj, 0.1, {
-                    x: _parent.x,
-                    y: _parent.y,
+                    x: _parent.x + 5,
+                    y: _parent.y + 5,
                     alpha: 1,
                     scaleX: 1,
                     scaleY: 1,
@@ -782,7 +838,7 @@ define(['enemy'], function(enemy) {
 
 
     function _updateStatusItem() {
-
+        console.log(currentRole);
         if (currentRole == null) {
             return false;
         }
@@ -792,30 +848,24 @@ define(['enemy'], function(enemy) {
         var _itemTouchLayer = arrCommonObj['itemTouchLayer'].children;
 
         for (var i = 0; i < _item.length; i++) {
-            for (var j = 0; j < _item[i].length; j++) {
-                for (var k = 0; k < _itemTouchLayer.length; k++) {
 
-                    if (_itemTouchLayer[k].myRow == i && _itemTouchLayer[k].myId == j) {
+            _itemLayer[i].x = _itemTouchLayer[i].x + 7;
+            _itemLayer[i].y = _itemTouchLayer[i].y + 7;
 
-                        _itemTouchLayer[k].myItemId = _item[i][j];
-
-                        // _itemLayer[k].children[1].text = arrItems[_item[i][j]].name;
-                        _itemTouchLayer[k].targetObj.children[1].text = arrItems[_item[i][j]].name;
-                        if (_item[i][j] > 0) {
-                            _itemTouchLayer[k].targetObj.visible = true;
-
-                            if (_item[i][j] == 99) {
-                                _itemTouchLayer[k].interactive = false;
-                                _itemTouchLayer[k].targetObj.children[0].texture = PIXI.Texture.fromFrame('wound_card.jpg');
-                                _itemTouchLayer[k].targetObj.children[1].text = '';
-                            }
-                        }
-
-                        break;
-                    }
+            _itemTouchLayer[i].myItemId = _item[i];
+            if (_item[i] > 0) {
+                if (_item[i] == 99) {
+                    _itemTouchLayer[i].interactive = false;
+                    _itemLayer[i].children[0].texture = PIXI.Texture.fromFrame('wound_card.jpg');
+                    _itemLayer[i].children[1].text = '';
+                } else {
+                    _itemLayer[i].children[1].text = arrItems[_item[i]].name;
                 }
+            } else {
+                _itemLayer[i].visible = false;
             }
         }
+
     }
 
     function _updateSkill() {
@@ -892,6 +942,7 @@ define(['enemy'], function(enemy) {
         createMsgBox: _createMsgBox,
         statusOpen: _statusOpen,
         statusClose: _statusClose,
-        createRoleStatus: _createRoleStatus
+        createRoleStatus: _createRoleStatus,
+        openAttackMenu: _openAttackMenu
     }
 })

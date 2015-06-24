@@ -74,7 +74,7 @@ define(['ui', 'map', 'role', 'findpath', 'help', 'datas', 'meter'], function(ui,
 
         gameStage.interactive = true;
 
-        statusLayer.visible = false;
+        statusLayer.visible = true;
 
         stage.addChild(gameStage);
         stage.addChild(mainUiLayer);

@@ -1,30 +1,102 @@
 {"frames": {
 
+"backpack_btn.png":
+{
+	"frame": {"x":359,"y":367,"w":86,"h":26},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":5,"y":0,"w":86,"h":26},
+	"sourceSize": {"w":99,"h":28},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"backpack_btn_hover.png":
+{
+	"frame": {"x":447,"y":367,"w":86,"h":26},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":5,"y":0,"w":86,"h":26},
+	"sourceSize": {"w":99,"h":28},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"cancel_btn.png":
+{
+	"frame": {"x":359,"y":451,"w":60,"h":22},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":6,"y":2,"w":60,"h":22},
+	"sourceSize": {"w":72,"h":28},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"cancel_btn_hover.png":
+{
+	"frame": {"x":359,"y":475,"w":60,"h":22},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":6,"y":2,"w":60,"h":22},
+	"sourceSize": {"w":72,"h":28},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"drop_icon.png":
+{
+	"frame": {"x":421,"y":455,"w":46,"h":58},
+	"rotated": true,
+	"trimmed": true,
+	"spriteSourceSize": {"x":5,"y":8,"w":46,"h":58},
+	"sourceSize": {"w":57,"h":68},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"drop_item_btn.png":
+{
+	"frame": {"x":359,"y":395,"w":86,"h":26},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":5,"y":2,"w":86,"h":26},
+	"sourceSize": {"w":96,"h":28},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"drop_item_btn_hover.png":
+{
+	"frame": {"x":359,"y":423,"w":86,"h":26},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":5,"y":2,"w":86,"h":26},
+	"sourceSize": {"w":96,"h":28},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"item_bg.jpg":
+{
+	"frame": {"x":2,"y":2,"w":750,"h":355},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":750,"h":355},
+	"sourceSize": {"w":750,"h":355},
+	"pivot": {"x":0.5,"y":0.5}
+},
 "item_card.jpg":
 {
-	"frame": {"x":2,"y":2,"w":150,"h":225},
+	"frame": {"x":359,"y":185,"w":120,"h":180},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":150,"h":225},
-	"sourceSize": {"w":150,"h":225},
+	"spriteSourceSize": {"x":0,"y":0,"w":120,"h":180},
+	"sourceSize": {"w":120,"h":180},
 	"pivot": {"x":0.5,"y":0.5}
 },
 "skill_bg.png":
 {
-	"frame": {"x":306,"y":2,"w":215,"h":196},
+	"frame": {"x":2,"y":754,"w":267,"h":344},
 	"rotated": true,
-	"trimmed": true,
-	"spriteSourceSize": {"x":0,"y":10,"w":215,"h":196},
-	"sourceSize": {"w":215,"h":206},
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":267,"h":344},
+	"sourceSize": {"w":267,"h":344},
 	"pivot": {"x":0.5,"y":0.5}
 },
 "wound_card.jpg":
 {
-	"frame": {"x":154,"y":2,"w":150,"h":225},
+	"frame": {"x":359,"y":2,"w":120,"h":181},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":150,"h":225},
-	"sourceSize": {"w":150,"h":225},
+	"spriteSourceSize": {"x":0,"y":0,"w":120,"h":181},
+	"sourceSize": {"w":120,"h":181},
 	"pivot": {"x":0.5,"y":0.5}
 }},
 "meta": {
@@ -32,8 +104,8 @@
 	"version": "1.0",
 	"image": "ui.png",
 	"format": "RGBA8888",
-	"size": {"w":504,"h":229},
+	"size": {"w":481,"h":1023},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:df233fbf11bbed39155513384959ad7a:38f7a97bdbff6bf86c12803a680da500:5b04aa198265472a3c5f56958d78e97b$"
+	"smartupdate": "$TexturePacker:SmartUpdate:d8399c5d91abd0ae81a552461aa62cd1:3777d6862687160fe4d4e443502a1282:5b04aa198265472a3c5f56958d78e97b$"
 }
 }

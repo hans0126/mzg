@@ -74,14 +74,11 @@ define(['attack', 'ui', 'findpath'], function(attack, ui, findpath) {
             newR.live = true;
             //[0] = hand 
             //[1] = backpack
-            newR.equip = [
-                [1, 2],
-                [0, 0, 0]
-            ];
+            newR.equip = [1,2,0,99,0];
 
             newR.wound = 0;
             newR.actionPoint = 3;
-            newR.on('mousedown', _roleClick);
+            newR.on('mousedown', ui.openAttackMenu);
             newR.roleName = arrRoleType[appearPlayer[i]].name;
             newR.score = 0;
 
@@ -106,11 +103,14 @@ define(['attack', 'ui', 'findpath'], function(attack, ui, findpath) {
     /*角色被選取時*/
     function _roleClick(event) {
         //console.log(this.objectName);
+         currentRole = this;
+
+
         _closeAttackBtn();
         this.interactive = false;
 
         _activeCurrentRoomObj(this.local.room_id);
-        currentRole = this;
+       
 
         ui.updateAp(currentRole.actionPoint);
 
