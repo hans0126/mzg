@@ -1,4 +1,4 @@
-define(['enemy'], function(enemy) {
+define(['enemy', 'ui_item'], function(enemy, ui_item) {
 
     function _createUiBtn() {
 
@@ -124,61 +124,19 @@ define(['enemy'], function(enemy) {
 
         }
 
-
         function _moveToTargetRole() {
             moveToTarget(arrLayerManager[this.roleName + "_token"].x, arrLayerManager[this.roleName + "_token"].y);
+            currentRole = arrLayerManager[this.roleName + "_token"];
+            //console.log(currentRole);
+            _openAttackMenu.call(currentRole);
         }
 
+
+
     }
-
-
-    function _createScore() {
-        var _graphic = new PIXI.Graphics();
-        _graphic.beginFill(0x99FFFF, 1);
-        _graphic.drawRect(10, 10, displayWidth - 20, 15);
-
-        mainUiLayer.addChild(_graphic);
-
-        var _graphicSpace = _graphic.width / 4;
-
-        for (var i = 0; i < 5; i++) {
-
-            var _textObj = new PIXI.Text(i + '0', {
-                font: '15px Arial',
-                fill: 0x000000
-            });
-
-            _textObj.x = _graphic.x + (i * _graphicSpace);
-            _textObj.y = 25;
-            mainUiLayer.addChild(_textObj);
-        }
-
-        var _arrow = new PIXI.Graphics();
-
-        _arrow.beginFill(0xFF0000);
-
-        // draw a triangle using lines
-        _arrow.moveTo(0, 0);
-
-        _arrow.lineTo(-7, -10);
-        _arrow.lineTo(7, -10);
-
-        _arrow.x = 10;
-        _arrow.y = 20;
-        // end the fill
-        _arrow.endFill();
-        arrCommonObj['arrow'] = _arrow;
-        mainUiLayer.addChild(_arrow);
-    }
-
 
     function _updateScore(num) {
-        /* var _scoreWidth = (displayWidth - 20) / 40;
-
-         var tween = new TweenMax(arrCommonObj['arrow'], 0.5, {
-             x: (_scoreWidth * num) + 10,
-             ease: Elastic.easeOut
-         });*/
+     
         var _currentValue = currentRole.score + num;
         currentRole.score = _currentValue;
         if (_currentValue < 10) {
@@ -187,9 +145,6 @@ define(['enemy'], function(enemy) {
 
         arrLayerManager[currentRole.roleName + "_icon_btn"].children[1].text = _currentValue;
         console.log(_currentValue);
-
-
-
 
         /*判斷有沒有升級*/
         var _targetLevel;
@@ -306,6 +261,8 @@ define(['enemy'], function(enemy) {
         statusLayer.y = displayHeight - statusLayer.height;
         //statusLayer.visible = true;
 
+        statusLayer.positionMode = [displayHeight + 60, displayHeight - 75, displayHeight - 350];
+
         //create btn
         var _btnImg = ["cancel_btn", "backpack_btn", "drop_item_btn"];
         var _btnEvent = [_closeMenu, _openBackpack, _dropMode];
@@ -336,25 +293,26 @@ define(['enemy'], function(enemy) {
 
         statusLayer.y = displayHeight + 60;
         statusLayer.visible = false;
-        _createItemStatusLayer();
+        ui_item.createItemStatusLayer();
 
     }
 
     function _openAttackMenu() {
+
         statusLayer.visible = true;
         currentRole = this;
-
-        _updateStatusItem();
+        statusLayer.activeMode = 1;
+        ui_item.updateStatusItem();
         new TweenMax(statusLayer, 0.5, {
-            y: displayHeight - 75,
-
+            y: statusLayer.positionMode[1]
         })
     }
 
     function _openBackpack() {
         statusLayer.visible = true;
+        statusLayer.activeMode = 2;
         new TweenMax(statusLayer, 0.5, {
-            y: displayHeight - 350,
+            y: statusLayer.positionMode[2]
 
         })
     }
@@ -364,8 +322,10 @@ define(['enemy'], function(enemy) {
     }
 
     function _closeMenu() {
+        statusLayer.activeMode = 0;
+        ui_item.clearSelectItem();
         new TweenMax(statusLayer, 0.5, {
-            y: displayHeight + 60,
+            y: statusLayer.positionMode[0],
             onComplete: function(_self) {
                 _self.target.visible = false;
             },
@@ -526,347 +486,6 @@ define(['enemy'], function(enemy) {
     }
 
 
-    function _createItemStatusLayer() {
-        //create global variable
-        itemSelected = [];
-        itemSelectedTarget = []
-        itemMode = '';
-        var _row2BaseX;
-        var _row2BaseY;
-        var _itemLayer = new PIXI.Container();
-        var _itemTouchLayer = new PIXI.Container();
-
-        _itemLayer.zIndex = 30;
-        _itemTouchLayer.zIndex = 10;
-
-        _itemLayer.zIndex = 60;
-
-        for (i = 0; i < 5; i++) {
-            var _itemCaseParent = new PIXI.Container();
-            var _itemBtn = new PIXI.Graphics();
-            var _itemCase = new PIXI.Sprite.fromFrame("item_card.jpg");
-
-            _itemBtn.beginFill(0x666666, 0.5);
-            _itemBtn.drawRect(0, 0, 132, 191);
-            _itemBtn.lineStyle(0, 0x0000FF, 0);
-            _itemTouchLayer.addChild(_itemBtn);
-
-
-            _itemCaseParent.zIndex = i;
-            _itemCaseParent.addChild(_itemCase);
-            _itemLayer.addChild(_itemCaseParent);
-
-            if (i < 2) {
-                _itemBtn.x = 74 + i * _itemCaseParent.width + 38 * i;
-                _itemBtn.y = -60;
-                _itemBtn.myRow = 0;
-                _itemBtn.myId = i;
-
-                if (i == 0) {
-
-                    _row2BaseY = _itemBtn.y + _itemBtn.height + 10;
-                }
-            } else {
-                _itemBtn.x = (i - 2) * _itemBtn.width + 24 * (i - 2);
-                _itemBtn.y = _row2BaseY + 2;
-                _itemBtn.myRow = 0;
-                _itemBtn.myId = i;
-
-                if (i == 5) {
-                    //   _itemCaseParent.children[0].tint = 0xFF0000;
-                    arrCommonObj['trashCard'] = _itemBtn;
-                }
-            }
-
-            _itemCaseParent.x = _itemBtn.x + 6;
-            _itemCaseParent.y = _itemBtn.y + 6;
-            _itemBtn.alpha = 0;
-
-            var _textObj = new PIXI.extras.BitmapText("Empty", {
-                font: "30px Crackhouse",
-                tint: 0x000000
-            });
-
-            _textObj.x = 20;
-            _textObj.y = 10;
-
-            _itemCaseParent.addChild(_textObj);
-
-            _itemCaseParent.visible = true;
-            _itemBtn.interactive = true;
-            _itemBtn.buttonMode = true;
-
-            _itemBtn.targetObj = _itemCaseParent;
-            _itemBtn.myItemId = 0;
-
-            _itemBtn.on("mousedown", _onItemClick)
-                // events for drag end
-                .on('mouseup', _onDragEnd)
-                .on('mouseupoutside', _onDragEnd)
-                // events for drag move
-                .on('mousemove', _onDragMove);
-
-        }
-
-        statusLayer.addChild(_itemLayer);
-        statusLayer.addChild(_itemTouchLayer);
-
-        _itemLayer.x = 250;
-        _itemTouchLayer.x = _itemLayer.x;
-        //record layer index   
-        arrCommonObj['itemLayer'] = _itemLayer;
-        arrCommonObj['itemTouchLayer'] = _itemTouchLayer;
-
-        statusLayer.updateLayersOrder();
-
-        /*click process*/
-        function _onItemClick(event) {
-            //has rwo mode 1.traslate  2. combine item
-
-            var _obj = this.targetObj;
-            var _currentTouch = this;
-
-            if (this.targetObj.visible) {
-                this.timer = setTimeout(function() {
-                    //combine mode
-                    itemMode = "drag";
-                    _zIndexUpFirst(_obj);
-                    _obj.data = event.data;
-                    _obj.dragging = true;
-                    _obj.sx = _obj.data.getLocalPosition(_obj).x * _obj.scale.x;
-                    _obj.sy = _obj.data.getLocalPosition(_obj).y * _obj.scale.y;
-                    _obj.alpha = 0.8;
-                    itemSelected = [];
-                    itemSelectedTarget = [];
-
-                    for (var i = 0; i < _itemTouchLayer.children.length; i++) {
-                        if (_itemTouchLayer.children[i].myRow != _currentTouch.myRow || _itemTouchLayer.children[i].myId != _currentTouch.myId) {
-                            _itemTouchLayer.children[i].interactive = false;
-                        }
-                    }
-
-                    var tween = new TweenMax(_obj, 0.2, {
-                        scaleX: 1.1,
-                        scaleY: 1.1,
-                        ease: Back.easeInOut
-                    });
-
-                }, 300);
-            }
-
-            if (itemSelected.length < 2) {
-                if (itemSelected.indexOf(this) == -1) {
-                    _obj.alpha = 0.5;
-                    itemSelected.push(this);
-                    itemSelectedTarget.push({
-                        targetObj: _obj,
-                        itemId: this.myItemId
-                    });
-                }
-            }
-
-            if (itemSelected.length == 2) {
-                clearTimeout(this.timer);
-                /**/
-                for (var i = 0; i < itemSelected.length; i++) {
-                    // i = current
-                    // convers i
-                    var _target;
-                    if (i == 0) {
-                        _target = 1;
-                    } else {
-                        _target = 0
-                    }
-
-                    var _alpha = 1;
-                    var _scaleX = 1;
-                    var _scaleY = 1;
-
-                    new TimelineLite().to(itemSelected[i].targetObj, 0.5, {
-                        x: itemSelected[_target].x+7,
-                        y: itemSelected[_target].y+7,
-                        alpha: _alpha,
-                        scaleX: _scaleX,
-                        scaleY: _scaleY,
-
-                        onComplete: function(_currentObj, _row, _id) {
-                            for (var j = 0; j < _itemTouchLayer.children.length; j++) {
-                                if (_itemTouchLayer.children[j].myItemId != 99) {
-
-                                    _itemTouchLayer.children[j].interactive = true;
-                                }
-                            }
-
-                            if (_row == 0 && _id == 2) {
-                                //                         
-                                _currentObj.targetObj.alpha = 1;
-                                _currentObj.targetObj.visible = false;
-                                _currentObj.targetObj.scale.x = 1;
-                                _currentObj.targetObj.scale.y = 1;
-                            }
-                        },
-                        onCompleteParams: [itemSelected[_target], itemSelected[_target].myRow, itemSelected[_target].myId]
-                    });
-
-
-                    itemSelected[i].targetObj = itemSelectedTarget[_target].targetObj;
-                    currentRole.equip[itemSelected[_target].myId] = itemSelected[i].myItemId;
-                    itemSelected[i].myItemId = itemSelectedTarget[_target].itemId;
-
-                }
-
-                itemSelected = [];
-                itemSelectedTarget = [];
-                // currentRole.equip[0].splice(2, 1);
-                // arrCommonObj['trashCard'].myItemId = 0;
-
-            }
-
-            console.log(currentRole.equip);
-        }
-
-        function _onDragEnd() {
-
-            clearTimeout(this.timer);
-
-            if (itemMode == "drag") {
-
-                this.targetObj.data = null;
-                this.targetObj.dragging = false;
-                itemSelected = [];
-
-                _checkCombine(this.targetObj, this);
-            }
-
-            itemMode = '';
-
-        }
-
-        function _onDragMove() {
-
-            if (this.targetObj.dragging) {
-                var newPosition = this.targetObj.data.getLocalPosition(this.targetObj.parent);
-                this.targetObj.position.x = newPosition.x - this.targetObj.width / 2;
-                this.targetObj.position.y = newPosition.y - this.targetObj.height / 2;
-            }
-        }
-
-        /*
-            current drag obj zindex go to top
-        */
-        function _zIndexUpFirst(_obj) {
-            for (var i = 0; i < _itemLayer.children.length; i++) {
-                _itemLayer.children[i].zIndex = 1;
-            }
-
-            _obj.zIndex = 10;
-            _itemLayer.updateLayersOrder();
-        }
-
-        /*
-        touch area 60%+ triggle change
-        */
-        function _checkCombine(_obj, _parent) {
-
-            var _iL = _itemTouchLayer.children;
-            var _getItemId;
-            var _targetObj;
-
-            for (var i = 0; i < _iL.length; i++) {
-                if (hitTest(_iL[i], _obj) && _iL[i] != _obj) {
-                    _targetObj = _iL[i];
-                    var _recWidth = ((_obj.width - Math.abs(_obj.x - _targetObj.x)) / _obj.width) * 100;
-                    var _recHeight = ((_obj.height - Math.abs(_obj.y - _targetObj.y)) / _obj.height) * 100;
-
-                    if (_recWidth > 60 && _recHeight > 60) {
-
-                        //match element
-                        var _targetItemId = _targetObj.myItemId;
-                        var _currentItemId = _parent.myItemId;
-
-                        for (_key in arrItems) {
-                            var _martch1 = arrItems[_key].combineElement.indexOf(_targetItemId);
-                            var _martch2 = arrItems[_key].combineElement.indexOf(_currentItemId);
-                            if (_martch1 > -1 && _martch2 > -1 && _martch1 != _martch2) {
-                                _getItemId = _key;
-                                break;
-                            }
-                        }
-
-                        break;
-                    }
-                }
-            }
-
-            if (_getItemId) {
-                _parent.myItemId = 0;
-                _obj.visible = 0;
-                _obj.x = _parent.x;
-                _obj.y = _parent.y;
-
-                currentRole.equip[_parent.myRow][_parent.myId] = 0;
-
-                _targetObj.myItemId = _getItemId;
-                _targetObj.targetObj.children[1].text = arrItems[_getItemId].name;
-
-                currentRole.equip[_targetObj.myRow][_targetObj.myId] = _getItemId;
-
-                //  _itemTouchLayer.children[i].interactive = true;
-
-            } else {
-                new TimelineLite().to(_parent.targetObj, 0.1, {
-                    x: _parent.x + 5,
-                    y: _parent.y + 5,
-                    alpha: 1,
-                    scaleX: 1,
-                    scaleY: 1,
-                    onComplete: function() {
-                        /* for (var i = 0; i < _itemTouchLayer.children.length; i++) {
-                             _itemTouchLayer.children[i].interactive = true;
-                         }*/
-                    }
-                });
-            }
-
-            for (var i = 0; i < _itemTouchLayer.children.length; i++) {
-                if (_itemTouchLayer.children[i].myItemId != 99) {
-                    _itemTouchLayer.children[i].interactive = true;
-                }
-            }
-        }
-    }
-
-
-    function _updateStatusItem() {
-        console.log(currentRole);
-        if (currentRole == null) {
-            return false;
-        }
-
-        var _item = currentRole.equip;
-        var _itemLayer = arrCommonObj['itemLayer'].children;
-        var _itemTouchLayer = arrCommonObj['itemTouchLayer'].children;
-
-        for (var i = 0; i < _item.length; i++) {
-
-            _itemLayer[i].x = _itemTouchLayer[i].x + 7;
-            _itemLayer[i].y = _itemTouchLayer[i].y + 7;
-
-            _itemTouchLayer[i].myItemId = _item[i];
-            if (_item[i] > 0) {
-                if (_item[i] == 99) {
-                    _itemTouchLayer[i].interactive = false;
-                    _itemLayer[i].children[0].texture = PIXI.Texture.fromFrame('wound_card.jpg');
-                    _itemLayer[i].children[1].text = '';
-                } else {
-                    _itemLayer[i].children[1].text = arrItems[_item[i]].name;
-                }
-            } else {
-                _itemLayer[i].visible = false;
-            }
-        }
-
-    }
 
     function _updateSkill() {
         for (var i = 0; i < currentRole.skill.length; i++) {
@@ -895,7 +514,7 @@ define(['enemy'], function(enemy) {
     /*statusOpen*/
     function _statusOpen() {
             gameStage.visible = false;
-            _updateStatusItem();
+            ui_item.updateStatusItem();
             _updateSkill();
             statusLayer.visible = true;
             mainUiLayer.visible = false;
@@ -935,7 +554,7 @@ define(['enemy'], function(enemy) {
         createAp: _createDisplayAp,
         updateAp: _updateAp,
         createStatus: _createStatus,
-        updateStatusItem: _updateStatusItem,
+        updateStatusItem: ui_item.updateStatusItem,
         closeAttackBtn: _closeAttackBtn,
         createScore: _createScore,
         updateScore: _updateScore,

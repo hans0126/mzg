@@ -1,14 +1,13 @@
-define(['findpath', 'ui'], function(findpath, ui) { /**/
+define(['findpath' ], function(findpath) { /**/
 
-    function _attack() {
+    function _attack() {     
 
-        ui.closeAttackBtn();
         currentRole.actionPoint--;
-        ui.updateAp(currentRole.actionPoint);
+       // ui.updateAp(currentRole.actionPoint);
         var _range = false; //判斷是否為遠程武器 //跟攻擊模式有關    
         //current local
         var _currentLocal = currentRole.local; //腳色目前所在位置
-        var _weaponObj = arrItems[this.weaponId]; //武器
+        var _weaponObj = arrItems[this.myItemId]; //武器
 
         var _minRange = _weaponObj.minRange; //最小射程
         var _maxRange = _weaponObj.maxRange; //最大射程:起始值
@@ -207,7 +206,7 @@ define(['findpath', 'ui'], function(findpath, ui) { /**/
                 }
             }
 
-               ui.updateScore(_score);
+             //  ui.updateScore(_score);
             //清除陣列
             _attackEnd(_range);
             // debugger;
@@ -319,7 +318,7 @@ define(['findpath', 'ui'], function(findpath, ui) { /**/
                         _fadeOutRemoveObj(_removeObj);
                     }
 
-                    ui.updateScore(_score);
+                  //  ui.updateScore(_score);
                 },
                 onCompleteParams: ["{self}", _killedObj]
             })

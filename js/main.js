@@ -17,7 +17,8 @@ requirejs.config({
         attack: "app/attack",
         findpath: "app/findpath",
         enemy: "app/enemy",
-        meter: "lib/stats.js-master/build/stats.min"
+        meter: "lib/stats.js-master/build/stats.min",
+        ui_item:"app/ui/ui_item_manager"
     }
 })
 
