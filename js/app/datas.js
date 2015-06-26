@@ -394,7 +394,7 @@ arrItems[1] = {
     minRange: 0,
     maxRange: 1,
     successRange: 4,
-    numberOfAttack: 5,
+    numberOfAttack: 1,
     dual: true,
     combineElement: []
 };

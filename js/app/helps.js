@@ -145,14 +145,12 @@ function checkActionPoint() {
     if (currentRole.actionPoint == 0) {
         currentRole.interactive = false;
         currentRole.tint = 0x999999;
-        //16777215
-        objectHelp(passageLayer.children, null, {
-            interactive: false,
-            tint: 0x666666,
-            buttonMode: false
-        });
+        disableAllRoomObj();
 
-        //currentRole = null;
+        if (typeof(this) == "function") {
+            this();
+        }
+
     }
 }
 
@@ -167,40 +165,6 @@ function removeAttackRangeArea() {
 }
 
 
-function countdown() {
-    this.setTime = 3000;
-    this.dateStart = new Date().getTime();
-    this.dateEnd = null;
-    this.percent = null;
-    this.isInit = false;
-    this.init = function() {
-        this.dateEnd = new Date().getTime() + this.setTime;
-        console.log(this.dateStart);
-        console.log(this.dateEnd);
-    }
-
-    this.play = function() {
-
-        if (!this.isInit) {
-            this.init();
-            this.isInit = true;
-        }
-
-        this.percent = ((new Date().getTime() - this.dateStart) / (this.dateEnd - this.dateStart)) * 100;
-
-        this.process();
-
-        if (this.percent > 100) {
-            this.end();
-            return true;
-        }
-    }
-
-    this.process = function() {}
-
-    this.end = function() {}
-
-}
 
 
 
@@ -451,9 +415,80 @@ function findGameObjfromMouse(_x, _y, _gameObj) {
 
 
 
+/**/
+function activeCurrentRoomObj(_room) {
+
+    for (var i = 0; i < passageLayer.children.length; i++) {
+        var _passageIndex = passageLayer.children[i].passage.indexOf(_room.room_id);
+        if (_passageIndex > -1) {
+            // get Map
+            if (_passageIndex == 0) {
+                _passageIndex = 1;
+            } else {
+                _passageIndex = 0;
+            }
+
+            _targetRoom = getMapInfo(arrMap, {
+                room_id: passageLayer.children[i].passage[_passageIndex]
+            })[0];
+
+            _currentPassage = passageLayer.children[i];
+
+            /*console.log(_room.localX + "/" + _room.localY);
+            console.log(_targetRoom.localX + "/" + _targetRoom.localY);
+            console.log("----");*/
+
+            if (_targetRoom.localX == _room.localX) {
+
+                if (_targetRoom.localY > _room.localY) {
+                    _currentPassage.texture = new PIXI.Texture.fromFrame("arrow_bottom.png");
+                } else {
+                    _currentPassage.texture = new PIXI.Texture.fromFrame("arrow_top.png");
+                }
+
+
+            } else if (_targetRoom.localY == _room.localY) {
+                if (_targetRoom.localX > _room.localX) {
+                    _currentPassage.texture = new PIXI.Texture.fromFrame("arrow_right.png");
+                } else {
+                    _currentPassage.texture = new PIXI.Texture.fromFrame("arrow_left.png");
+                }
+            }
 
 
 
+            _currentPassage.interactive = true;
+            _currentPassage.buttonMode = true;
+            _currentPassage.tint = 0x00FF00;
+            _currentPassage.visible = true;
+
+
+        }
+    }
+
+
+
+    for (var i = 0; i < itemLayer.children.length; i++) {
+        if (itemLayer.children[i].local.room_id == _room.room_id) {
+
+            itemLayer.children[i].interactive = true;
+        }
+    }
+}
+
+function disableAllRoomObj() {
+
+    objectHelp(passageLayer.children, null, {
+        interactive: false,
+        tint: 0x666666,
+        visible: false
+    });
+
+    objectHelp(itemLayer.children, null, {
+        interactive: false
+    });
+
+}
 
 
 /*

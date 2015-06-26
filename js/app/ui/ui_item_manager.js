@@ -113,7 +113,7 @@ define(['attack'], function(attack) {
 
             switch (statusLayer.activeMode) {
                 case 1:
-                    attack.attack.call(this);
+                    attack.attackEequence.call(this);
                     break;
                 case 2:
                     _itemManagerMode.call(this);
@@ -319,48 +319,7 @@ define(['attack'], function(attack) {
 
             }
         }
-    }
-
-
-    function _updateStatusItem() {
-        if (currentRole == null) {
-            console.log('non-role');
-            return false;
-        }
-
-        var _item = currentRole.equip;
-        var _itemLayer = arrCommonObj['itemLayer'].children;
-        var _itemTouchLayer = arrCommonObj['itemTouchLayer'].children;
-
-        for (var i = 0; i < _item.length; i++) {
-
-            _itemLayer[i].x = _itemTouchLayer[i].x + arrCommonObj['itemTouchLayer'].cardPositionTune;
-            _itemLayer[i].y = _itemTouchLayer[i].y + arrCommonObj['itemTouchLayer'].cardPositionTune;
-
-            _itemTouchLayer[i].myItemId = _item[i];
-
-            _itemTouchLayer[i].targetObj = _itemLayer[i];
-
-            _itemLayer[i].visible = true;
-            switch (_item[i]) {
-                case 0:
-                    _itemLayer[i].visible = false;
-                    _itemLayer[i].children[1].text = 'Empty';
-                    break;
-
-                case 99:
-                    _itemTouchLayer[i].interactive = false;
-                    _itemLayer[i].children[0].texture = PIXI.Texture.fromFrame('wound_card.jpg');
-                    _itemLayer[i].children[1].text = '';
-                    break;
-
-                default:
-                    _itemLayer[i].children[1].text = arrItems[_item[i]].name;
-
-            }
-        }
-
-    }
+    }    
 
     function _attackCardHoming() {
         new TweenMax(this.targetObj, 0.2, {
@@ -368,15 +327,10 @@ define(['attack'], function(attack) {
         })
     }
 
-    function _clearSelectItem() {
-        arrCommonObj['itemTouchLayer'].itemSelected = [];
-        arrCommonObj['itemTouchLayer'].itemSelectedTarget = [];
-    }
+    
 
     return {
-        createItemStatusLayer: _createItemStatusLayer,
-        updateStatusItem: _updateStatusItem,
-        clearSelectItem: _clearSelectItem
+        createItemStatusLayer: _createItemStatusLayer
     }
 
 })

@@ -1,4 +1,4 @@
-define(['ui', 'map', 'role', 'findpath', 'help', 'datas', 'meter'], function(ui, map, role, findpath) {
+define(['ui', 'map', 'role', 'findpath', 'helps', 'datas'], function(ui, map, role, findpath) {
 
     function init() {
 
@@ -109,6 +109,9 @@ define(['ui', 'map', 'role', 'findpath', 'help', 'datas', 'meter'], function(ui,
         //增加增加敵人
         role.createEnemy();
         role.createPlayer();
+
+        playerLayer.children[0].equip = [0,1,0,0,0];
+        playerLayer.children[1].equip = [2,0,0,0,0];
 
         /*
                 var cR = new role.createRole();

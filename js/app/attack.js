@@ -1,13 +1,28 @@
-define(['findpath' ], function(findpath) { /**/
+define(['findpath','help'], function(findpath,help) { /**/
 
-    function _attack() {     
+
+    function _attackEequence() {
+        var _currentItem = arrItems[this.myItemId];
+
+        if (_currentItem.category == "weapon") {
+            _attack.call(_currentItem);
+            disableAllRoomObj();
+
+        } else {
+            return false;
+        }
+
+    }
+
+
+    function _attack() {
 
         currentRole.actionPoint--;
-       // ui.updateAp(currentRole.actionPoint);
+        // ui.updateAp(currentRole.actionPoint);
         var _range = false; //判斷是否為遠程武器 //跟攻擊模式有關    
         //current local
         var _currentLocal = currentRole.local; //腳色目前所在位置
-        var _weaponObj = arrItems[this.myItemId]; //武器
+        var _weaponObj = this; //武器
 
         var _minRange = _weaponObj.minRange; //最小射程
         var _maxRange = _weaponObj.maxRange; //最大射程:起始值
@@ -25,7 +40,7 @@ define(['findpath' ], function(findpath) { /**/
             _range = true;
         }
 
-     //   _range = false;
+        //   _range = false;
         //處理skill    
         if (currentRole.skill.length > 0) {
             //combat traget
@@ -51,7 +66,7 @@ define(['findpath' ], function(findpath) { /**/
 
         //雙持武器
         if (_weaponObj.dual) {
-            if (currentRole.equip[0][0] == currentRole.equip[0][1]) {
+            if (currentRole.equip[0] == currentRole.equip[1]) {
                 _numberOfAttack = _numberOfAttack * 2;
                 console.log('dual weapons');
             }
@@ -120,12 +135,12 @@ define(['findpath' ], function(findpath) { /**/
             for (var i = 0; i < _numberOfAttack; i++) {
                 if (_attackRoll() >= _successRange) {
                     _arrAttackResult.push(true);
-                   
+
                 } else {
                     _arrAttackResult.push(false);
                 }
             }
-            
+
             //該房間的敵人
             for (var i = 0; i < enemyLayer.children.length; i++) {
                 if (enemyLayer.children[i].local == this.local && enemyLayer.children[i] != currentRole) {
@@ -145,7 +160,7 @@ define(['findpath' ], function(findpath) { /**/
                         console.log(_weaponObj.name + " 對 " + _arrTemp[i].objectName + " 攻擊成功");
                         _success = true;
                         _textObj.setText = "KILL";
-                         _score++;
+                        _score++;
                         _arrRemoveTemp.push(_arrTemp[i]);
 
                     } else {
@@ -181,7 +196,7 @@ define(['findpath' ], function(findpath) { /**/
                             // 判斷所有動畫都撥完畢之後再刪除物件
 
                             if (checkAllTweenComplete(_obj2)) {
-                             
+
                                 console.log("A");
                                 for (var i = 0; i < _arrRemoveTemp.length; i++) {
                                     for (var j = 0; j < enemyLayer.children.length; j++) {
@@ -206,7 +221,7 @@ define(['findpath' ], function(findpath) { /**/
                 }
             }
 
-             //  ui.updateScore(_score);
+            //  ui.updateScore(_score);
             //清除陣列
             _attackEnd(_range);
             // debugger;
@@ -279,7 +294,7 @@ define(['findpath' ], function(findpath) { /**/
                 });
             }
 
-          //  _textObj.myId = createRandomId();
+            //  _textObj.myId = createRandomId();
 
             //計算攻擊
             if (_attackRoll() >= _successRange) {
@@ -293,6 +308,12 @@ define(['findpath' ], function(findpath) { /**/
                 this.interactive = false;
 
                 _killedObj = this;
+
+                for (var i = 0; i < _activeRole.length; i++) {
+                    if (_activeRole[i] == this) {
+                        _activeRole.splice(i, 1);
+                    }
+                }
 
             } else {
                 _textObj.text = "MISS";
@@ -318,10 +339,12 @@ define(['findpath' ], function(findpath) { /**/
                         _fadeOutRemoveObj(_removeObj);
                     }
 
-                  //  ui.updateScore(_score);
+                    //  ui.updateScore(_score);
                 },
                 onCompleteParams: ["{self}", _killedObj]
             })
+
+            console.log(_activeRole.length);
 
             if (_attackCounter == 0 || _activeRole.length <= 0) {
                 _attackEnd(_range);
@@ -346,7 +369,9 @@ define(['findpath' ], function(findpath) { /**/
             attackMode = false;
 
             currentRole.interactive = true;
-            checkActionPoint();
+            activeCurrentRoomObj(currentRole.local);
+            help.checkActionPoint();
+
 
         }
 
@@ -372,7 +397,9 @@ define(['findpath' ], function(findpath) { /**/
             new TweenMax(_obj, 0.3, {
                 alpha: 0,
                 onComplete: function() {
+
                     enemyLayer.removeChild(_obj);
+
                 },
                 onCompleteParams: [_obj]
             })
@@ -389,14 +416,14 @@ define(['findpath' ], function(findpath) { /**/
                 actionUiLayer.removeChild(this);
             }
             _mc.anchor.x = 0.5;
-            _mc.anchor.y = 0.5;         
+            _mc.anchor.y = 0.5;
             _mc.play();
         }
 
     }
 
     return {
-        attack: _attack
+        attackEequence: _attackEequence
     }
 
 })

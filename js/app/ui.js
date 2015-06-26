@@ -1,4 +1,4 @@
-define(['enemy', 'ui_item'], function(enemy, ui_item) {
+define(['enemy', 'ui_item','help'], function(enemy, ui_item,help) {
 
     function _createUiBtn() {
 
@@ -128,7 +128,7 @@ define(['enemy', 'ui_item'], function(enemy, ui_item) {
             moveToTarget(arrLayerManager[this.roleName + "_token"].x, arrLayerManager[this.roleName + "_token"].y);
             currentRole = arrLayerManager[this.roleName + "_token"];
             //console.log(currentRole);
-            _openAttackMenu.call(currentRole);
+            help.openAttackMenu.call(currentRole);
         }
 
 
@@ -265,7 +265,7 @@ define(['enemy', 'ui_item'], function(enemy, ui_item) {
 
         //create btn
         var _btnImg = ["cancel_btn", "backpack_btn", "drop_item_btn"];
-        var _btnEvent = [_closeMenu, _openBackpack, _dropMode];
+        var _btnEvent = [help.closeMenu, help.openBackpack, help.dropMode];
         var _btnGroup = new PIXI.Container();
 
         for (var i = 0; i < 3; i++) {
@@ -297,41 +297,9 @@ define(['enemy', 'ui_item'], function(enemy, ui_item) {
 
     }
 
-    function _openAttackMenu() {
+ 
 
-        statusLayer.visible = true;
-        currentRole = this;
-        statusLayer.activeMode = 1;
-        ui_item.updateStatusItem();
-        new TweenMax(statusLayer, 0.5, {
-            y: statusLayer.positionMode[1]
-        })
-    }
-
-    function _openBackpack() {
-        statusLayer.visible = true;
-        statusLayer.activeMode = 2;
-        new TweenMax(statusLayer, 0.5, {
-            y: statusLayer.positionMode[2]
-
-        })
-    }
-
-    function _dropMode() {
-
-    }
-
-    function _closeMenu() {
-        statusLayer.activeMode = 0;
-        ui_item.clearSelectItem();
-        new TweenMax(statusLayer, 0.5, {
-            y: statusLayer.positionMode[0],
-            onComplete: function(_self) {
-                _self.target.visible = false;
-            },
-            onCompleteParams: ["{self}"]
-        })
-    }
+   
 
 
     function _createStatusCloseBtn() {
@@ -555,13 +523,11 @@ define(['enemy', 'ui_item'], function(enemy, ui_item) {
         updateAp: _updateAp,
         createStatus: _createStatus,
         updateStatusItem: ui_item.updateStatusItem,
-        closeAttackBtn: _closeAttackBtn,
-        createScore: _createScore,
+        closeAttackBtn: _closeAttackBtn,      
         updateScore: _updateScore,
         createMsgBox: _createMsgBox,
         statusOpen: _statusOpen,
         statusClose: _statusClose,
-        createRoleStatus: _createRoleStatus,
-        openAttackMenu: _openAttackMenu
+        createRoleStatus: _createRoleStatus
     }
 })

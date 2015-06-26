@@ -44,12 +44,11 @@ define(['role'], function(role) {
                     //門
                     for (var i = 0; i < arrDoors.length; i++) {
                         if (arrDoors[i].root_room == arrMap[y][x].room_id) {
-                            var _doorGraphics = new PIXI.Graphics();
+                            var _doorGraphics = new PIXI.Sprite();
 
-                            _doorGraphics.beginFill(0x666666, 1);
-                            _doorGraphics.drawRect((x * blockWidth) + arrDoors[i].x, (y * blockWidth) + arrDoors[i].y, arrDoors[i].width, arrDoors[i].height);
-                            _doorGraphics.lineStyle(1, 0x0000FF, 1);
-
+                            _doorGraphics.x = (x * blockWidth) + arrDoors[i].x;
+                            _doorGraphics.y = (y * blockHeight) + arrDoors[i].y;                       
+                           
                             _doorGraphics.passage = arrDoors[i].passage;
                             _doorGraphics.open = arrDoors[i].open;
                             _doorGraphics.visible = false;

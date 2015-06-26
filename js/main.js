@@ -8,7 +8,7 @@ requirejs.config({
         TweenMax: "lib/greensock-js/src/minified/TweenMax.min",
         EasePack: "lib/greensock-js/src/minified/easing/EasePack.min",
         datas: "app/datas",
-        help: "app/helps",
+        helps: "app/helps",
         attackModel: "app/attack_model",
         ui: "app/ui",
         init: "app/init",
@@ -18,12 +18,14 @@ requirejs.config({
         findpath: "app/findpath",
         enemy: "app/enemy",
         meter: "lib/stats.js-master/build/stats.min",
-        ui_item:"app/ui/ui_item_manager"
+        ui_item:"app/ui/ui_item_manager",
+        help:"app/help"
+
     }
 })
 
 
-requirejs(['init', 'jquery', 'pixi', 'TweenMax', 'EasePack'], function(init) {
+requirejs(['init', 'jquery', 'pixi', 'TweenMax', 'EasePack','meter'], function(init) {
 
     PIXI.Container.prototype.updateLayersOrder = function() {
         this.children.sort(function(a, b) {

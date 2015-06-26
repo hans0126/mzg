@@ -1,4 +1,4 @@
-define(['attack', 'ui', 'findpath'], function(attack, ui, findpath) {
+define(['ui', 'findpath','help'], function(ui, findpath,help) {
 
     function _createRole() {
         this._roleLocal = null; //Object
@@ -16,7 +16,7 @@ define(['attack', 'ui', 'findpath'], function(attack, ui, findpath) {
 
             _role.x = randomDeploy(this._roleLocal.localX, blockWidth);
             _role.y = randomDeploy(this._roleLocal.localY, blockHeight);
-     
+
             _role.pivot.x = 0.5;
             _role.pivot.y = 0.5;
             _role.anchor.x = 0.5;
@@ -74,15 +74,15 @@ define(['attack', 'ui', 'findpath'], function(attack, ui, findpath) {
             newR.live = true;
             //[0] = hand 
             //[1] = backpack
-            newR.equip = [1,2,0,99,0];
+            newR.equip = [0, 0, 0, 0, 0];
 
             newR.wound = 0;
             newR.actionPoint = 3;
-            newR.on('mousedown', ui.openAttackMenu);
+            newR.on('mousedown', help.openAttackMenu);
             newR.roleName = arrRoleType[appearPlayer[i]].name;
             newR.score = 0;
 
-            arrLayerManager[arrRoleType[appearPlayer[i]].name+"_token"] = newR;
+            arrLayerManager[arrRoleType[appearPlayer[i]].name + "_token"] = newR;
 
             //取得視野
             newR.panorama = findpath.getPanorama(newR.local.room_id, 0, 5);
@@ -103,14 +103,14 @@ define(['attack', 'ui', 'findpath'], function(attack, ui, findpath) {
     /*角色被選取時*/
     function _roleClick(event) {
         //console.log(this.objectName);
-         currentRole = this;
+        currentRole = this;
 
 
         _closeAttackBtn();
         this.interactive = false;
 
         _activeCurrentRoomObj(this.local.room_id);
-       
+
 
         ui.updateAp(currentRole.actionPoint);
 
@@ -155,7 +155,7 @@ define(['attack', 'ui', 'findpath'], function(attack, ui, findpath) {
 
                 actionUiLayer.addChild(_btn);
 
-                _btn.on("mousedown", attack.attack);
+                //_btn.on("mousedown", attack.attack);
             }
         }
 
@@ -240,7 +240,7 @@ define(['attack', 'ui', 'findpath'], function(attack, ui, findpath) {
 
             //locationCheck(currentRole, arrRoleObj, roomLocal);
 
-            _disableObj();
+            disableAllRoomObj();
 
             /*
                 扣除Action
@@ -255,10 +255,10 @@ define(['attack', 'ui', 'findpath'], function(attack, ui, findpath) {
             ui.updateAp(currentRole.actionPoint);
             if (currentRole.actionPoint > 0) {
                 currentRole.interactive = true;
-                _activeCurrentRoomObj(_targetRoomId);
+                activeCurrentRoomObj(_roomLocal);
             }
 
-            checkActionPoint();
+            help.checkActionPoint();
 
         }
 
