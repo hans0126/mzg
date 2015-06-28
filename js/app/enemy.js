@@ -153,7 +153,7 @@ define(['findpath'], function(findpath) {
 
 
 
-                if (_targetPayer.wound < 5) {
+                if (_targetPayer.wound < 6) {
                     _getWound(_targetPayer);
 
                 } else {
@@ -202,7 +202,7 @@ define(['findpath'], function(findpath) {
                             if (_arrDiePlayer.length == 0) {
                                 _endTurn();
                             } else {
-                                _killedPlayer();
+                               // _killedPlayer();
                             }
                         }
 
@@ -292,15 +292,15 @@ define(['findpath'], function(findpath) {
         //初始掃描裝備欄是否有傷並做history標記 true:有傷 必須在找下一個
         var _history = [];
         for (var i = 0; i < _playerObj.equip.length; i++) {
-            for (var j = 0; j < _playerObj.equip[i].length; j++) {
-                if (_playerObj.equip[i][j] != 99) {
-                    _history.push([i, j]);
+          
+                if (_playerObj.equip[i] != 99) {
+                    _history.push([i]);
                 }
-            }
+            
         }
 
         var getRandom = Math.floor(Math.random() * _history.length);
-        _playerObj.equip[_history[getRandom][0]][_history[getRandom][1]] = 99;
+        _playerObj.equip[_history[getRandom][0]] = 99;
     }
 
 

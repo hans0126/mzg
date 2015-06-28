@@ -1,4 +1,4 @@
-define(['ui'], function(ui) {
+define([], function() {
 
     function _activeCurrentRoomObj(_room) {
 
@@ -68,10 +68,14 @@ define(['ui'], function(ui) {
     */
 
     function _checkActionPoint() {
+
+
         if (currentRole.actionPoint == 0) {
             currentRole.interactive = false;
             currentRole.tint = 0x999999;
+            arrLayerManager[currentRole.roleName + "_icon_btn"].interactive = false;
             _disableAllRoomObj();
+            _closeMenu();
         }
     }
 
