@@ -23,7 +23,7 @@ define(['ui', 'map', 'role', 'findpath', 'helps', 'datas'], function(ui, map, ro
         arrCommonObj = [];
         score = 0;
 
-      
+
 
         arrLayerManager = [];
         arrFrameManager = [];
@@ -57,7 +57,7 @@ define(['ui', 'map', 'role', 'findpath', 'helps', 'datas'], function(ui, map, ro
 
         dragMap = true;
         stage = new PIXI.Container();
-      
+
         /*game stage*/
         gameStage = new PIXI.Container(); //主場景
         mapLayer = new PIXI.Container(); //地圖
@@ -110,8 +110,8 @@ define(['ui', 'map', 'role', 'findpath', 'helps', 'datas'], function(ui, map, ro
         role.createEnemy();
         role.createPlayer();
 
-        playerLayer.children[0].equip = [0,1,0,0,0];
-        playerLayer.children[1].equip = [2,0,0,0,0];
+        playerLayer.children[0].equip = [0, 1, 0, 0, 0];
+        playerLayer.children[1].equip = [2, 0, 0, 0, 0];
 
         /*
                 var cR = new role.createRole();
@@ -165,20 +165,20 @@ define(['ui', 'map', 'role', 'findpath', 'helps', 'datas'], function(ui, map, ro
         var _frames = [];
 
         for (var i = 0; i < 7; i++) {
-            _frames.push(PIXI.Texture.fromFrame("effect_blade_" + i+".png"));
+            _frames.push(PIXI.Texture.fromFrame("effect_blade_" + i + ".png"));
         }
 
         arrFrameManager['blade'] = _frames;
 
-       /* var mc = new PIXI.extras.MovieClip(frames);
-        mc.animationSpeed = 0.5;
-        mc.loop = false;
-        stage.addChild(mc);
-       mc.onComplete = function(){
-          //  stage.removeChild(this);
-       }
+        /* var mc = new PIXI.extras.MovieClip(frames);
+         mc.animationSpeed = 0.5;
+         mc.loop = false;
+         stage.addChild(mc);
+        mc.onComplete = function(){
+           //  stage.removeChild(this);
+        }
 
-        mc.play();*/
+         mc.play();*/
 
 
 
